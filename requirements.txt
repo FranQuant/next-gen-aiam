@@ -12,3 +12,11 @@ ipykernel>=6.29
 
 # HTTP (EODHD client, web fetches)
 requests>=2.31
+
+# scientific computing
+scipy>=1.13
+scikit-learn>=1.7
+
+# dev tools
+pytest>=8.0
+nbstripout>=0.7

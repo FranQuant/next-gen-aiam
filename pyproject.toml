@@ -7,7 +7,7 @@ name = "aiam"
 version = "0.0.1"
 description = "Comparative model harness for AI-driven asset management"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12,<3.13"
 authors = [{ name = "frasagui" }]
 dependencies = []
 
