@@ -27,3 +27,5 @@ data/cache/
 # Logs
 *.log
 private_notes/
+.env.local
+.env.*.local
