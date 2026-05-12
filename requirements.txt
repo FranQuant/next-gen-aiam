@@ -1,0 +1,14 @@
+# Core scientific stack
+numpy>=1.26
+pandas>=2.2
+pyarrow>=15.0       # parquet I/O (Panel cache)
+
+# Plotting
+matplotlib>=3.8
+
+# Notebook environment
+jupyter>=1.0
+ipykernel>=6.29
+
+# HTTP (EODHD client, web fetches)
+requests>=2.31
