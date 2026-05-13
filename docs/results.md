@@ -3,7 +3,7 @@
 **Period:** 2008-01-01 to 2026-04-30 (18.3 years, ~4 600 trading days)
 **Universe:** 30 tickers — 8 large-cap equities, 6 sector ETFs, 2 broad equity ETFs,
 3 international equity ETFs, 5 fixed-income ETFs, 6 commodities/FX/crypto
-**Rebalancing:** monthly (`ME` frequency), no transaction costs, long-only
+**Data frequency:** daily (NYSE business days) | **Rebalancing:** monthly, no transaction costs, long-only
 **Benchmark:** EW (equal-weight, 1/N)
 **Sharpe formula:** `(r - rf).mean() / (r - rf).std() * sqrt(252)`, rf = 0 throughout
 **VMP params (all entries):** lookback=21d, lag=1d, exposure clipped to [0.25, 1.5],
@@ -32,12 +32,18 @@ and lagged one day to prevent lookahead. All VMP variants target the strategy's 
 long-run realized volatility, so the vol level is preserved and only its time-series
 variation is reduced.
 
+![VMP exposure mechanism — MSR(LW)](figures/vmp_exposure_mechanism.png)
+*Figure 4: VMP exposure multiplier for MSR(LW), 2008–2026. Top: 21-day realized vol (annualized) vs. long-run vol (11.9%). Bottom: exposure multiplier clipped to [0.25, 1.5]. Red fill = vol cap active; green fill = maximum leverage applied. Crisis periods appear as the deepest vol spikes, but the 0.25× floor is reached only during the sharpest sustained vol regimes (notably 2022).*
+
 ---
 
 ## 2. Full 48-Strategy Comparison Table
 
 48 rows = 24 base strategies × (base + VMP). Organized by method family.
 Columns: annualized return, annualized volatility, Sharpe ratio, maximum drawdown, Calmar ratio.
+
+![Cumulative wealth, 2008–2026](figures/cumulative_wealth.png)
+*Figure 1: Cumulative wealth curves on a log-y axis, 2008–2026. Shaded regions mark the GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return (24.97% p.a.) but suffered the deepest base-strategy drawdown (−50.85% for BL-Mom(LW), annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.*
 
 ### 2a. Classical Mean-Variance
 
@@ -156,6 +162,9 @@ All 10 are VMP variants. The highest-Sharpe base strategy is MSR(LW) at 1.262.
 |   21 | FF3-Quality|  0.726 |   6.59% |
 |   20 | FF3-Multi  |  0.786 |   6.79% |
 
+![Sharpe vs. Maximum Drawdown — all 48 strategies](figures/sharpe_vs_drawdown.png)
+*Figure 2: Sharpe ratio vs. maximum drawdown for all 48 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits far right but is an artifact of SHY concentration (low drawdown because the portfolio is near-cash).*
+
 ---
 
 ## 3. Main Findings
@@ -199,7 +208,7 @@ In the regime-conditional Sharpe table (14 base strategies × 8 regimes), regime
 (low macro level, falling, with positive convexity — a late-cycle or early-recession
 environment) produces MSR(sample) conditional Sharpe=1.679 vs MSR(LW) conditional
 Sharpe=1.482. Sample wins by +0.197 within this regime. Regime 5 accounts for 779
-of the 4 512 monthly observations (~17%). In all other regimes MSR(LW) matches or
+of the 4 512 daily observations (~17%). In all other regimes MSR(LW) matches or
 beats MSR(sample). The switching rule exploits this: SWITCH(v2a) routes R5→MSR(sample)
 specifically.
 
@@ -217,6 +226,9 @@ yields SWITCH(v2a) Sharpe=1.340 (+0.161 vs v1). V2a achieves this with only two
 targeted swaps and no change to the default rule, keeping the improvement tractable
 and interpretable.
 
+![Regime-conditional Sharpe heatmap](figures/regime_conditional_heatmap.png)
+*Figure 3: Annualized Sharpe by strategy and regime for the 12 non-SWITCH base strategies. Diverging red–blue colormap (center = 0). Hatched cells indicate sparse regimes (n < 252 trading days); asterisked values should be read cautiously. Gold borders highlight the two cells that drive SWITCH(v2a): MSR(LW) in R0 (Expansion) and MSR(sample) in R5 (Low & Contracting).*
+
 ### Finding 6 — VMP improves all 24/24 base strategies
 
 VMP lifts Sharpe for every strategy in the table without exception (24/24 base
@@ -226,6 +238,10 @@ already manages volatility clustering: MSR(sample) has the largest lift because 
 concentration-driven vol spikes are the most amenable to scaling back. HRP variants
 have the smallest lifts (+0.165, +0.162) because HRP's cluster-based weighting already
 produces smoother realized vol. Median lift across all 24 strategies: ≈+0.270 Sharpe points.
+
+### Finding 6.5 — VMP(GMV(sample)) rank-1 Sharpe is an artifact
+
+VMP(GMV(sample))'s Sharpe=1.533 is the highest in the table, but the result is an artifact: GMV(sample) corners the portfolio in SHY (iShares 1–3 Year Treasury), giving near-zero base vol, and VMP then scales exposure up to the 1.5× cap to match the target volatility — in effect leveraging a near-cash position and claiming the credit as a "portfolio" return.
 
 ### Finding 7 — VMP makes shrinkage partially redundant
 
