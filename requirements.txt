@@ -12,6 +12,9 @@ ipykernel>=6.29
 
 # HTTP (EODHD client, web fetches)
 requests>=2.31
+eodhd>=1.0
+fredapi>=0.5
+python-dotenv>=1.0
 
 # scientific computing
 scipy>=1.13
