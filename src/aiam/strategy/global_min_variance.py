@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Callable
 
 import cvxpy as cp
@@ -8,6 +9,8 @@ import pandas as pd
 
 from aiam.data.panel import Panel
 from aiam.strategy.base import PointInTimeStrategy
+
+logger = logging.getLogger(__name__)
 
 
 class GlobalMinVariance(PointInTimeStrategy):
@@ -36,6 +39,12 @@ class GlobalMinVariance(PointInTimeStrategy):
         constraints = [cp.sum(w) == 1, w >= 0]
         prob = cp.Problem(objective, constraints)
         prob.solve(solver=cp.OSQP, eps_abs=1e-8, eps_rel=1e-8)
+
+        if prob.status != "optimal":
+            logger.warning(
+                "%s solver status non-optimal: %s at asof=%s",
+                type(self).__name__, prob.status, asof,
+            )
 
         if w.value is None:
             # fallback to equal weight if solver fails
