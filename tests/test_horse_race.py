@@ -11,15 +11,18 @@ from aiam.strategy.max_sharpe import MaximumSharpe
 from aiam.strategy.most_diversified import MostDiversified
 from aiam.strategy.hierarchical_risk_parity import HierarchicalRiskParity
 from aiam.strategy.risk_parity import RiskParity
+from aiam.strategy.switching import SwitchingStrategy
 
 CACHE = "data/cache/prices_30.parquet"
+REGIME_CACHE = "data/cache/regime_signals.parquet"
 START = "2008-01-01"
 END = "2026-04-30"
 
 
 def load_panel() -> Panel:
     prices = pd.read_parquet(CACHE)
-    return Panel({"prices": prices})
+    regimes = pd.read_parquet(REGIME_CACHE)
+    return Panel({"prices": prices, "regimes": regimes})
 
 
 def test_equal_weight_horse_race():
@@ -51,6 +54,23 @@ def test_strategy_comparison(capsys):
         "HRP(sample)": HierarchicalRiskParity(sample_cov),
         "HRP(ledoit_wolf)": HierarchicalRiskParity(ledoit_wolf_cov),
     }
+
+    # SWITCH variants — paam_lab 19d rule: R0→EW, R5→MSR, all others→MDP
+    for cov_label, cov_est, mean_est in [
+        ("sample", sample_cov, sample_mean),
+        ("ledoit_wolf", ledoit_wolf_cov, sample_mean),
+    ]:
+        ew = EqualWeight()
+        mdp = MostDiversified(cov_estimator=cov_est)
+        msr = MaximumSharpe(cov_estimator=cov_est, mean_estimator=mean_est)
+        switch = SwitchingStrategy(
+            switching_rule={
+                0: ew, 1: mdp, 2: mdp, 3: mdp, 4: mdp, 6: mdp, 7: mdp,
+                5: msr,
+            },
+            default_strategy=mdp,
+        )
+        strategies[f"SWITCH({cov_label})"] = switch
 
     rows = []
     for name, strategy in strategies.items():
