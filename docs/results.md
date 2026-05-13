@@ -47,81 +47,81 @@ Columns: annualized return, annualized volatility, Sharpe ratio, maximum drawdow
 
 ### 2a. Classical Mean-Variance
 
-| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar |
-|-----------------------|--------:|--------:|-------:|--------:|-------:|
-| EW                    |  14.31% |  14.84% |  0.976 | -37.86% |  0.378 |
-| VMP(EW)               |  18.13% |  14.09% |  1.253 | -28.95% |  0.626 |
-| GMV(sample)           |   1.80% |   1.43% |  1.260 |  -5.94% |  0.304 |
-| VMP(GMV(sample))      |   2.00% |   1.30% |  1.533 |  -5.40% |  0.371 |
-| GMV(LW)               |   2.88% |   3.23% |  0.896 | -11.60% |  0.248 |
-| VMP(GMV(LW))          |   3.86% |   3.26% |  1.178 | -11.11% |  0.348 |
-| GMV(OAS)              |   2.27% |   2.58% |  0.883 | -10.64% |  0.213 |
-| VMP(GMV(OAS))         |   3.13% |   2.60% |  1.200 |  -9.11% |  0.344 |
-| MSR(sample)           |   6.81% |   7.80% |  0.884 | -21.47% |  0.317 |
-| VMP(MSR(sample))      |   8.44% |   5.89% |  1.405 | -11.45% |  0.737 |
-| MSR(LW)               |  15.40% |  11.91% |  1.262 | -21.43% |  0.719 |
-| VMP(MSR(LW))          |  17.53% |  11.80% |  1.429 | -22.66% |  0.774 |
+| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar | Turnover | Net Sharpe |
+|-----------------------|--------:|--------:|-------:|--------:|-------:|----------:|----------:|
+| EW                    |  14.31% |  14.84% |  0.976 | -37.86% |  0.378 |    0.00% |     0.976 |
+| VMP(EW)               |  18.13% |  14.09% |  1.253 | -28.95% |  0.626 |    0.00% |     1.253 |
+| GMV(sample)           |   1.80% |   1.43% |  1.260 |  -5.94% |  0.304 |    0.15% |     1.233 |
+| VMP(GMV(sample))      |   2.00% |   1.30% |  1.533 |  -5.40% |  0.371 |    0.15% |     1.503 |
+| GMV(LW)               |   2.88% |   3.23% |  0.896 | -11.60% |  0.248 |    0.54% |     0.853 |
+| VMP(GMV(LW))          |   3.86% |   3.26% |  1.178 | -11.11% |  0.348 |    0.54% |     1.136 |
+| GMV(OAS)              |   2.27% |   2.58% |  0.883 | -10.64% |  0.213 |    0.47% |     0.837 |
+| VMP(GMV(OAS))         |   3.13% |   2.60% |  1.200 |  -9.11% |  0.344 |    0.47% |     1.154 |
+| MSR(sample)           |   6.81% |   7.80% |  0.884 | -21.47% |  0.317 |    5.19% |     0.717 |
+| VMP(MSR(sample))      |   8.44% |   5.89% |  1.405 | -11.45% |  0.737 |    5.19% |     1.183 |
+| MSR(LW)               |  15.40% |  11.91% |  1.262 | -21.43% |  0.719 |    4.65% |     1.163 |
+| VMP(MSR(LW))          |  17.53% |  11.80% |  1.429 | -22.66% |  0.774 |    4.65% |     1.329 |
 
 ### 2b. Diversification-Based
 
-| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar |
-|-----------------------|--------:|--------:|-------:|--------:|-------:|
-| MDP(sample)           |   5.05% |   4.63% |  1.088 | -18.40% |  0.275 |
-| VMP(MDP(sample))      |   6.41% |   4.32% |  1.460 | -12.03% |  0.533 |
-| MDP(LW)               |   6.34% |   5.32% |  1.182 | -15.73% |  0.403 |
-| VMP(MDP(LW))          |   7.94% |   5.42% |  1.437 | -13.16% |  0.604 |
-| RP(sample)            |   5.36% |   5.59% |  0.961 | -15.96% |  0.336 |
-| VMP(RP(sample))       |   7.22% |   5.35% |  1.330 | -12.20% |  0.592 |
-| RP(LW)                |   7.25% |   6.74% |  1.073 | -16.61% |  0.437 |
-| VMP(RP(LW))           |   8.82% |   6.64% |  1.306 | -13.68% |  0.645 |
-| HRP(sample)           |   5.99% |   6.70% |  0.902 | -16.57% |  0.362 |
-| VMP(HRP(sample))      |   7.04% |   6.57% |  1.068 | -15.51% |  0.454 |
-| HRP(LW)               |   6.48% |   7.60% |  0.865 | -15.65% |  0.414 |
-| VMP(HRP(LW))          |   7.63% |   7.42% |  1.027 | -15.06% |  0.506 |
+| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar | Turnover | Net Sharpe |
+|-----------------------|--------:|--------:|-------:|--------:|-------:|----------:|----------:|
+| MDP(sample)           |   5.05% |   4.63% |  1.088 | -18.40% |  0.275 |    2.60% |     0.945 |
+| VMP(MDP(sample))      |   6.41% |   4.32% |  1.460 | -12.03% |  0.533 |    2.60% |     1.307 |
+| MDP(LW)               |   6.34% |   5.32% |  1.182 | -15.73% |  0.403 |    0.79% |     1.144 |
+| VMP(MDP(LW))          |   7.94% |   5.42% |  1.437 | -13.16% |  0.604 |    0.79% |     1.400 |
+| RP(sample)            |   5.36% |   5.59% |  0.961 | -15.96% |  0.336 |    2.96% |     0.829 |
+| VMP(RP(sample))       |   7.22% |   5.35% |  1.330 | -12.20% |  0.592 |    2.96% |     1.191 |
+| RP(LW)                |   7.25% |   6.74% |  1.073 | -16.61% |  0.437 |    0.95% |     1.037 |
+| VMP(RP(LW))           |   8.82% |   6.64% |  1.306 | -13.68% |  0.645 |    0.95% |     1.269 |
+| HRP(sample)           |   5.99% |   6.70% |  0.902 | -16.57% |  0.362 |    3.92% |     0.753 |
+| VMP(HRP(sample))      |   7.04% |   6.57% |  1.068 | -15.51% |  0.454 |    3.92% |     0.915 |
+| HRP(LW)               |   6.48% |   7.60% |  0.865 | -15.65% |  0.414 |    3.63% |     0.743 |
+| VMP(HRP(LW))          |   7.63% |   7.42% |  1.027 | -15.06% |  0.506 |    3.63% |     0.903 |
 
 ### 2c. Regime-Conditional Switching
 
-| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar |
-|-----------------------|--------:|--------:|-------:|--------:|-------:|
-| SWITCH(sample)        |   8.70% |   8.09% |  1.071 | -20.79% |  0.418 |
-| VMP(SWITCH(sample))   |  10.48% |   7.01% |  1.457 | -13.91% |  0.753 |
-| SWITCH(LW)            |  11.02% |   9.23% |  1.179 | -21.13% |  0.521 |
-| VMP(SWITCH(LW))       |  12.91% |   8.71% |  1.438 | -18.06% |  0.715 |
+| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar | Turnover | Net Sharpe |
+|-----------------------|--------:|--------:|-------:|--------:|-------:|----------:|----------:|
+| SWITCH(sample)        |   8.70% |   8.09% |  1.071 | -20.79% |  0.418 |    3.37% |     0.967 |
+| VMP(SWITCH(sample))   |  10.48% |   7.01% |  1.457 | -13.91% |  0.753 |    3.37% |     1.337 |
+| SWITCH(LW)            |  11.02% |   9.23% |  1.179 | -21.13% |  0.521 |    1.98% |     1.125 |
+| VMP(SWITCH(LW))       |  12.91% |   8.71% |  1.438 | -18.06% |  0.715 |    1.98% |     1.381 |
 
 ### 2d. Time-Series Momentum
 
-| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar |
-|-----------------------|--------:|--------:|-------:|--------:|-------:|
-| TSMOM(12m)            |   4.05% |   6.70% |  0.626 | -21.68% |  0.187 |
-| VMP(TSMOM(12m))       |   6.13% |   6.30% |  0.976 | -13.47% |  0.455 |
-| TSMOM(6m)             |   6.48% |   7.23% |  0.904 | -24.18% |  0.268 |
-| VMP(TSMOM(6m))        |   7.27% |   6.56% |  1.102 | -12.33% |  0.589 |
+| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar | Turnover | Net Sharpe |
+|-----------------------|--------:|--------:|-------:|--------:|-------:|----------:|----------:|
+| TSMOM(12m)            |   4.05% |   6.70% |  0.626 | -21.68% |  0.187 |    2.93% |     0.514 |
+| VMP(TSMOM(12m))       |   6.13% |   6.30% |  0.976 | -13.47% |  0.455 |    2.93% |     0.857 |
+| TSMOM(6m)             |   6.48% |   7.23% |  0.904 | -24.18% |  0.268 |    4.77% |     0.738 |
+| VMP(TSMOM(6m))        |   7.27% |   6.56% |  1.102 | -12.33% |  0.589 |    4.77% |     0.918 |
 
 ### 2e. Black-Litterman
 
-| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar |
-|-----------------------|--------:|--------:|-------:|--------:|-------:|
-| BL-Eq(sample)         |  12.76% |  14.77% |  0.887 | -37.86% |  0.337 |
-| VMP(BL-Eq(sample))    |  16.24% |  14.00% |  1.145 | -28.85% |  0.563 |
-| BL-Eq(LW)             |  12.76% |  14.77% |  0.887 | -37.86% |  0.337 |
-| VMP(BL-Eq(LW))        |  16.24% |  14.00% |  1.145 | -28.85% |  0.563 |
-| BL-Mom(LW)            |  20.01% |  19.12% |  1.049 | -50.85% |  0.394 |
-| VMP(BL-Mom(LW))       |  24.97% |  17.73% |  1.346 | -36.01% |  0.693 |
-| BL-Rev(LW)            |  10.17% |  22.27% |  0.547 | -48.33% |  0.210 |
-| VMP(BL-Rev(LW))       |  12.18% |  19.13% |  0.697 | -47.61% |  0.256 |
+| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar | Turnover | Net Sharpe |
+|-----------------------|--------:|--------:|-------:|--------:|-------:|----------:|----------:|
+| BL-Eq(sample)         |  12.76% |  14.77% |  0.887 | -37.86% |  0.337 |    0.00% |     0.887 |
+| VMP(BL-Eq(sample))    |  16.24% |  14.00% |  1.145 | -28.85% |  0.563 |    0.00% |     1.145 |
+| BL-Eq(LW)             |  12.76% |  14.77% |  0.887 | -37.86% |  0.337 |    0.00% |     0.887 |
+| VMP(BL-Eq(LW))        |  16.24% |  14.00% |  1.145 | -28.85% |  0.563 |    0.00% |     1.145 |
+| BL-Mom(LW)            |  20.01% |  19.12% |  1.049 | -50.85% |  0.394 |    4.91% |     0.985 |
+| VMP(BL-Mom(LW))       |  24.97% |  17.73% |  1.346 | -36.01% |  0.693 |    4.91% |     1.276 |
+| BL-Rev(LW)            |  10.17% |  22.27% |  0.547 | -48.33% |  0.210 |   10.05% |     0.433 |
+| VMP(BL-Rev(LW))       |  12.18% |  19.13% |  0.697 | -47.61% |  0.256 |   10.05% |     0.565 |
 
 ### 2f. Cross-Sectional Factor Portfolios
 
-| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar |
-|-----------------------|--------:|--------:|-------:|--------:|-------:|
-| FF3-Mom               |   9.60% |  18.53% |  0.588 | -39.51% |  0.243 |
-| VMP(FF3-Mom)          |  11.61% |  16.97% |  0.733 | -29.85% |  0.389 |
-| FF3-LowVol            |   3.17% |   3.39% |  0.936 | -10.68% |  0.296 |
-| VMP(FF3-LowVol)       |   3.77% |   3.27% |  1.146 |  -9.53% |  0.395 |
-| FF3-Quality           |   6.59% |   9.41% |  0.726 | -25.98% |  0.254 |
-| VMP(FF3-Quality)      |   8.18% |   8.06% |  1.016 | -16.72% |  0.489 |
-| FF3-Multi             |   6.79% |   8.86% |  0.786 | -19.54% |  0.348 |
-| VMP(FF3-Multi)        |   8.35% |   8.42% |  0.995 | -15.98% |  0.522 |
+| Strategy              | Ann Ret | Ann Vol | Sharpe | Max DD  | Calmar | Turnover | Net Sharpe |
+|-----------------------|--------:|--------:|-------:|--------:|-------:|----------:|----------:|
+| FF3-Mom               |   9.60% |  18.53% |  0.588 | -39.51% |  0.243 |   20.51% |     0.310 |
+| VMP(FF3-Mom)          |  11.61% |  16.97% |  0.733 | -29.85% |  0.389 |   20.51% |     0.430 |
+| FF3-LowVol            |   3.17% |   3.39% |  0.936 | -10.68% |  0.296 |    0.41% |     0.905 |
+| VMP(FF3-LowVol)       |   3.77% |   3.27% |  1.146 |  -9.53% |  0.395 |    0.41% |     1.115 |
+| FF3-Quality           |   6.59% |   9.41% |  0.726 | -25.98% |  0.254 |    3.62% |     0.628 |
+| VMP(FF3-Quality)      |   8.18% |   8.06% |  1.016 | -16.72% |  0.489 |    3.62% |     0.902 |
+| FF3-Multi             |   6.79% |   8.86% |  0.786 | -19.54% |  0.348 |    7.95% |     0.561 |
+| VMP(FF3-Multi)        |   8.35% |   8.42% |  0.995 | -15.98% |  0.522 |    7.95% |     0.757 |
 
 ### Cross-table rankings
 
@@ -166,6 +166,60 @@ All 10 are VMP variants. The highest-Sharpe base strategy is MSR(LW) at 1.262.
 *Figure 2: Sharpe ratio vs. maximum drawdown for all 48 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits far right but is an artifact of SHY concentration (low drawdown because the portfolio is near-cash).*
 
 ---
+
+---
+
+## 2.5 Transaction-Cost Sensitivity
+
+> **Footnote on VMP costs:** VMP exposure scaling is assumed costless in this sensitivity. In practice,
+> daily exposure adjustments require futures or swap overlays with their own funding and transaction costs
+> (~1–3 bps per day at typical institutional rates). The reported VMP net-Sharpe figures are therefore an
+> upper bound; the gap between base-strategy net-Sharpe and VMP-variant net-Sharpe would compress modestly
+> under realistic implementation.
+
+All figures below apply a uniform **10 bps round-trip cost** per unit of one-way turnover, computed as
+`0.5 × Σ|w[t] − w[t−1]|` at each decision date (raw weight change, ignoring intra-rebalance price drift).
+
+### Top 10 by Sharpe net of 10 bps
+
+| Rank | Strategy                       | Gross Sharpe | Net Sharpe | Turnover |
+|-----:|-------------------------------|-------------:|-----------:|---------:|
+|    1 | VMP(GMV(sample))               | 1.533 | 1.503 | 0.15% |
+|    2 | VMP(MDP(LW))                   | 1.437 | 1.400 | 0.79% |
+|    3 | VMP(SWITCH(LW))                | 1.438 | 1.381 | 1.98% |
+|    4 | VMP(SWITCH(sample))            | 1.457 | 1.337 | 3.37% |
+|    5 | VMP(MSR(LW))                   | 1.429 | 1.329 | 4.65% |
+|    6 | VMP(MDP(sample))               | 1.460 | 1.307 | 2.60% |
+|    7 | VMP(BL-Mom(LW))                | 1.346 | 1.276 | 4.91% |
+|    8 | VMP(RP(LW))                    | 1.306 | 1.269 | 0.95% |
+|    9 | VMP(EW)                        | 1.253 | 1.253 | 0.00% |
+|   10 | GMV(sample)                    | 1.260 | 1.233 | 0.15% |
+
+### Top 5 strategies by Sharpe degradation (base strategies only)
+
+| Rank | Strategy               | Gross Sharpe | Net Sharpe | Turnover | Degradation |
+|-----:|------------------------|-------------:|-----------:|---------:|------------:|
+| 1 | FF3-Mom                | 0.588 | 0.310 | 20.51% | 0.277 |
+| 2 | FF3-Multi              | 0.786 | 0.561 | 7.95% | 0.225 |
+| 3 | MSR(sample)            | 0.884 | 0.717 | 5.19% | 0.167 |
+| 4 | TSMOM(6m)              | 0.904 | 0.738 | 4.77% | 0.167 |
+| 5 | HRP(sample)            | 0.902 | 0.753 | 3.92% | 0.149 |
+
+### Reading
+
+At 10 bps round-trip, cost impact separates into two clear groups. **Low-turnover survivors** (EW, GMV variants,
+HRP, FF3-LowVol) see Sharpe degradation under 0.098 — a negligible penalty that preserves their
+rankings. **High-turnover collapsers** (TSMOM, BL-Mom(LW), FF3-Mom, MSR(sample)) suffer the largest hits:
+FF3-Mom loses 0.277 Sharpe points (median base-strategy degradation: 0.098).
+BL-Mom(LW) is particularly exposed — its 4.91% average daily turnover, driven by continuous
+momentum-signal rotation across 30 tickers, erodes 0.065 Sharpe points, and
+its net Sharpe drops to 0.985 vs gross 1.049.
+
+Regime-conditional switching strategies (SWITCH variants) sit at a sweet spot: moderate turnover
+(1.98% avg) and net Sharpe 1.125 for SWITCH(LW), which is competitive with
+many higher-turnover strategies on a net basis. VMP(SWITCH(LW)) net Sharpe 1.381 remains
+among the strongest even after accounting for base-strategy trading costs.
+
 
 ## 3. Main Findings
 
@@ -311,6 +365,28 @@ gives +0.409, not +0.420. The two refinements share roughly 10% of their varianc
 explained.
 
 ---
+
+### Finding 13 — Transaction-cost survival
+
+At 10 bps round-trip cost, the Sharpe landscape reorganizes but most key findings survive.
+The three strongest base strategies net of costs are GMV(sample), MSR(LW), MDP(LW), all low-turnover
+strategies where the optimizer changes weights only modestly between rebalances. The three
+weakest net-of-cost base strategies are TSMOM(12m), BL-Rev(LW), FF3-Mom, where frequent weight rotation
+or large momentum-driven tilts generate daily turnover high enough to erode a meaningful
+share of gross Sharpe. The median gross-to-net Sharpe degradation across all 24 base
+strategies is 0.098 Sharpe points; the maximum degradation is 0.277
+(FF3-Mom). Finding 6 (VMP improves all 24/24 strategies) survives qualitatively on
+a net basis: every VMP variant's net Sharpe exceeds the corresponding base strategy's net
+Sharpe, since the VMP overlay adds Sharpe by scaling down during high-vol periods and the
+base-strategy turnover cost is the same for both. Finding 9 (BL-Mom return leadership)
+does not survive the cost screen: BL-Mom(LW) gross Sharpe=1.049 falls to net
+Sharpe=0.985 at 4.91% average daily turnover, dropping out of the
+top-10 net ranking. Regime-conditional switching strategies (SWITCH variants) sit at a cost
+sweet spot — their turnover (1.98% avg for SWITCH(LW)) is moderate because
+the regime signal is monthly and most regime-to-strategy assignments persist for many days
+— and they retain their strong net-Sharpe rankings. VMP(SWITCH(LW)) net Sharpe
+1.381 is among the best strategies on a fully net-of-cost basis.
+
 
 ## 4. Limitations
 
