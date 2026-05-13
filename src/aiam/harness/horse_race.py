@@ -16,7 +16,10 @@ def run_horse_race(
     start = pd.Timestamp(start)
     end = pd.Timestamp(end)
 
-    returns = panel.data["prices"].pct_change()
+    # Filter to weekdays so weekend calendar rows don't inject artificial zeros
+    # for US equities or double-count crypto/FX weekend moves.
+    all_returns = panel.data["prices"].pct_change()
+    returns = all_returns[all_returns.index.dayofweek < 5]
 
     trading_days = pd.bdate_range(start=start, end=end)
 
@@ -26,7 +29,7 @@ def run_horse_race(
     for t in trading_days:
         weights_t = strategy.predict_weights(panel, asof=t)
 
-        # find next business day for the one-day-lag return
+        # next weekday in the returns index (one-day lag, no look-ahead)
         next_days = returns.index[returns.index > t]
         if next_days.empty:
             break

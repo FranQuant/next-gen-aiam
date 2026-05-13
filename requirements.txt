@@ -19,6 +19,8 @@ python-dotenv>=1.0
 # scientific computing
 scipy>=1.13
 scikit-learn>=1.7
+cvxpy>=1.4
+pandas_market_calendars>=4.3
 
 # dev tools
 pytest>=8.0
