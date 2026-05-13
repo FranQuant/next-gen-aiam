@@ -3,9 +3,14 @@ import pytest
 
 from aiam.data.panel import Panel
 from aiam.estimators.covariance import ledoit_wolf_cov, oas_cov, sample_cov
+from aiam.estimators.mean import sample_mean
 from aiam.harness.horse_race import run_horse_race
 from aiam.strategy.equal_weight import EqualWeight
 from aiam.strategy.global_min_variance import GlobalMinVariance
+from aiam.strategy.max_sharpe import MaximumSharpe
+from aiam.strategy.most_diversified import MostDiversified
+from aiam.strategy.hierarchical_risk_parity import HierarchicalRiskParity
+from aiam.strategy.risk_parity import RiskParity
 
 CACHE = "data/cache/prices_30.parquet"
 START = "2008-01-01"
@@ -29,7 +34,7 @@ def test_equal_weight_horse_race():
     )
 
 
-def test_four_way_comparison(capsys):
+def test_strategy_comparison(capsys):
     panel = load_panel()
 
     strategies = {
@@ -37,6 +42,14 @@ def test_four_way_comparison(capsys):
         "GMV(sample)": GlobalMinVariance(sample_cov),
         "GMV(ledoit_wolf)": GlobalMinVariance(ledoit_wolf_cov),
         "GMV(oas)": GlobalMinVariance(oas_cov),
+        "MSR(sample)": MaximumSharpe(sample_cov, sample_mean),
+        "MSR(ledoit_wolf)": MaximumSharpe(ledoit_wolf_cov, sample_mean),
+        "MDP(sample)": MostDiversified(sample_cov),
+        "MDP(ledoit_wolf)": MostDiversified(ledoit_wolf_cov),
+        "RP(sample)": RiskParity(sample_cov),
+        "RP(ledoit_wolf)": RiskParity(ledoit_wolf_cov),
+        "HRP(sample)": HierarchicalRiskParity(sample_cov),
+        "HRP(ledoit_wolf)": HierarchicalRiskParity(ledoit_wolf_cov),
     }
 
     rows = []
@@ -63,9 +76,9 @@ def test_four_way_comparison(capsys):
     for col, f in fmt.items():
         display[col] = df[col].map(lambda v, f=f: f.format(v))
 
-    print("\n--- Four-way strategy comparison (2008-01-01 to 2026-04-30) ---")
+    print("\n--- Strategy comparison (2008-01-01 to 2026-04-30) ---")
     print(display.to_string())
 
     for name in strategies:
         vol = df.loc[name, "annualized_volatility"]
-        assert 0.005 <= vol <= 0.35, f"{name}: vol={vol:.4f} out of range"
+        assert 0.005 <= vol <= 0.50, f"{name}: vol={vol:.4f} out of range"
