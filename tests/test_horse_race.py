@@ -1,9 +1,12 @@
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
 from aiam.data.panel import Panel
 from aiam.estimators.covariance import ledoit_wolf_cov, oas_cov, sample_cov
 from aiam.estimators.mean import sample_mean
+from aiam.evaluation.performance import performance_stats
 from aiam.harness.horse_race import run_horse_race
 from aiam.strategy.equal_weight import EqualWeight
 from aiam.strategy.global_min_variance import GlobalMinVariance
@@ -15,6 +18,7 @@ from aiam.strategy.switching import SwitchingStrategy
 
 CACHE = "data/cache/prices_30.parquet"
 REGIME_CACHE = "data/cache/regime_signals.parquet"
+PORTFOLIO_CACHE = "data/cache/portfolio_returns/14strategies_2008_2026.parquet"
 START = "2008-01-01"
 END = "2026-04-30"
 
@@ -37,10 +41,8 @@ def test_equal_weight_horse_race():
     )
 
 
-def test_strategy_comparison(capsys):
-    panel = load_panel()
-
-    strategies = {
+def _build_all_strategies() -> dict:
+    strategies: dict = {
         "EW": EqualWeight(),
         "GMV(sample)": GlobalMinVariance(sample_cov),
         "GMV(ledoit_wolf)": GlobalMinVariance(ledoit_wolf_cov),
@@ -54,8 +56,6 @@ def test_strategy_comparison(capsys):
         "HRP(sample)": HierarchicalRiskParity(sample_cov),
         "HRP(ledoit_wolf)": HierarchicalRiskParity(ledoit_wolf_cov),
     }
-
-    # SWITCH variants — paam_lab 19d rule: R0→EW, R5→MSR, all others→MDP
     for cov_label, cov_est, mean_est in [
         ("sample", sample_cov, sample_mean),
         ("ledoit_wolf", ledoit_wolf_cov, sample_mean),
@@ -63,19 +63,41 @@ def test_strategy_comparison(capsys):
         ew = EqualWeight()
         mdp = MostDiversified(cov_estimator=cov_est)
         msr = MaximumSharpe(cov_estimator=cov_est, mean_estimator=mean_est)
-        switch = SwitchingStrategy(
-            switching_rule={
-                0: ew, 1: mdp, 2: mdp, 3: mdp, 4: mdp, 6: mdp, 7: mdp,
-                5: msr,
-            },
+        strategies[f"SWITCH({cov_label})"] = SwitchingStrategy(
+            switching_rule={0: ew, 1: mdp, 2: mdp, 3: mdp, 4: mdp, 6: mdp, 7: mdp, 5: msr},
             default_strategy=mdp,
         )
-        strategies[f"SWITCH({cov_label})"] = switch
+    return strategies
 
-    rows = []
+
+def _load_or_run_portfolio_returns(panel: Panel) -> dict[str, pd.Series]:
+    cache_path = Path(PORTFOLIO_CACHE)
+    prices_path = Path(CACHE)
+
+    if cache_path.exists() and cache_path.stat().st_mtime > prices_path.stat().st_mtime:
+        print("loaded from cache")
+        wide = pd.read_parquet(cache_path)
+        return {col: wide[col].dropna() for col in wide.columns}
+
+    print("regenerating cache")
+    strategies = _build_all_strategies()
+    portfolio_returns: dict[str, pd.Series] = {}
     for name, strategy in strategies.items():
         result = run_horse_race(panel, strategy, start=START, end=END)
-        s = result["stats"]
+        portfolio_returns[name] = result["portfolio_returns"].dropna()
+
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(portfolio_returns).to_parquet(cache_path)
+    return portfolio_returns
+
+
+def test_strategy_comparison(capsys):
+    panel = load_panel()
+    portfolio_returns = _load_or_run_portfolio_returns(panel)
+
+    rows = []
+    for name, port_ret in portfolio_returns.items():
+        s = performance_stats(port_ret)
         rows.append({
             "strategy": name,
             "annualized_return": s["annualized_return"],
@@ -99,6 +121,6 @@ def test_strategy_comparison(capsys):
     print("\n--- Strategy comparison (2008-01-01 to 2026-04-30) ---")
     print(display.to_string())
 
-    for name in strategies:
+    for name in portfolio_returns:
         vol = df.loc[name, "annualized_volatility"]
         assert 0.005 <= vol <= 0.50, f"{name}: vol={vol:.4f} out of range"
