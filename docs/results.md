@@ -2,7 +2,7 @@
 author: "Francisco Sanchez"
 header-includes:
   - \usepackage{booktabs}
-  - \usepackage{lscape}
+  - \RequirePackage{lscape}
 abstract: |
   We compare 48 portfolio allocation strategies on a uniform 30-asset multi-class
   universe spanning January 2008 through April 2026 (18.3 years, approximately
