@@ -24,6 +24,9 @@ def performance_stats(returns: pd.Series, rf: float = 0.0) -> dict:
 
     calmar = ann_return / abs(max_drawdown) if max_drawdown != 0 else np.nan
 
+    monthly = (1 + returns).resample("ME").prod() - 1
+    hit_ratio = float((monthly > 0).sum() / len(monthly)) if len(monthly) > 0 else np.nan
+
     return {
         "total_return": total_return,
         "annualized_return": ann_return,
@@ -31,4 +34,5 @@ def performance_stats(returns: pd.Series, rf: float = 0.0) -> dict:
         "sharpe_ratio": sharpe,
         "max_drawdown": max_drawdown,
         "calmar_ratio": calmar,
+        "hit_ratio": hit_ratio,
     }
