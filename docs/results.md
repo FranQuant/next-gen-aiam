@@ -148,6 +148,23 @@ performed in Section 3.3. The VMP overlay is applied daily (Section 2.4) and is 
 costless in the base analysis; the implications of this assumption are discussed in
 Section 3.3.
 
+### Backtesting Hygiene
+
+Six practices govern the harness implementation. (1) **Look-ahead prevention** — weights
+at date $t$ use only data observable up to close($t$); they apply to realized returns at
+$t+1$. (2) **Feature leakage** — all signals (momentum, vol, regime) are constructed from
+lagged price history; no asset's return at $t$ enters its own feature at $t$.
+(3) **Signal/return alignment** — `held_weights = target_weights.shift(1)` is enforced
+at the harness level; unlagged application manufactures spurious performance.
+(4) **Compounding** — log returns are converted to simple returns before portfolio
+aggregation; mixing the two is an implementation error. (5) **Survivorship** — the
+30-ticker universe is fixed at the start of the sample; tickers that did not exist at
+2008-01-01 (BTC-USD, certain ETFs) are forward-filled from inception, with this
+acknowledged as a survivorship trade-off vs. full historical reconstruction.
+(6) **Over-interpretation** — every reported number is one backtest, a hypothesis check
+rather than evidence of a durable edge; the Statistical Robustness section (§4)
+quantifies the sampling uncertainty around the key findings.
+
 ## Strategy Families
 
 ### Classical Mean-Variance
