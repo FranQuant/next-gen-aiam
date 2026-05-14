@@ -2,7 +2,6 @@
 author: "Francisco Sanchez"
 header-includes:
   - \usepackage{booktabs}
-  - \RequirePackage{lscape}
 abstract: |
   We compare 48 portfolio allocation strategies on a uniform 30-asset multi-class
   universe spanning January 2008 through April 2026 (18.3 years, approximately
@@ -648,9 +647,8 @@ The table below presents the complete performance record for all 48 strategies e
 
 ```{=latex}
 \clearpage
-\begin{landscape}
 \footnotesize
-\begin{tabular}{p{2.4cm} p{4.8cm} r r r r r r r}
+\begin{tabular}{p{1.5cm} p{3.6cm} r r r r r r r}
 \toprule
 Family & Strategy & Ann Ret & Ann Vol & Sharpe & Max DD & Calmar & Turnover & Net Sharpe \\
 \midrule
@@ -709,6 +707,5 @@ Factor & FF3-Mom             &  9.60\% & 18.53\% & 0.588 & -39.51\% & 0.243 & 20
        & VMP(FF3-Multi)      &  8.35\% &  8.42\% & 0.995 & -15.98\% & 0.522 & 7.95\%  & 0.757 \\
 \bottomrule
 \end{tabular}
-\end{landscape}
 \clearpage
 ```
