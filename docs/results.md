@@ -674,34 +674,49 @@ the implementability leaders.
 tilt; strategies exploiting cross-sectional dispersion (FF3, BL-Mom) may respond
 differently in small-cap or non-US universes. Only monthly rebalancing is tested.
 The VMP overlay cost is assumed zero in the base analysis; daily exposure scaling
-via futures overlays carries its own friction (~1–3 bps/day). The TSMOM long-only
-constraint systematically weakens time-series momentum relative to published long-short
-implementations [@moskowitz2012time]. All Sharpe ratios are computed at $r_f = 0$; at
-positive risk-free rates the relative ordering of low-return strategies (GMV(sample),
-FF3-LowVol) would deteriorate further.
+via futures overlays carries its own friction (~1–3 bps/day). All Sharpe ratios are
+computed at $r_f = 0$; at positive risk-free rates the relative ordering of
+low-return strategies (GMV(sample), FF3-LowVol) would deteriorate further.
+
+**Long-short extensions (Appendix A, Long-Short block).** Three long-short variants
+are added to quantify the long-only constraint gap identified in Findings 8 and 11:
+TSMOM-LS(12m), BL-Mom-LS(LW), and FF3-Mom-LS. All assume zero borrow cost, unlimited
+short availability, and no short rebate — conditions that overstate practical L/S
+returns; see the footnote in Appendix A. The results are mixed and universe-specific.
+Finding 8 (TSMOM weakened by long-only constraint) does *not* vanish: TSMOM-LS(12m)
+achieves Sharpe 0.414, worse than TSMOM(12m) long-only (0.626). Activating the short
+leg in this mixed-asset universe shorts assets with negative 12-month momentum, which
+includes bonds and commodities during their respective drawdown periods — assets that
+subsequently recover and impose losses on the short leg. Finding 9 (BL-Mom return
+leadership) does rebalance as expected: BL-Mom-LS(LW) achieves Sharpe 0.991 with vol
+5.56% and max drawdown −20.30%, a dramatically improved risk profile vs. BL-Mom(LW)
+(vol 19.12%, drawdown −50.85%), at the cost of lower absolute return (5.50% vs.
+20.01%). FF3-Mom-LS produces Sharpe 0.088 gross (−0.273 net of 10 bps), confirming
+that cross-sectional momentum long-short in a 30-ticker mixed-asset universe is not a
+viable strategy — the bottom tercile being shorted contains structurally different
+assets (bonds, commodities) rather than equity momentum losers.
 
 **Future work.** The harness architecture accommodates several natural extensions.
 First, machine-learning signal strategies — Lasso expected-return estimation, Random
 Forest regime classification, and XGBoost factor scoring — can replace the rolling
-sample-mean signals currently used in MSR and BL-Mom, with the uniform harness
-providing a clean performance attribution. Second, long-short extensions of TSMOM and
-factor portfolios would remove the long-only constraint penalty and allow direct
-replication of published results [@moskowitz2012time; @jegadeesh1993titman]. Third,
-multi-universe robustness checks — applying the same 48-strategy comparison to a
-global equity universe, a fixed-income-only universe, and a commodities universe —
-would test whether the ranking structure generalizes across asset classes. Fourth,
-deep learning sequence models (LSTM, Transformer) and reinforcement learning agents
-via a `SequentialStrategy` interface represent the frontier for dynamic allocation
-within the same evaluation framework.
+sample-mean signals currently used in MSR and BL-Mom. Second, applying the L/S
+strategies to a pure-equity universe would permit a cleaner replication of published
+long-short momentum results [@moskowitz2012time; @jegadeesh1993titman], isolating the
+constraint gap from the mixed-asset composition effect. Third, multi-universe
+robustness checks — applying the 58-strategy comparison to a global equity universe,
+a fixed-income-only universe, and a commodities universe — would test whether the
+ranking structure generalizes. Fourth, deep learning sequence models (LSTM,
+Transformer) and reinforcement learning agents via a `SequentialStrategy` interface
+represent the frontier for dynamic allocation within the same evaluation framework.
 
 # References {.unnumbered}
 
 ::: {#refs}
 :::
 
-# Appendix A — Full 52-Strategy Comparison Table {.unnumbered}
+# Appendix A — Full 58-Strategy Comparison Table {.unnumbered}
 
-The table below presents the complete performance record for all 52 strategies: the original 48 strategies plus 4 constrained variants (MSR\_C and MVO\_C with per-asset bounds [5\%, 40\%] following JPM (2022) §3 practice). Strategies are organized by family, with each base strategy followed immediately by its VMP variant. The benchmark equal-weight portfolio (EW) appears at the head of the Classical MV block. Columns report annualized return (Ann Ret), annualized volatility (Ann Vol), gross Sharpe ratio (Sharpe), hit ratio (Hit\% = fraction of calendar months with positive return), maximum drawdown (Max DD), Calmar ratio, average daily one-way turnover (Turnover), and Sharpe ratio net of a uniform 10 bps round-trip transaction cost (Net Sharpe). Hit ratio is reported for base strategies only; VMP variants inherit the same months but with different magnitudes. All figures are computed over the full 2008-01-01 to 2026-04-30 walk-forward period with no lookahead, using the monthly rebalancing harness described in Section 2.2. The VMP(GMV(sample)) Sharpe of 1.533 is the highest in the table but is flagged as a degenerate result (see Finding 1 and Finding 6.5): the optimizer concentrates entirely in SHY, producing near-zero portfolio volatility that the VMP overlay then levers to the 1.5× cap. Hit ratios range from 62.4\% (BL-Rev(LW)) to 68.8\% (FF3-LowVol), a surprisingly narrow band (6.4 pp range) across all strategies.
+The table below presents the complete performance record for all 58 strategies: the original 48 strategies, 4 constrained variants (MSR\_C and MVO\_C with per-asset bounds [5\%, 40\%] following JPM (2022) §3 practice), and 6 long-short variants (3 base + 3 VMP). Strategies are organized by family, with each base strategy followed immediately by its VMP variant. Columns report annualized return (Ann Ret), annualized volatility (Ann Vol), gross Sharpe ratio (Sharpe), hit ratio (Hit\% = fraction of calendar months with positive return), maximum drawdown (Max DD), Calmar ratio, average daily one-way turnover (Turnover), and Sharpe ratio net of a uniform 10 bps round-trip transaction cost (Net Sharpe). Hit ratio is reported for base strategies only. All figures are computed over 2008-01-01 to 2026-04-30 with no lookahead. The VMP(GMV(sample)) Sharpe of 1.533 is flagged as a degenerate result (see Findings 1 and 6.5).
 
 ```{=latex}
 \clearpage
@@ -772,6 +787,15 @@ Factor & FF3-Mom             &  9.60\% & 18.53\% & 0.588 & 67.4 & -39.51\% & 0.2
        & VMP(FF3-Quality)    &  8.18\% &  8.06\% & 1.016 &      & -16.72\% & 0.489 & 3.62\%  & 0.902 \\
        & FF3-Multi           &  6.79\% &  8.86\% & 0.786 & 66.5 & -19.54\% & 0.348 & 7.95\%  & 0.561 \\
        & VMP(FF3-Multi)      &  8.35\% &  8.42\% & 0.995 &      & -15.98\% & 0.522 & 7.95\%  & 0.757 \\
+\midrule
+\multicolumn{10}{l}{\textit{Long-Short\textsuperscript{†}: zero borrow cost, unlimited short availability, no short rebate assumed.}} \\
+\midrule
+Long-Short & TSMOM-LS(12m)       &  2.11\% &  5.39\% & 0.414 & 59.7 & -16.42\% & 0.128 &  2.38\% & 0.301 \\
+           & VMP(TSMOM-LS(12m))  &  3.57\% &  5.01\% & 0.725 &      & -12.98\% & 0.275 &  2.38\% & 0.604 \\
+           & BL-Mom-LS(LW)       &  5.50\% &  5.56\% & 0.991 & 59.7 & -20.30\% & 0.271 &  4.49\% & 0.787 \\
+           & VMP(BL-Mom-LS(LW))  &  7.06\% &  5.43\% & 1.283 &      & -13.67\% & 0.517 &  4.49\% & 1.074 \\
+           & FF3-Mom-LS          &  0.38\% &  9.81\% & 0.088 & 52.9 & -30.88\% & 0.012 & 14.07\% & -0.273 \\
+           & VMP(FF3-Mom-LS)     & -0.94\% &  9.98\% & -0.045 &     & -37.77\% & -0.025 & 14.07\% & -0.400 \\
 \bottomrule
 \end{tabular}
 \clearpage

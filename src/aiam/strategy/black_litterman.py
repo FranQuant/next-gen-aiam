@@ -22,6 +22,7 @@ class BlackLitterman(PointInTimeStrategy):
         tau: float = 0.05,
         delta: float = 2.5,
         prior_weights_method: str = "equal",
+        long_only: bool = True,
     ) -> None:
         self.view_generator = view_generator
         self.cov_estimator = cov_estimator
@@ -29,6 +30,7 @@ class BlackLitterman(PointInTimeStrategy):
         self.tau = tau
         self.delta = delta
         self.prior_weights_method = prior_weights_method
+        self.long_only = long_only
 
     def _predict_weights(self, panel: Panel, asof: pd.Timestamp) -> pd.Series:
         prices = panel.slice(asof, kind="prices", lookback=self.lookback * 2)
@@ -87,7 +89,9 @@ class BlackLitterman(PointInTimeStrategy):
 
         w = cp.Variable(n)
         objective = cp.Minimize(cp.quad_form(w, cp.psd_wrap(cov_post)))
-        constraints = [mu_ex @ w == 1, w >= 0]
+        constraints = [mu_ex @ w == 1]
+        if self.long_only:
+            constraints.append(w >= 0)
         prob = cp.Problem(objective, constraints)
         prob.solve(solver=cp.OSQP, eps_abs=1e-8, eps_rel=1e-8)
 
@@ -99,7 +103,11 @@ class BlackLitterman(PointInTimeStrategy):
         if w.value is None or prob.status != "optimal":
             return _ew_fallback()
 
-        weights = np.maximum(w.value, 0.0)
-        weights /= weights.sum()
+        if self.long_only:
+            weights = np.maximum(w.value, 0.0)
+            weights /= weights.sum()
+        else:
+            gross = np.abs(w.value).sum()
+            weights = w.value / gross if gross > 1e-12 else np.ones(n) / n
 
         return pd.Series(weights, index=valid_cols).reindex(universe, fill_value=0.0).rename(asof)

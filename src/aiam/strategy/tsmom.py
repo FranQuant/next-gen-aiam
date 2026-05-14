@@ -72,13 +72,13 @@ class TSMOM(PointInTimeStrategy):
         recent_vol = recent_vol.clip(lower=1e-6)
         raw_weights = signal * (self.target_per_asset_vol / recent_vol.values)
 
-        total = raw_weights.sum()
-        if total == 0:
-            # All-flat (e.g. sustained bear market): fall back to equal weight
-            # so the harness weight-sum invariant (= 1) is satisfied.
+        # Normalize by gross (abs sum) — works for both long-only (gross = net)
+        # and long-short (gross = 1, net ≈ 0).
+        gross = np.abs(raw_weights).sum()
+        if gross < 1e-12:
             n = len(valid_cols)
             weights = np.full(n, 1.0 / n)
         else:
-            weights = raw_weights / total
+            weights = raw_weights / gross
 
         return pd.Series(weights, index=valid_cols, name=asof)
