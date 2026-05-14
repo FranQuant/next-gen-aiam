@@ -1,4 +1,8 @@
 ---
+author: "Francisco Sanchez"
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{lscape}
 abstract: |
   We compare 48 portfolio allocation strategies on a uniform 30-asset multi-class
   universe spanning January 2008 through April 2026 (18.3 years, approximately
@@ -242,16 +246,14 @@ vector. Because the target is each strategy's own long-run vol, the overall vola
 level is preserved and only its time-series variation is reduced. The overlay is applied
 to all 24 base strategies, producing 24 additional VMP variants (48 rows total).
 
-![VMP exposure mechanism — MSR(LW)](figures/vmp_exposure_mechanism.png)
-
-*Figure 4: VMP exposure multiplier for MSR(LW), 2008–2026. Top: 21-day realized vol (annualized) vs. long-run vol (11.9%). Bottom: exposure multiplier clipped to [0.25, 1.5]. Red fill = vol cap active; green fill = maximum leverage applied. Crisis periods appear as the deepest vol spikes, but the 0.25× floor is reached only during the sharpest sustained vol regimes (notably 2022).*
+![VMP exposure multiplier for MSR(LW), 2008–2026. Top panel: 21-day realized vol (annualized) vs. long-run vol (11.9%). Bottom panel: exposure multiplier clipped to [0.25, 1.5]. Red fill = vol cap active; green fill = maximum leverage applied. Crisis periods appear as the deepest vol spikes; the 0.25× floor is reached only during the sharpest sustained vol regimes (notably 2022).](figures/vmp_exposure_mechanism.png)
 
 ## Regime Classification
 
 The regime engine classifies macro state from eight FRED indicators (GDP growth, CPI
 inflation, unemployment, VIX, S&P 500 trailing return, and three yield-curve
 features — level, slope, and curvature) into eight regimes (0–7) using a
-a feature engineering pipeline [@lopezdeprado2016building] that computes level,
+feature engineering pipeline [@lopezdeprado2016building] that computes level,
 first-difference, and second-difference (convexity) for each indicator. The dominant
 regime at each decision date is the mode across all eight indicator classifications.
 Regime 0 corresponds to an expansion state (26% of sample days); Regime 5 corresponds
@@ -274,74 +276,78 @@ return, annualized volatility, gross Sharpe ratio, maximum drawdown, Calmar rati
 average daily turnover, and Sharpe net of 10 bps round-trip costs are reported. The
 benchmark equal-weight portfolio (EW) heads the table.
 
-![Cumulative wealth, 2008–2026](figures/cumulative_wealth.png)
-
-*Figure 1: Cumulative wealth curves on a log-y axis, 2008–2026. Shaded regions mark the GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return (24.97% p.a.) but suffered the deepest base-strategy drawdown (−50.85% for BL-Mom(LW), annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.*
+![Cumulative wealth curves on a log-y axis, 2008–2026. Shaded regions mark the GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return (24.97% p.a.) but suffered the deepest base-strategy drawdown (−50.85% for BL-Mom(LW), annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.](figures/cumulative_wealth.png)
 
 ```{=latex}
-\begingroup\small
-```
-
-| Family | Strategy | Ann Ret | Ann Vol | Sharpe | Max DD | Calmar | Turnover | Net Sharpe |
-|:---|:---|---:|---:|---:|---:|---:|---:|---:|
-| Classical MV | EW | 14.31% | 14.84% | 0.976 | -37.86% | 0.378 | 0.00% | 0.976 |
-| | VMP(EW) | 18.13% | 14.09% | 1.253 | -28.95% | 0.626 | 0.00% | 1.253 |
-| | GMV(sample) | 1.80% | 1.43% | 1.260 | -5.94% | 0.304 | 0.15% | 1.233 |
-| | VMP(GMV(sample)) | 2.00% | 1.30% | 1.533 | -5.40% | 0.371 | 0.15% | 1.503 |
-| | GMV(LW) | 2.88% | 3.23% | 0.896 | -11.60% | 0.248 | 0.54% | 0.853 |
-| | VMP(GMV(LW)) | 3.86% | 3.26% | 1.178 | -11.11% | 0.348 | 0.54% | 1.136 |
-| | GMV(OAS) | 2.27% | 2.58% | 0.883 | -10.64% | 0.213 | 0.47% | 0.837 |
-| | VMP(GMV(OAS)) | 3.13% | 2.60% | 1.200 | -9.11% | 0.344 | 0.47% | 1.154 |
-| | MSR(sample) | 6.81% | 7.80% | 0.884 | -21.47% | 0.317 | 5.19% | 0.717 |
-| | VMP(MSR(sample)) | 8.44% | 5.89% | 1.405 | -11.45% | 0.737 | 5.19% | 1.183 |
-| | MSR(LW) | 15.40% | 11.91% | 1.262 | -21.43% | 0.719 | 4.65% | 1.163 |
-| | VMP(MSR(LW)) | 17.53% | 11.80% | 1.429 | -22.66% | 0.774 | 4.65% | 1.329 |
-| Diversification | MDP(sample) | 5.05% | 4.63% | 1.088 | -18.40% | 0.275 | 2.60% | 0.945 |
-| | VMP(MDP(sample)) | 6.41% | 4.32% | 1.460 | -12.03% | 0.533 | 2.60% | 1.307 |
-| | MDP(LW) | 6.34% | 5.32% | 1.182 | -15.73% | 0.403 | 0.79% | 1.144 |
-| | VMP(MDP(LW)) | 7.94% | 5.42% | 1.437 | -13.16% | 0.604 | 0.79% | 1.400 |
-| | RP(sample) | 5.36% | 5.59% | 0.961 | -15.96% | 0.336 | 2.96% | 0.829 |
-| | VMP(RP(sample)) | 7.22% | 5.35% | 1.330 | -12.20% | 0.592 | 2.96% | 1.191 |
-| | RP(LW) | 7.25% | 6.74% | 1.073 | -16.61% | 0.437 | 0.95% | 1.037 |
-| | VMP(RP(LW)) | 8.82% | 6.64% | 1.306 | -13.68% | 0.645 | 0.95% | 1.269 |
-| | HRP(sample) | 5.99% | 6.70% | 0.902 | -16.57% | 0.362 | 3.92% | 0.753 |
-| | VMP(HRP(sample)) | 7.04% | 6.57% | 1.068 | -15.51% | 0.454 | 3.92% | 0.915 |
-| | HRP(LW) | 6.48% | 7.60% | 0.865 | -15.65% | 0.414 | 3.63% | 0.743 |
-| | VMP(HRP(LW)) | 7.63% | 7.42% | 1.027 | -15.06% | 0.506 | 3.63% | 0.903 |
-| Regime Switch | SWITCH(sample) | 8.70% | 8.09% | 1.071 | -20.79% | 0.418 | 3.37% | 0.967 |
-| | VMP(SWITCH(sample)) | 10.48% | 7.01% | 1.457 | -13.91% | 0.753 | 3.37% | 1.337 |
-| | SWITCH(LW) | 11.02% | 9.23% | 1.179 | -21.13% | 0.521 | 1.98% | 1.125 |
-| | VMP(SWITCH(LW)) | 12.91% | 8.71% | 1.438 | -18.06% | 0.715 | 1.98% | 1.381 |
-| TS Momentum | TSMOM(12m) | 4.05% | 6.70% | 0.626 | -21.68% | 0.187 | 2.93% | 0.514 |
-| | VMP(TSMOM(12m)) | 6.13% | 6.30% | 0.976 | -13.47% | 0.455 | 2.93% | 0.857 |
-| | TSMOM(6m) | 6.48% | 7.23% | 0.904 | -24.18% | 0.268 | 4.77% | 0.738 |
-| | VMP(TSMOM(6m)) | 7.27% | 6.56% | 1.102 | -12.33% | 0.589 | 4.77% | 0.918 |
-| Black-Litterman | BL-Eq(sample) | 12.76% | 14.77% | 0.887 | -37.86% | 0.337 | 0.00% | 0.887 |
-| | VMP(BL-Eq(sample)) | 16.24% | 14.00% | 1.145 | -28.85% | 0.563 | 0.00% | 1.145 |
-| | BL-Eq(LW) | 12.76% | 14.77% | 0.887 | -37.86% | 0.337 | 0.00% | 0.887 |
-| | VMP(BL-Eq(LW)) | 16.24% | 14.00% | 1.145 | -28.85% | 0.563 | 0.00% | 1.145 |
-| | BL-Mom(LW) | 20.01% | 19.12% | 1.049 | -50.85% | 0.394 | 4.91% | 0.985 |
-| | VMP(BL-Mom(LW)) | 24.97% | 17.73% | 1.346 | -36.01% | 0.693 | 4.91% | 1.276 |
-| | BL-Rev(LW) | 10.17% | 22.27% | 0.547 | -48.33% | 0.210 | 10.05% | 0.433 |
-| | VMP(BL-Rev(LW)) | 12.18% | 19.13% | 0.697 | -47.61% | 0.256 | 10.05% | 0.565 |
-| Factor | FF3-Mom | 9.60% | 18.53% | 0.588 | -39.51% | 0.243 | 20.51% | 0.310 |
-| | VMP(FF3-Mom) | 11.61% | 16.97% | 0.733 | -29.85% | 0.389 | 20.51% | 0.430 |
-| | FF3-LowVol | 3.17% | 3.39% | 0.936 | -10.68% | 0.296 | 0.41% | 0.905 |
-| | VMP(FF3-LowVol) | 3.77% | 3.27% | 1.146 | -9.53% | 0.395 | 0.41% | 1.115 |
-| | FF3-Quality | 6.59% | 9.41% | 0.726 | -25.98% | 0.254 | 3.62% | 0.628 |
-| | VMP(FF3-Quality) | 8.18% | 8.06% | 1.016 | -16.72% | 0.489 | 3.62% | 0.902 |
-| | FF3-Multi | 6.79% | 8.86% | 0.786 | -19.54% | 0.348 | 7.95% | 0.561 |
-| | VMP(FF3-Multi) | 8.35% | 8.42% | 0.995 | -15.98% | 0.522 | 7.95% | 0.757 |
-
-```{=latex}
-\endgroup
+\clearpage
+\begin{landscape}
+\footnotesize
+\begin{tabular}{p{2.4cm} p{4.8cm} r r r r r r r}
+\toprule
+Family & Strategy & Ann Ret & Ann Vol & Sharpe & Max DD & Calmar & Turnover & Net Sharpe \\
+\midrule
+Classical MV & EW                  & 14.31\% & 14.84\% & 0.976 & -37.86\% & 0.378 & 0.00\%  & 0.976 \\
+             & VMP(EW)             & 18.13\% & 14.09\% & 1.253 & -28.95\% & 0.626 & 0.00\%  & 1.253 \\
+             & GMV(sample)         &  1.80\% &  1.43\% & 1.260 &  -5.94\% & 0.304 & 0.15\%  & 1.233 \\
+             & VMP(GMV(sample))    &  2.00\% &  1.30\% & 1.533 &  -5.40\% & 0.371 & 0.15\%  & 1.503 \\
+             & GMV(LW)             &  2.88\% &  3.23\% & 0.896 & -11.60\% & 0.248 & 0.54\%  & 0.853 \\
+             & VMP(GMV(LW))        &  3.86\% &  3.26\% & 1.178 & -11.11\% & 0.348 & 0.54\%  & 1.136 \\
+             & GMV(OAS)            &  2.27\% &  2.58\% & 0.883 & -10.64\% & 0.213 & 0.47\%  & 0.837 \\
+             & VMP(GMV(OAS))       &  3.13\% &  2.60\% & 1.200 &  -9.11\% & 0.344 & 0.47\%  & 1.154 \\
+             & MSR(sample)         &  6.81\% &  7.80\% & 0.884 & -21.47\% & 0.317 & 5.19\%  & 0.717 \\
+             & VMP(MSR(sample))    &  8.44\% &  5.89\% & 1.405 & -11.45\% & 0.737 & 5.19\%  & 1.183 \\
+             & MSR(LW)             & 15.40\% & 11.91\% & 1.262 & -21.43\% & 0.719 & 4.65\%  & 1.163 \\
+             & VMP(MSR(LW))        & 17.53\% & 11.80\% & 1.429 & -22.66\% & 0.774 & 4.65\%  & 1.329 \\
+\midrule
+Diversification & MDP(sample)      &  5.05\% &  4.63\% & 1.088 & -18.40\% & 0.275 & 2.60\%  & 0.945 \\
+                & VMP(MDP(sample)) &  6.41\% &  4.32\% & 1.460 & -12.03\% & 0.533 & 2.60\%  & 1.307 \\
+                & MDP(LW)          &  6.34\% &  5.32\% & 1.182 & -15.73\% & 0.403 & 0.79\%  & 1.144 \\
+                & VMP(MDP(LW))     &  7.94\% &  5.42\% & 1.437 & -13.16\% & 0.604 & 0.79\%  & 1.400 \\
+                & RP(sample)       &  5.36\% &  5.59\% & 0.961 & -15.96\% & 0.336 & 2.96\%  & 0.829 \\
+                & VMP(RP(sample))  &  7.22\% &  5.35\% & 1.330 & -12.20\% & 0.592 & 2.96\%  & 1.191 \\
+                & RP(LW)           &  7.25\% &  6.74\% & 1.073 & -16.61\% & 0.437 & 0.95\%  & 1.037 \\
+                & VMP(RP(LW))      &  8.82\% &  6.64\% & 1.306 & -13.68\% & 0.645 & 0.95\%  & 1.269 \\
+                & HRP(sample)      &  5.99\% &  6.70\% & 0.902 & -16.57\% & 0.362 & 3.92\%  & 0.753 \\
+                & VMP(HRP(sample)) &  7.04\% &  6.57\% & 1.068 & -15.51\% & 0.454 & 3.92\%  & 0.915 \\
+                & HRP(LW)          &  6.48\% &  7.60\% & 0.865 & -15.65\% & 0.414 & 3.63\%  & 0.743 \\
+                & VMP(HRP(LW))     &  7.63\% &  7.42\% & 1.027 & -15.06\% & 0.506 & 3.63\%  & 0.903 \\
+\midrule
+Regime Switch & SWITCH(sample)      &  8.70\% &  8.09\% & 1.071 & -20.79\% & 0.418 & 3.37\%  & 0.967 \\
+              & VMP(SWITCH(sample)) & 10.48\% &  7.01\% & 1.457 & -13.91\% & 0.753 & 3.37\%  & 1.337 \\
+              & SWITCH(LW)          & 11.02\% &  9.23\% & 1.179 & -21.13\% & 0.521 & 1.98\%  & 1.125 \\
+              & VMP(SWITCH(LW))     & 12.91\% &  8.71\% & 1.438 & -18.06\% & 0.715 & 1.98\%  & 1.381 \\
+\midrule
+TS Momentum & TSMOM(12m)          &  4.05\% &  6.70\% & 0.626 & -21.68\% & 0.187 & 2.93\%  & 0.514 \\
+            & VMP(TSMOM(12m))     &  6.13\% &  6.30\% & 0.976 & -13.47\% & 0.455 & 2.93\%  & 0.857 \\
+            & TSMOM(6m)           &  6.48\% &  7.23\% & 0.904 & -24.18\% & 0.268 & 4.77\%  & 0.738 \\
+            & VMP(TSMOM(6m))      &  7.27\% &  6.56\% & 1.102 & -12.33\% & 0.589 & 4.77\%  & 0.918 \\
+\midrule
+Black-Litterman & BL-Eq(sample)       & 12.76\% & 14.77\% & 0.887 & -37.86\% & 0.337 & 0.00\%  & 0.887 \\
+                & VMP(BL-Eq(sample))  & 16.24\% & 14.00\% & 1.145 & -28.85\% & 0.563 & 0.00\%  & 1.145 \\
+                & BL-Eq(LW)           & 12.76\% & 14.77\% & 0.887 & -37.86\% & 0.337 & 0.00\%  & 0.887 \\
+                & VMP(BL-Eq(LW))      & 16.24\% & 14.00\% & 1.145 & -28.85\% & 0.563 & 0.00\%  & 1.145 \\
+                & BL-Mom(LW)          & 20.01\% & 19.12\% & 1.049 & -50.85\% & 0.394 & 4.91\%  & 0.985 \\
+                & VMP(BL-Mom(LW))     & 24.97\% & 17.73\% & 1.346 & -36.01\% & 0.693 & 4.91\%  & 1.276 \\
+                & BL-Rev(LW)          & 10.17\% & 22.27\% & 0.547 & -48.33\% & 0.210 & 10.05\% & 0.433 \\
+                & VMP(BL-Rev(LW))     & 12.18\% & 19.13\% & 0.697 & -47.61\% & 0.256 & 10.05\% & 0.565 \\
+\midrule
+Factor & FF3-Mom             &  9.60\% & 18.53\% & 0.588 & -39.51\% & 0.243 & 20.51\% & 0.310 \\
+       & VMP(FF3-Mom)        & 11.61\% & 16.97\% & 0.733 & -29.85\% & 0.389 & 20.51\% & 0.430 \\
+       & FF3-LowVol          &  3.17\% &  3.39\% & 0.936 & -10.68\% & 0.296 & 0.41\%  & 0.905 \\
+       & VMP(FF3-LowVol)     &  3.77\% &  3.27\% & 1.146 &  -9.53\% & 0.395 & 0.41\%  & 1.115 \\
+       & FF3-Quality         &  6.59\% &  9.41\% & 0.726 & -25.98\% & 0.254 & 3.62\%  & 0.628 \\
+       & VMP(FF3-Quality)    &  8.18\% &  8.06\% & 1.016 & -16.72\% & 0.489 & 3.62\%  & 0.902 \\
+       & FF3-Multi           &  6.79\% &  8.86\% & 0.786 & -19.54\% & 0.348 & 7.95\%  & 0.561 \\
+       & VMP(FF3-Multi)      &  8.35\% &  8.42\% & 0.995 & -15.98\% & 0.522 & 7.95\%  & 0.757 \\
+\bottomrule
+\end{tabular}
+\end{landscape}
+\clearpage
 ```
 
 ## Rankings
 
-![Sharpe vs. Maximum Drawdown — all 48 strategies](figures/sharpe_vs_drawdown.png)
-
-*Figure 2: Sharpe ratio vs. maximum drawdown for all 48 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits far right but is an artifact of SHY concentration (low drawdown because the portfolio is near-cash).*
+![Sharpe ratio vs. maximum drawdown for all 48 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits far right but is an artifact of SHY concentration (low drawdown because the portfolio is near-cash).](figures/sharpe_vs_drawdown.png)
 
 **Top 10 by Sharpe (all 48 strategies):**
 
@@ -389,7 +395,7 @@ All 10 are VMP variants. The highest-Sharpe base strategy is MSR(LW) at 1.262.
 > under realistic implementation.
 
 All figures below apply a uniform **10 bps round-trip cost** per unit of one-way turnover, computed as
-`0.5 × Σ|w[t] − w[t−1]|` at each decision date (raw weight change, ignoring intra-rebalance price drift).
+$0.5 \times \sum|w_t - w_{t-1}|$ at each decision date (raw weight change, ignoring intra-rebalance price drift).
 
 ### Top 10 by Sharpe net of 10 bps
 
@@ -491,9 +497,7 @@ yields SWITCH(v2a) Sharpe=1.340 (+0.161 vs v1). V2a achieves this with only two
 targeted swaps and no change to the default rule, keeping the improvement tractable
 and interpretable.
 
-![Regime-conditional Sharpe heatmap](figures/regime_conditional_heatmap.png)
-
-*Figure 3: Annualized Sharpe by strategy and regime for the 12 non-SWITCH base strategies. Diverging red–blue colormap (center = 0). Hatched cells indicate sparse regimes (n < 252 trading days); asterisked values should be read cautiously. Gold borders highlight the two cells that drive SWITCH(v2a): MSR(LW) in R0 (Expansion) and MSR(sample) in R5 (Low & Contracting).*
+![Annualized Sharpe by strategy and regime for the 12 non-SWITCH base strategies. Diverging red–blue colormap (center = 0). Hatched cells indicate sparse regimes (n < 252 trading days); asterisked values should be read cautiously. Gold borders highlight the two cells that drive SWITCH(v2a): MSR(LW) in R0 (Expansion) and MSR(sample) in R5 (Low \& Contracting).](figures/regime_conditional_heatmap.png)
 
 ## Finding 6 — VMP improves all 24/24 base strategies
 
