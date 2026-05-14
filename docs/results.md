@@ -270,80 +270,11 @@ constructed from regime-conditional Sharpe analysis on 12 single-strategy baseli
 
 ## 48-Strategy Comparison
 
-The master table below reports all 48 strategies organized by family. Within each
-family block the VMP variant immediately follows its base strategy pair. Annualized
-return, annualized volatility, gross Sharpe ratio, maximum drawdown, Calmar ratio,
-average daily turnover, and Sharpe net of 10 bps round-trip costs are reported. The
-benchmark equal-weight portfolio (EW) heads the table.
-
 ![Cumulative wealth curves on a log-y axis, 2008–2026. Shaded regions mark the GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return (24.97% p.a.) but suffered the deepest base-strategy drawdown (−50.85% for BL-Mom(LW), annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.](figures/cumulative_wealth.png)
 
-```{=latex}
-\clearpage
-\begin{landscape}
-\footnotesize
-\begin{tabular}{p{2.4cm} p{4.8cm} r r r r r r r}
-\toprule
-Family & Strategy & Ann Ret & Ann Vol & Sharpe & Max DD & Calmar & Turnover & Net Sharpe \\
-\midrule
-Classical MV & EW                  & 14.31\% & 14.84\% & 0.976 & -37.86\% & 0.378 & 0.00\%  & 0.976 \\
-             & VMP(EW)             & 18.13\% & 14.09\% & 1.253 & -28.95\% & 0.626 & 0.00\%  & 1.253 \\
-             & GMV(sample)         &  1.80\% &  1.43\% & 1.260 &  -5.94\% & 0.304 & 0.15\%  & 1.233 \\
-             & VMP(GMV(sample))    &  2.00\% &  1.30\% & 1.533 &  -5.40\% & 0.371 & 0.15\%  & 1.503 \\
-             & GMV(LW)             &  2.88\% &  3.23\% & 0.896 & -11.60\% & 0.248 & 0.54\%  & 0.853 \\
-             & VMP(GMV(LW))        &  3.86\% &  3.26\% & 1.178 & -11.11\% & 0.348 & 0.54\%  & 1.136 \\
-             & GMV(OAS)            &  2.27\% &  2.58\% & 0.883 & -10.64\% & 0.213 & 0.47\%  & 0.837 \\
-             & VMP(GMV(OAS))       &  3.13\% &  2.60\% & 1.200 &  -9.11\% & 0.344 & 0.47\%  & 1.154 \\
-             & MSR(sample)         &  6.81\% &  7.80\% & 0.884 & -21.47\% & 0.317 & 5.19\%  & 0.717 \\
-             & VMP(MSR(sample))    &  8.44\% &  5.89\% & 1.405 & -11.45\% & 0.737 & 5.19\%  & 1.183 \\
-             & MSR(LW)             & 15.40\% & 11.91\% & 1.262 & -21.43\% & 0.719 & 4.65\%  & 1.163 \\
-             & VMP(MSR(LW))        & 17.53\% & 11.80\% & 1.429 & -22.66\% & 0.774 & 4.65\%  & 1.329 \\
-\midrule
-Diversification & MDP(sample)      &  5.05\% &  4.63\% & 1.088 & -18.40\% & 0.275 & 2.60\%  & 0.945 \\
-                & VMP(MDP(sample)) &  6.41\% &  4.32\% & 1.460 & -12.03\% & 0.533 & 2.60\%  & 1.307 \\
-                & MDP(LW)          &  6.34\% &  5.32\% & 1.182 & -15.73\% & 0.403 & 0.79\%  & 1.144 \\
-                & VMP(MDP(LW))     &  7.94\% &  5.42\% & 1.437 & -13.16\% & 0.604 & 0.79\%  & 1.400 \\
-                & RP(sample)       &  5.36\% &  5.59\% & 0.961 & -15.96\% & 0.336 & 2.96\%  & 0.829 \\
-                & VMP(RP(sample))  &  7.22\% &  5.35\% & 1.330 & -12.20\% & 0.592 & 2.96\%  & 1.191 \\
-                & RP(LW)           &  7.25\% &  6.74\% & 1.073 & -16.61\% & 0.437 & 0.95\%  & 1.037 \\
-                & VMP(RP(LW))      &  8.82\% &  6.64\% & 1.306 & -13.68\% & 0.645 & 0.95\%  & 1.269 \\
-                & HRP(sample)      &  5.99\% &  6.70\% & 0.902 & -16.57\% & 0.362 & 3.92\%  & 0.753 \\
-                & VMP(HRP(sample)) &  7.04\% &  6.57\% & 1.068 & -15.51\% & 0.454 & 3.92\%  & 0.915 \\
-                & HRP(LW)          &  6.48\% &  7.60\% & 0.865 & -15.65\% & 0.414 & 3.63\%  & 0.743 \\
-                & VMP(HRP(LW))     &  7.63\% &  7.42\% & 1.027 & -15.06\% & 0.506 & 3.63\%  & 0.903 \\
-\midrule
-Regime Switch & SWITCH(sample)      &  8.70\% &  8.09\% & 1.071 & -20.79\% & 0.418 & 3.37\%  & 0.967 \\
-              & VMP(SWITCH(sample)) & 10.48\% &  7.01\% & 1.457 & -13.91\% & 0.753 & 3.37\%  & 1.337 \\
-              & SWITCH(LW)          & 11.02\% &  9.23\% & 1.179 & -21.13\% & 0.521 & 1.98\%  & 1.125 \\
-              & VMP(SWITCH(LW))     & 12.91\% &  8.71\% & 1.438 & -18.06\% & 0.715 & 1.98\%  & 1.381 \\
-\midrule
-TS Momentum & TSMOM(12m)          &  4.05\% &  6.70\% & 0.626 & -21.68\% & 0.187 & 2.93\%  & 0.514 \\
-            & VMP(TSMOM(12m))     &  6.13\% &  6.30\% & 0.976 & -13.47\% & 0.455 & 2.93\%  & 0.857 \\
-            & TSMOM(6m)           &  6.48\% &  7.23\% & 0.904 & -24.18\% & 0.268 & 4.77\%  & 0.738 \\
-            & VMP(TSMOM(6m))      &  7.27\% &  6.56\% & 1.102 & -12.33\% & 0.589 & 4.77\%  & 0.918 \\
-\midrule
-Black-Litterman & BL-Eq(sample)       & 12.76\% & 14.77\% & 0.887 & -37.86\% & 0.337 & 0.00\%  & 0.887 \\
-                & VMP(BL-Eq(sample))  & 16.24\% & 14.00\% & 1.145 & -28.85\% & 0.563 & 0.00\%  & 1.145 \\
-                & BL-Eq(LW)           & 12.76\% & 14.77\% & 0.887 & -37.86\% & 0.337 & 0.00\%  & 0.887 \\
-                & VMP(BL-Eq(LW))      & 16.24\% & 14.00\% & 1.145 & -28.85\% & 0.563 & 0.00\%  & 1.145 \\
-                & BL-Mom(LW)          & 20.01\% & 19.12\% & 1.049 & -50.85\% & 0.394 & 4.91\%  & 0.985 \\
-                & VMP(BL-Mom(LW))     & 24.97\% & 17.73\% & 1.346 & -36.01\% & 0.693 & 4.91\%  & 1.276 \\
-                & BL-Rev(LW)          & 10.17\% & 22.27\% & 0.547 & -48.33\% & 0.210 & 10.05\% & 0.433 \\
-                & VMP(BL-Rev(LW))     & 12.18\% & 19.13\% & 0.697 & -47.61\% & 0.256 & 10.05\% & 0.565 \\
-\midrule
-Factor & FF3-Mom             &  9.60\% & 18.53\% & 0.588 & -39.51\% & 0.243 & 20.51\% & 0.310 \\
-       & VMP(FF3-Mom)        & 11.61\% & 16.97\% & 0.733 & -29.85\% & 0.389 & 20.51\% & 0.430 \\
-       & FF3-LowVol          &  3.17\% &  3.39\% & 0.936 & -10.68\% & 0.296 & 0.41\%  & 0.905 \\
-       & VMP(FF3-LowVol)     &  3.77\% &  3.27\% & 1.146 &  -9.53\% & 0.395 & 0.41\%  & 1.115 \\
-       & FF3-Quality         &  6.59\% &  9.41\% & 0.726 & -25.98\% & 0.254 & 3.62\%  & 0.628 \\
-       & VMP(FF3-Quality)    &  8.18\% &  8.06\% & 1.016 & -16.72\% & 0.489 & 3.62\%  & 0.902 \\
-       & FF3-Multi           &  6.79\% &  8.86\% & 0.786 & -19.54\% & 0.348 & 7.95\%  & 0.561 \\
-       & VMP(FF3-Multi)      &  8.35\% &  8.42\% & 0.995 & -15.98\% & 0.522 & 7.95\%  & 0.757 \\
-\bottomrule
-\end{tabular}
-\end{landscape}
-\clearpage
-```
+Across all 48 strategies, the top three by gross Sharpe are VMP(GMV(sample)) (1.533), VMP(MDP(sample)) (1.460), and VMP(SWITCH(sample)) (1.457) — all VMP variants of low-to-moderate turnover base strategies. By net Sharpe after 10 bps round-trip costs, the leaders shift to VMP(GMV(sample)) (1.503), VMP(MDP(LW)) (1.400), and VMP(SWITCH(LW)) (1.381), reflecting turnover penalties on the higher-rotation sample-covariance variants. Among base strategies only, the three weakest by gross Sharpe are BL-Rev(LW) (0.547), FF3-Mom (0.588), and TSMOM(12m) (0.626) — strategies where return-chasing signals generate high turnover or deep drawdowns without commensurate compensation.
+
+The complete 48-strategy comparison table appears in Appendix A.
 
 ## Rankings
 
@@ -707,3 +638,77 @@ via a `SequentialStrategy` interface represent the frontier for dynamic allocati
 within the same evaluation framework.
 
 # References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Appendix A — Full 48-Strategy Comparison Table {.unnumbered}
+
+The table below presents the complete performance record for all 48 strategies evaluated in this study. Strategies are organized by family (Classical Mean-Variance, Diversification-Based, Regime Switch, Time-Series Momentum, Black-Litterman, and Factor), with each base strategy followed immediately by its VMP variant. The benchmark equal-weight portfolio (EW) appears at the head of the Classical MV block. Columns report annualized return (Ann Ret), annualized volatility (Ann Vol), gross Sharpe ratio (Sharpe), maximum drawdown (Max DD), Calmar ratio, average daily one-way turnover (Turnover), and Sharpe ratio net of a uniform 10 bps round-trip transaction cost (Net Sharpe). All figures are computed over the full 2008-01-01 to 2026-04-30 walk-forward period with no lookahead, using the monthly rebalancing harness described in Section 2.2. The VMP(GMV(sample)) Sharpe of 1.533 is the highest in the table but is flagged as a degenerate result (see Finding 1 and Finding 6.5): the optimizer concentrates entirely in SHY, producing near-zero portfolio volatility that the VMP overlay then levers to the 1.5× cap.
+
+```{=latex}
+\clearpage
+\begin{landscape}
+\footnotesize
+\begin{tabular}{p{2.4cm} p{4.8cm} r r r r r r r}
+\toprule
+Family & Strategy & Ann Ret & Ann Vol & Sharpe & Max DD & Calmar & Turnover & Net Sharpe \\
+\midrule
+Classical MV & EW                  & 14.31\% & 14.84\% & 0.976 & -37.86\% & 0.378 & 0.00\%  & 0.976 \\
+             & VMP(EW)             & 18.13\% & 14.09\% & 1.253 & -28.95\% & 0.626 & 0.00\%  & 1.253 \\
+             & GMV(sample)         &  1.80\% &  1.43\% & 1.260 &  -5.94\% & 0.304 & 0.15\%  & 1.233 \\
+             & VMP(GMV(sample))    &  2.00\% &  1.30\% & 1.533 &  -5.40\% & 0.371 & 0.15\%  & 1.503 \\
+             & GMV(LW)             &  2.88\% &  3.23\% & 0.896 & -11.60\% & 0.248 & 0.54\%  & 0.853 \\
+             & VMP(GMV(LW))        &  3.86\% &  3.26\% & 1.178 & -11.11\% & 0.348 & 0.54\%  & 1.136 \\
+             & GMV(OAS)            &  2.27\% &  2.58\% & 0.883 & -10.64\% & 0.213 & 0.47\%  & 0.837 \\
+             & VMP(GMV(OAS))       &  3.13\% &  2.60\% & 1.200 &  -9.11\% & 0.344 & 0.47\%  & 1.154 \\
+             & MSR(sample)         &  6.81\% &  7.80\% & 0.884 & -21.47\% & 0.317 & 5.19\%  & 0.717 \\
+             & VMP(MSR(sample))    &  8.44\% &  5.89\% & 1.405 & -11.45\% & 0.737 & 5.19\%  & 1.183 \\
+             & MSR(LW)             & 15.40\% & 11.91\% & 1.262 & -21.43\% & 0.719 & 4.65\%  & 1.163 \\
+             & VMP(MSR(LW))        & 17.53\% & 11.80\% & 1.429 & -22.66\% & 0.774 & 4.65\%  & 1.329 \\
+\midrule
+Diversification & MDP(sample)      &  5.05\% &  4.63\% & 1.088 & -18.40\% & 0.275 & 2.60\%  & 0.945 \\
+                & VMP(MDP(sample)) &  6.41\% &  4.32\% & 1.460 & -12.03\% & 0.533 & 2.60\%  & 1.307 \\
+                & MDP(LW)          &  6.34\% &  5.32\% & 1.182 & -15.73\% & 0.403 & 0.79\%  & 1.144 \\
+                & VMP(MDP(LW))     &  7.94\% &  5.42\% & 1.437 & -13.16\% & 0.604 & 0.79\%  & 1.400 \\
+                & RP(sample)       &  5.36\% &  5.59\% & 0.961 & -15.96\% & 0.336 & 2.96\%  & 0.829 \\
+                & VMP(RP(sample))  &  7.22\% &  5.35\% & 1.330 & -12.20\% & 0.592 & 2.96\%  & 1.191 \\
+                & RP(LW)           &  7.25\% &  6.74\% & 1.073 & -16.61\% & 0.437 & 0.95\%  & 1.037 \\
+                & VMP(RP(LW))      &  8.82\% &  6.64\% & 1.306 & -13.68\% & 0.645 & 0.95\%  & 1.269 \\
+                & HRP(sample)      &  5.99\% &  6.70\% & 0.902 & -16.57\% & 0.362 & 3.92\%  & 0.753 \\
+                & VMP(HRP(sample)) &  7.04\% &  6.57\% & 1.068 & -15.51\% & 0.454 & 3.92\%  & 0.915 \\
+                & HRP(LW)          &  6.48\% &  7.60\% & 0.865 & -15.65\% & 0.414 & 3.63\%  & 0.743 \\
+                & VMP(HRP(LW))     &  7.63\% &  7.42\% & 1.027 & -15.06\% & 0.506 & 3.63\%  & 0.903 \\
+\midrule
+Regime Switch & SWITCH(sample)      &  8.70\% &  8.09\% & 1.071 & -20.79\% & 0.418 & 3.37\%  & 0.967 \\
+              & VMP(SWITCH(sample)) & 10.48\% &  7.01\% & 1.457 & -13.91\% & 0.753 & 3.37\%  & 1.337 \\
+              & SWITCH(LW)          & 11.02\% &  9.23\% & 1.179 & -21.13\% & 0.521 & 1.98\%  & 1.125 \\
+              & VMP(SWITCH(LW))     & 12.91\% &  8.71\% & 1.438 & -18.06\% & 0.715 & 1.98\%  & 1.381 \\
+\midrule
+TS Momentum & TSMOM(12m)          &  4.05\% &  6.70\% & 0.626 & -21.68\% & 0.187 & 2.93\%  & 0.514 \\
+            & VMP(TSMOM(12m))     &  6.13\% &  6.30\% & 0.976 & -13.47\% & 0.455 & 2.93\%  & 0.857 \\
+            & TSMOM(6m)           &  6.48\% &  7.23\% & 0.904 & -24.18\% & 0.268 & 4.77\%  & 0.738 \\
+            & VMP(TSMOM(6m))      &  7.27\% &  6.56\% & 1.102 & -12.33\% & 0.589 & 4.77\%  & 0.918 \\
+\midrule
+Black-Litterman & BL-Eq(sample)       & 12.76\% & 14.77\% & 0.887 & -37.86\% & 0.337 & 0.00\%  & 0.887 \\
+                & VMP(BL-Eq(sample))  & 16.24\% & 14.00\% & 1.145 & -28.85\% & 0.563 & 0.00\%  & 1.145 \\
+                & BL-Eq(LW)           & 12.76\% & 14.77\% & 0.887 & -37.86\% & 0.337 & 0.00\%  & 0.887 \\
+                & VMP(BL-Eq(LW))      & 16.24\% & 14.00\% & 1.145 & -28.85\% & 0.563 & 0.00\%  & 1.145 \\
+                & BL-Mom(LW)          & 20.01\% & 19.12\% & 1.049 & -50.85\% & 0.394 & 4.91\%  & 0.985 \\
+                & VMP(BL-Mom(LW))     & 24.97\% & 17.73\% & 1.346 & -36.01\% & 0.693 & 4.91\%  & 1.276 \\
+                & BL-Rev(LW)          & 10.17\% & 22.27\% & 0.547 & -48.33\% & 0.210 & 10.05\% & 0.433 \\
+                & VMP(BL-Rev(LW))     & 12.18\% & 19.13\% & 0.697 & -47.61\% & 0.256 & 10.05\% & 0.565 \\
+\midrule
+Factor & FF3-Mom             &  9.60\% & 18.53\% & 0.588 & -39.51\% & 0.243 & 20.51\% & 0.310 \\
+       & VMP(FF3-Mom)        & 11.61\% & 16.97\% & 0.733 & -29.85\% & 0.389 & 20.51\% & 0.430 \\
+       & FF3-LowVol          &  3.17\% &  3.39\% & 0.936 & -10.68\% & 0.296 & 0.41\%  & 0.905 \\
+       & VMP(FF3-LowVol)     &  3.77\% &  3.27\% & 1.146 &  -9.53\% & 0.395 & 0.41\%  & 1.115 \\
+       & FF3-Quality         &  6.59\% &  9.41\% & 0.726 & -25.98\% & 0.254 & 3.62\%  & 0.628 \\
+       & VMP(FF3-Quality)    &  8.18\% &  8.06\% & 1.016 & -16.72\% & 0.489 & 3.62\%  & 0.902 \\
+       & FF3-Multi           &  6.79\% &  8.86\% & 0.786 & -19.54\% & 0.348 & 7.95\%  & 0.561 \\
+       & VMP(FF3-Multi)      &  8.35\% &  8.42\% & 0.995 & -15.98\% & 0.522 & 7.95\%  & 0.757 \\
+\bottomrule
+\end{tabular}
+\end{landscape}
+\clearpage
+```
