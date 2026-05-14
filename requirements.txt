@@ -5,6 +5,7 @@ pyarrow>=15.0       # parquet I/O (Panel cache)
 
 # Plotting
 matplotlib>=3.8
+seaborn>=0.13
 
 # Notebook environment
 jupyter>=1.0
