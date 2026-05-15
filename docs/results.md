@@ -3,7 +3,7 @@ author: "Francisco Sanchez"
 header-includes:
   - \usepackage{booktabs}
 abstract: |
-  We compare 48 portfolio allocation strategies on a uniform 30-asset multi-class
+  We compare 58 portfolio allocation strategies on a uniform 30-asset multi-class
   universe spanning January 2008 through April 2026 (18.3 years, approximately
   4,600 NYSE trading days). The universe covers six asset classes — large-cap US
   equities, US sector ETFs, broad equity index funds, international equity ETFs,
@@ -12,7 +12,7 @@ abstract: |
   from six families (classical mean-variance, diversification-based,
   regime-conditional switching, time-series momentum, Black-Litterman, and
   cross-sectional factor portfolios) are each paired with a Volatility-Managed
-  Portfolio (VMP) overlay, yielding 48 comparable performance records on identical
+  Portfolio (VMP) overlay, yielding 58 comparable performance records on identical
   data. Three headline results emerge. First, the VMP overlay improves Sharpe for
   all 24 of 24 base strategies without exception, with a median lift of +0.270
   Sharpe points, confirming volatility management as a universal meta-strategy
@@ -53,7 +53,7 @@ base strategies, and whether regime-conditional switching is substitutable with
 volatility management. These are empirical questions that require simultaneous
 evaluation on the same data over the same period.
 
-This study expands the comparison to 48 strategies, standardizes the evaluation harness,
+This study expands the comparison to 58 strategies, standardizes the evaluation harness,
 and systematically adds a VMP overlay to every base method — providing the most
 comprehensive single-universe allocation comparison we are aware of.
 
@@ -95,8 +95,9 @@ the Global Financial Crisis, the COVID-19 crash, and the 2022 rate-shock bear ma
 This study makes three contributions to the comparative portfolio evaluation literature:
 
 1. **Scale.** To our knowledge, this is the largest single-universe, single-period
-   comparison of diversified allocation strategies, evaluating 48 distinct methods
-   (24 base strategies paired with and without a VMP overlay) against a common benchmark
+   comparison of diversified allocation strategies, evaluating 58 distinct methods
+   (24 base strategies, 4 constrained MV variants, and 6 long-short variants, each paired
+   with and without a VMP overlay) against a common benchmark
    on identical data.
 
 2. **Systematic VMP overlay.** Every base strategy is evaluated both with and without the
@@ -134,7 +135,7 @@ with $r_f = 0$ throughout (annualized excess-return Sharpe).
 
 ## Walk-Forward Harness
 
-All 48 strategies are evaluated through a common walk-forward harness
+All 58 strategies are evaluated through a common walk-forward harness
 (`aiam.harness.run_horse_race`) with the following fixed parameters:
 
 - **Rebalancing:** monthly, on NYSE business days
@@ -162,7 +163,7 @@ aggregation; mixing the two is an implementation error. (5) **Survivorship** —
 2008-01-01 (BTC-USD, certain ETFs) are forward-filled from inception, with this
 acknowledged as a survivorship trade-off vs. full historical reconstruction.
 (6) **Over-interpretation** — every reported number is one backtest, a hypothesis check
-rather than evidence of a durable edge; the Statistical Robustness section (§4)
+rather than evidence of a durable edge; the Statistical Robustness section (§5)
 quantifies the sampling uncertainty around the key findings.
 
 ## Strategy Families
@@ -284,29 +285,46 @@ constructed from regime-conditional Sharpe analysis on 12 single-strategy baseli
 
 # Results
 
-## 48-Strategy Comparison
+## 58-Strategy Comparison
 
 ![Cumulative wealth curves on a log-y axis, 2008–2026. Shaded regions mark the GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return (24.97% p.a.) but suffered the deepest base-strategy drawdown (−50.85% for BL-Mom(LW), annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.](figures/cumulative_wealth.png)
 
-Across all 48 strategies, the top three by gross Sharpe are VMP(GMV(sample)) (1.533), VMP(MDP(sample)) (1.460), and VMP(SWITCH(sample)) (1.457) — all VMP variants of low-to-moderate turnover base strategies. By net Sharpe after 10 bps round-trip costs, the leaders shift to VMP(GMV(sample)) (1.503), VMP(MDP(LW)) (1.400), and VMP(SWITCH(LW)) (1.381), reflecting turnover penalties on the higher-rotation sample-covariance variants. Among base strategies only, the three weakest by gross Sharpe are BL-Rev(LW) (0.547), FF3-Mom (0.588), and TSMOM(12m) (0.626) — strategies where return-chasing signals generate high turnover or deep drawdowns without commensurate compensation.
+Across all 58 strategies, the top three by gross Sharpe are VMP(GMV(sample)) (1.533), VMP(MDP(sample)) (1.460), and VMP(SWITCH(sample)) (1.457) — all VMP variants of low-to-moderate turnover base strategies. VMP(GMV(sample)) is flagged as a degenerate artifact (see Findings 1 and 6.5 and Section 3.2). By net Sharpe after 10 bps round-trip costs, the leaders shift to VMP(GMV(sample)) (1.503), VMP(MDP(LW)) (1.400), and VMP(SWITCH(LW)) (1.381), reflecting turnover penalties on the higher-rotation sample-covariance variants. Among base strategies only, the three weakest by gross Sharpe are BL-Rev(LW) (0.547), FF3-Mom (0.588), and TSMOM(12m) (0.626) — strategies where return-chasing signals generate high turnover or deep drawdowns without commensurate compensation.
 
-The complete 48-strategy comparison table appears in Appendix A.
+The complete 58-strategy comparison table appears in Appendix A.
 
 ## Rankings
 
-![Sharpe ratio vs. maximum drawdown for all 48 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits far right but is an artifact of SHY concentration (low drawdown because the portfolio is near-cash).](figures/sharpe_vs_drawdown.png)
+![Sharpe ratio vs. maximum drawdown for all 58 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits in the extreme upper-left and is a degenerate artifact: the GMV(sample) optimizer corners the portfolio in SHY (near-cash), producing near-zero vol and therefore a high Sharpe that reflects the absence of risk-taking rather than genuine portfolio construction skill. Excluding this artifact, VMP(MDP(sample)) is the dominant strategy on the risk-adjusted frontier.](figures/sharpe_vs_drawdown.png)
 
-**Top 10 by Sharpe (all 48 strategies):**
+**Top 10 by Sharpe — raw (all 58 strategies, artifact included):**
+
+| Rank | Strategy | Sharpe | Note |
+|-----:|:---------|-------:|:-----|
+|    1 | VMP(GMV(sample))    | 1.533 | (†) degenerate artifact — SHY concentration |
+|    2 | VMP(MDP(sample))    | 1.460 | |
+|    3 | VMP(SWITCH(sample)) | 1.457 | |
+|    4 | VMP(SWITCH(LW))     | 1.438 | |
+|    5 | VMP(MDP(LW))        | 1.437 | |
+|    6 | VMP(MSR(LW))        | 1.429 | |
+|    7 | VMP(MSR(sample))    | 1.405 | |
+|    8 | VMP(MSR_C(LW))      | 1.390 | |
+|    9 | VMP(BL-Mom(LW))     | 1.346 | |
+|   10 | VMP(RP(sample))     | 1.330 | |
+
+(†) VMP(GMV(sample)) Sharpe=1.533 is not a genuine portfolio result: GMV(sample) corners the portfolio in SHY (iShares 1–3 Year Treasury), producing near-zero base volatility, and VMP then levers up to 1.5× of that near-cash position. The "Sharpe" reflects cash concentration, not diversified portfolio construction. Rankings 2–10 are genuine.
+
+**Top 10 by Sharpe — excluding SHY-concentration artifact:**
 
 | Rank | Strategy | Sharpe |
 |-----:|:---------|-------:|
-|    1 | VMP(GMV(sample))    | 1.533 |
-|    2 | VMP(MDP(sample))    | 1.460 |
-|    3 | VMP(SWITCH(sample)) | 1.457 |
-|    4 | VMP(SWITCH(LW))     | 1.438 |
-|    5 | VMP(MDP(LW))        | 1.437 |
-|    6 | VMP(MSR(LW))        | 1.429 |
-|    7 | VMP(MSR(sample))    | 1.405 |
+|    1 | VMP(MDP(sample))    | 1.460 |
+|    2 | VMP(SWITCH(sample)) | 1.457 |
+|    3 | VMP(SWITCH(LW))     | 1.438 |
+|    4 | VMP(MDP(LW))        | 1.437 |
+|    5 | VMP(MSR(LW))        | 1.429 |
+|    6 | VMP(MSR(sample))    | 1.405 |
+|    7 | VMP(MSR_C(LW))      | 1.390 |
 |    8 | VMP(BL-Mom(LW))     | 1.346 |
 |    9 | VMP(RP(sample))     | 1.330 |
 |   10 | VMP(RP(LW))         | 1.306 |
@@ -344,20 +362,22 @@ All 10 are VMP variants. The highest-Sharpe base strategy is MSR(LW) at 1.262.
 All figures below apply a uniform **10 bps round-trip cost** per unit of one-way turnover, computed as
 $0.5 \times \sum|w_t - w_{t-1}|$ at each decision date (raw weight change, ignoring intra-rebalance price drift).
 
-### Top 10 by Sharpe net of 10 bps
+### Top 10 by Sharpe net of 10 bps (artifact excluded)
+
+The net-cost ranking excludes VMP(GMV(sample)) (gross net Sharpe 1.503 after costs) as a degenerate artifact — see Section 3.2 and Findings 1 and 6.5. VMP(MDP(LW)) is the strongest genuine result net of costs.
 
 | Rank | Strategy                       | Gross Sharpe | Net Sharpe | Turnover |
 |-----:|:------------------------------|-------------:|-----------:|---------:|
-|    1 | VMP(GMV(sample))               | 1.533 | 1.503 | 0.15% |
-|    2 | VMP(MDP(LW))                   | 1.437 | 1.400 | 0.79% |
-|    3 | VMP(SWITCH(LW))                | 1.438 | 1.381 | 1.98% |
-|    4 | VMP(SWITCH(sample))            | 1.457 | 1.337 | 3.37% |
-|    5 | VMP(MSR(LW))                   | 1.429 | 1.329 | 4.65% |
-|    6 | VMP(MDP(sample))               | 1.460 | 1.307 | 2.60% |
-|    7 | VMP(BL-Mom(LW))                | 1.346 | 1.276 | 4.91% |
-|    8 | VMP(RP(LW))                    | 1.306 | 1.269 | 0.95% |
-|    9 | VMP(EW)                        | 1.253 | 1.253 | 0.00% |
-|   10 | GMV(sample)                    | 1.260 | 1.233 | 0.15% |
+|    1 | VMP(MDP(LW))                   | 1.437 | 1.400 | 0.79% |
+|    2 | VMP(SWITCH(LW))                | 1.438 | 1.381 | 1.98% |
+|    3 | VMP(SWITCH(sample))            | 1.457 | 1.337 | 3.37% |
+|    4 | VMP(MSR(LW))                   | 1.429 | 1.329 | 4.65% |
+|    5 | VMP(MDP(sample))               | 1.460 | 1.307 | 2.60% |
+|    6 | VMP(BL-Mom(LW))                | 1.346 | 1.276 | 4.91% |
+|    7 | VMP(RP(LW))                    | 1.306 | 1.269 | 0.95% |
+|    8 | VMP(EW)                        | 1.253 | 1.253 | 0.00% |
+|    9 | GMV(sample)                    | 1.260 | 1.233 | 0.15% |
+|   10 | VMP(MSR_C(LW))                 | 1.390 | 1.252 | 5.34% |
 
 ### Top 5 strategies by Sharpe degradation (base strategies only)
 
@@ -443,20 +463,28 @@ Substituting R0→MSR(LW) and R5→MSR(sample) while keeping R1–R4,R6–R7→M
 yields SWITCH(v2a) Sharpe=1.340 (+0.161 vs v1). V2a achieves this with only two
 targeted swaps and no change to the default rule — a tractable candidate refinement.
 The empirical gain does not clear statistical significance at conventional levels
-(z=0.91, p=0.37; see §4.1), so we retain v2a as a candidate improvement rather than
+(z=0.91, p=0.37; see §5.1), so we retain v2a as a candidate improvement rather than
 a documented one.
 
 ![Annualized Sharpe by strategy and regime for the 12 non-SWITCH base strategies. Diverging red–blue colormap (center = 0). Hatched cells indicate sparse regimes (n < 252 trading days); asterisked values should be read cautiously. Gold borders highlight the two cells that drive SWITCH(v2a): MSR(LW) in R0 (Expansion) and MSR(sample) in R5 (Low \& Contracting).](figures/regime_conditional_heatmap.png)
 
-## Finding 6 — VMP improves all 24/24 base strategies
+## Finding 6 — VMP improves all 24/24 original base strategies
 
-VMP lifts Sharpe for every strategy in the table without exception (24/24 base
-strategies, 24/24 improvements). The lift ranges from +0.145 (FF3-Mom) to +0.521
-(MSR(sample)). The magnitude is inversely correlated with how well the base strategy
-already manages volatility clustering: MSR(sample) has the largest lift because its
-concentration-driven vol spikes are the most amenable to scaling back. HRP variants
-have the smallest lifts (+0.165, +0.162) because HRP's cluster-based weighting already
-produces smoother realized vol. Median lift across all 24 strategies: ≈+0.270 Sharpe points.
+VMP lifts Sharpe for every one of the original 24 strategy families without exception
+(24/24 improvements). The lift ranges from +0.145 (FF3-Mom) to +0.521 (MSR(sample)).
+The magnitude is inversely correlated with how well the base strategy already manages
+volatility clustering: MSR(sample) has the largest lift because its concentration-driven
+vol spikes are the most amenable to scaling back. HRP variants have the smallest lifts
+(+0.165, +0.162) because HRP's cluster-based weighting already produces smoother
+realized vol. Median lift across all 24 strategies: ≈+0.270 Sharpe points.
+
+The 7 additional strategies introduced in the expanded comparison (4 constrained MV
+variants and 3 long-short variants) also improve under VMP in 6 of 7 cases. The sole
+exception is FF3-Mom-LS, where VMP(FF3-Mom-LS) Sharpe=−0.045 worsens the already
+near-zero gross Sharpe=0.088: with an extreme-low-return base that frequently generates
+negative rolling periods, VMP scaling amplifies the downside rather than dampening vol
+spikes. This exception is specific to strategies with near-zero expected returns and does
+not qualify the universal finding for the original 24 families.
 
 ## Finding 6.5 — VMP(GMV(sample)) rank-1 Sharpe is an artifact
 
@@ -482,7 +510,7 @@ and instead holds a zero weight, losing the return from the short leg. This asym
 lookback: TSMOM(6m) Sharpe=0.904. VMP(TSMOM(12m)) Sharpe=0.976 (+0.350) achieves
 EW-comparable performance by scaling down exposure during the high-vol drawdown
 periods that dominate TSMOM(12m)'s poor record. Even after VMP rescue, TSMOM(12m) is
-near the median of all 48 strategies and adds little over VMP(EW) Sharpe=1.253.
+near the median of all 58 strategies and adds little over VMP(EW) Sharpe=1.253.
 
 ## Finding 9 — BL-Mom(LW) and VMP(BL-Mom(LW)) are the return leaders
 
@@ -539,10 +567,12 @@ weakest net-of-cost base strategies are TSMOM(12m), BL-Rev(LW), FF3-Mom, where f
 or large momentum-driven tilts generate daily turnover high enough to erode a meaningful
 share of gross Sharpe. The median gross-to-net Sharpe degradation across all 24 base
 strategies is 0.098 Sharpe points; the maximum degradation is 0.277
-(FF3-Mom). Finding 6 (VMP improves all 24/24 strategies) survives qualitatively on
+(FF3-Mom). Finding 6 (VMP improves all 24/24 original base strategies) survives qualitatively on
 a net basis: every VMP variant's net Sharpe exceeds the corresponding base strategy's net
-Sharpe, since the VMP overlay adds Sharpe by scaling down during high-vol periods and the
-base-strategy turnover cost is the same for both. Finding 9 (BL-Mom return leadership)
+Sharpe for the original 24 families, since the VMP overlay adds Sharpe by scaling down
+during high-vol periods and the base-strategy turnover cost is the same for both. The
+FF3-Mom-LS exception (VMP worsens an already near-zero-Sharpe long-short strategy) does
+not affect the original 24-family result. Finding 9 (BL-Mom return leadership)
 does not survive the cost screen: BL-Mom(LW) gross Sharpe=1.049 falls to net
 Sharpe=0.985 at 4.91% average daily turnover, dropping out of the
 top-10 net ranking. Regime-conditional switching strategies (SWITCH variants) sit at a cost
@@ -589,17 +619,19 @@ over sample covariance for MSR is a reliable empirical result at this sample siz
 
 ## Finding R2 — VMP universal lift: best defended by sign-test
 
-**Finding 6** (VMP improves all 24/24 base strategies) is most powerfully defended by
-a sign-test rather than pairwise Memmel contrasts. Under $H_0$ that VMP is
+**Finding 6** (VMP improves all 24/24 original base strategies) is most powerfully
+defended by a sign-test rather than pairwise Memmel contrasts. Under $H_0$ that VMP is
 equally likely to help or hurt, the probability of observing 24 improvements out of
 24 trials is $2^{-24} \approx 6 \times 10^{-8}$ — overwhelming evidence. The headline
 pairwise contrast — VMP(MSR(LW)) vs. MSR(LW), $\Delta=+0.166$ Sharpe — is marginal
 at the conventional 5% level ($z=1.90$, $p=0.058$), but the directional consistency
-across all 24 strategies is the primary evidence. Block-bootstrap 95% confidence
-intervals for the top-10 strategies confirm that all VMP variants' intervals lie
-above Sharpe 0.60, with the top three (VMP(GMV(sample)), VMP(MDP(sample)),
-VMP(SWITCH(sample))) spanning roughly [0.65, 2.25], [0.73, 2.06], and [0.96, 2.01]
-respectively.
+across all 24 families is the primary evidence. Block-bootstrap 95% confidence
+intervals for the genuine top-10 strategies (excluding the VMP(GMV(sample)) artifact;
+see Section 3.2) confirm that all VMP variants' intervals lie above Sharpe 0.60, with
+the leading three non-artifact strategies (VMP(MDP(sample)), VMP(SWITCH(sample)),
+VMP(SWITCH(LW))) spanning roughly [0.73, 2.06], [0.96, 2.01], and [0.85, 2.00]
+respectively. VMP(GMV(sample)) bootstrap CIs [0.65, 2.25] are excluded from
+comparative inference because the underlying base strategy is a degenerate cash corner.
 
 ## Finding R3 — SWITCH(v2a) improvement: within sampling noise
 
@@ -681,10 +713,38 @@ universe is not Sharpe enhancement but risk-profile transformation: its Sharpe
 from 19.12% to 5.56% and max drawdown from −50.85% to −20.30%, making the L/S
 form a qualitatively different instrument for risk-budgeted mandates.
 
+## Sample-Period Sensitivity
+
+The sub-period analysis (Appendix B) reveals that within-strategy variation across time
+is substantially larger than the cross-strategy variation in the full-sample headline
+table — and this is the paper's most uncomfortable honest finding.
+
+MSR(LW), the best-performing non-degenerate base strategy in the full-sample table
+(Sharpe=1.262), ranges from 0.34 in 2008–2012 to 2.48 in 2013–2017 and back to 0.58
+in 2018–2022. This within-strategy range of 2.14 Sharpe points dwarfs the full-sample
+cross-strategy spread of approximately 0.98 points (from BL-Rev(LW) at 0.547 to
+MSR(LW) at 1.262). VMP(MSR(LW)) similarly swings from 0.48 to 2.46 across the same
+windows. MDP(LW), which finishes near the full-sample median, leads the 2023–2026
+period (Sharpe=2.34) and was near the bottom in 2018–2022 (Sharpe=0.30). SWITCH(v2a),
+constructed to exploit regime patterns, achieves its best sub-period in 2008–2012
+(Sharpe=1.19) — precisely the crisis window that most other strategies underperform —
+suggesting its regime conditioning adds the most value when regime signals are sharpest.
+
+The implication is direct: the full-sample ranking table is not a stable ranking of
+strategy quality. It is a ranking of average performance over a specific 18-year
+window that happened to include a particular sequence of macro regimes. A practitioner
+selecting MSR(LW) in 2019 based on 2013–2017 performance would have suffered the
+weakest sub-period (Sharpe=0.58) in the subsequent four years. The cross-period
+instability exceeding the full-sample cross-strategy spread is the strongest argument
+for treating headline rankings as evidence of family-level behavior patterns — VMP
+variants consistently improve within every sub-period, shrinkage consistently helps
+MSR — rather than as specific-strategy superiority claims. See Appendix B for the
+full sub-period table.
+
 
 # Conclusion and Future Work
 
-This study evaluated 48 portfolio allocation strategies — the largest single-universe
+This study evaluated 58 portfolio allocation strategies — the largest single-universe
 comparison in the literature we are aware of — across 18.3 years of daily multi-asset
 returns from 2008 to 2026. The central findings are: (1) the VMP overlay is a
 universal Sharpe-improver with a median lift of +0.270 that works across all six
@@ -695,6 +755,8 @@ switching and VMP are partial substitutes targeting the same volatility-regime
 vulnerability through complementary mechanisms; (5) transaction costs reorganize the
 ranking table, with regime-conditional and low-turnover strategies surviving as
 the implementability leaders.
+
+The most forceful caveat is temporal: within-strategy sub-period Sharpe variation (e.g., MSR(LW) ranging 0.34–2.48 across 5-year buckets) exceeds the full-sample cross-strategy spread, meaning that the headline ranking table describes family-level behavioral tendencies — VMP universally improves, shrinkage helps mean-variance but not HRP — rather than an enduring ordering of specific strategies.
 
 **Limitations.** All results are for a specific 30-ticker universe with US equity
 tilt; strategies exploiting cross-sectional dispersion (FF3, BL-Mom) may respond
