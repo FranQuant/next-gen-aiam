@@ -20,6 +20,9 @@ dist/
 # Data cache — locally fetched EODHD parquet
 data/cache/
 
+# Raw data exports (portability CSVs, potentially large)
+data/raw/
+
 # Secrets / env
 .env
 .envrc

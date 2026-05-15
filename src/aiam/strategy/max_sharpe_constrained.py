@@ -54,6 +54,9 @@ class MaximumSharpeConstrained(PointInTimeStrategy):
             w = pd.Series(1.0 / n, index=valid_cols)
             return w.reindex(universe, fill_value=0.0).rename(asof)
 
+        if len(returns) < self.lookback:
+            return _ew_fallback()
+
         cov = self.cov_estimator(returns)
         mu = self.mean_estimator(returns)
         mu_ex = mu - self.rf

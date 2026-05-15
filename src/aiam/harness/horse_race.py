@@ -12,9 +12,9 @@ _WEIGHTS_DIR = Path("data/cache/portfolio_weights")
 _PRICES_CACHE = Path("data/cache/prices_30.parquet")
 
 
-def _weights_path(strategy_name: str) -> Path:
+def _weights_path(strategy_name: str, suffix: str = "2008_2026") -> Path:
     safe = strategy_name.replace("(", "_").replace(")", "").replace("/", "_")
-    return _WEIGHTS_DIR / f"{safe}_2008_2026.parquet"
+    return _WEIGHTS_DIR / f"{safe}_{suffix}.parquet"
 
 
 def run_horse_race(
@@ -24,6 +24,7 @@ def run_horse_race(
     end: str | pd.Timestamp,
     save_weights: bool = False,
     strategy_name: str | None = None,
+    weights_suffix: str = "2008_2026",
 ) -> dict:
     start = pd.Timestamp(start)
     end = pd.Timestamp(end)
@@ -59,7 +60,7 @@ def run_horse_race(
     stats = performance_stats(port_series.dropna())
 
     if save_weights and strategy_name is not None:
-        path = _weights_path(strategy_name)
+        path = _weights_path(strategy_name, suffix=weights_suffix)
         path.parent.mkdir(parents=True, exist_ok=True)
         weights_df.to_parquet(path)
 

@@ -50,6 +50,9 @@ class BlackLitterman(PointInTimeStrategy):
             k = len(cols)
             return pd.Series(1.0 / k, index=cols).reindex(universe, fill_value=0.0).rename(asof)
 
+        if len(returns) < self.lookback:
+            return _ew_fallback()
+
         # Annualized covariance — pi must be in annual units to match view Q.
         cov = self.cov_estimator(returns) * 252
 

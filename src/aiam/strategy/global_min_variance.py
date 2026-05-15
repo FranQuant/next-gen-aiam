@@ -31,6 +31,10 @@ class GlobalMinVariance(PointInTimeStrategy):
         valid_cols = [c for c in returns.columns if returns[c].isna().sum() <= thresh]
         returns = returns[valid_cols].fillna(0.0)
 
+        if len(returns) < self.lookback:
+            n = len(valid_cols)
+            return pd.Series(np.ones(n) / n, index=valid_cols, name=asof)
+
         cov = self.cov_estimator(returns)
         n = len(valid_cols)
 

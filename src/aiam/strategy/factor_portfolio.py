@@ -45,7 +45,7 @@ class FactorPortfolio(PointInTimeStrategy):
             k = len(cols)
             return pd.Series(1.0 / k, index=cols).reindex(universe, fill_value=0.0).rename(asof)
 
-        if not valid_cols:
+        if not valid_cols or len(returns) < min(self.lookback, 252):
             return _ew_fallback()
 
         signal = self.signal_fn(returns, asof)

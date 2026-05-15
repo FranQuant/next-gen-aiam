@@ -44,8 +44,13 @@ class MVOConstrained(PointInTimeStrategy):
         returns = returns[valid_cols].fillna(0.0)
 
         universe = panel.universe_at(asof)
-        cov = self.cov_estimator(returns)
         n = len(valid_cols)
+
+        if len(returns) < self.lookback:
+            weights = np.ones(n) / n
+            return pd.Series(weights, index=valid_cols, name=asof).reindex(universe, fill_value=0.0)
+
+        cov = self.cov_estimator(returns)
 
         ub_eff = min(self.ub, 1.0)
         w = cp.Variable(n)

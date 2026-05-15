@@ -33,6 +33,10 @@ class RiskParity(PointInTimeStrategy):
         valid_cols = [c for c in returns.columns if returns[c].isna().sum() <= thresh]
         returns = returns[valid_cols].fillna(0.0)
 
+        if len(returns) < self.lookback:
+            n = len(valid_cols)
+            return pd.Series(np.ones(n) / n, index=valid_cols, name=asof)
+
         # Covariance is not annualised: scaling cov by any constant k leaves
         # the ERC optimal weights unchanged (both port_vol and mrc scale by k).
         cov = self.cov_estimator(returns)
@@ -55,7 +59,7 @@ class RiskParity(PointInTimeStrategy):
             method="SLSQP",
             bounds=bounds,
             constraints=constraints,
-            options={"ftol": 1e-14, "maxiter": 2000},
+            options={"ftol": 1e-9, "maxiter": 500},
         )
 
         if not result.success:
