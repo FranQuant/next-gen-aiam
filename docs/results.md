@@ -2,6 +2,7 @@
 author: "Francisco Salazar"
 header-includes:
   - \usepackage{booktabs}
+  - \raggedbottom
 abstract: |
   This study evaluates 62 portfolio allocation strategies on a 29-asset, 23.3-year
   (2003–2026) multi-asset universe with BTC-USD excluded entirely for survivorship hygiene.
@@ -121,7 +122,6 @@ dates: GOOGL (2004-08-19), FXI (2004-10-08), GLD (2004-11-18), and HYG (2007-04-
 the universe size $N(t)$ is variable during their pre-inception periods, with absent
 assets holding zero weight.
 
-![Asset-class allocation over time for four representative strategies (EW, MDP(LW), MSR(LW), SWITCH(LW)), 2003–2026. Monthly-resampled weights grouped into six asset classes; grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. MDP(LW) tilts toward fixed income during stress regimes; MSR(LW) concentrates in equities during expansion; SWITCH(LW) reallocates by regime signal.](figures/asset_class_allocation_timeline.png)
 
 The 2003 start date extends the sample by 5 years relative to the prior 2008-based
 study, adding the 2003 recovery from the dot-com crash and capturing two additional
@@ -299,15 +299,103 @@ constructed from regime-conditional Sharpe analysis on 12 single-strategy baseli
 
 ## 62-Strategy Comparison
 
+Across all 62 strategies, the top three by gross Sharpe are VMP(MDP(LW)) (1.372), VMP(MDP(sample)) (1.368), and VMP(GMV(sample)) (1.345) — all VMP variants of low-to-moderate turnover base strategies. VMP(GMV(sample)) is flagged as a degenerate artifact (see Findings 1 and 6.5 and Section 3.2). By net Sharpe after 10 bps round-trip costs, the leaders shift to VMP(MDP(LW)) (1.336), VMP(MDP(sample)) (1.227), and VMP(SWITCH(LW)) (1.201), reflecting turnover penalties on the higher-rotation sample-covariance variants. Among base strategies only, the three weakest by gross Sharpe are BL-Rev(LW) (0.663), FF3-Mom (0.685), and TSMOM(12m) (0.801) — strategies where return-chasing signals generate high turnover or deep drawdowns without commensurate compensation.
+
+The complete 62-strategy performance record on the 29-asset 2003–2026 universe is presented in Table 1 below. Columns report annualized return (Ann Ret), annualized volatility (Ann Vol), gross Sharpe ratio (Sharpe), hit ratio (Hit% — fraction of calendar months with positive return, reported for base strategies only), maximum drawdown (Max DD), Calmar ratio, average daily one-way turnover (Turnover), Sharpe net of uniform 10 bps round-trip cost (Net 10bps), and Sharpe net of asset-class-stratified transaction costs (Net Strat).
+
+```{=latex}
+\begin{landscape}
+\small
+\begin{tabular}{p{1.4cm} p{3.2cm} r r r r r r r r r}
+\toprule
+Family & Strategy & Ann Ret & Ann Vol & Sharpe & Hit\% & Max DD & Calmar & Turnover & Net 10bps & NetStrat \\
+\midrule
+Classical MV & EW                  & 12.60\% & 13.89\% & 0.924 & 67.5 & -37.86\% & 0.333 & 0.00\% & 0.924 & 0.924 \\
+             & VMP(EW)             & 15.31\% & 13.37\% & 1.133 &      & -27.32\% & 0.560 & 0.00\% & 1.133 & 1.133 \\
+             & GMV(sample)         &  3.02\% &  3.16\% & 0.958 & 70.7 &  -9.62\% & 0.314 & 0.00\% & 0.944 & 0.953 \\
+             & VMP(GMV(sample))    &  3.13\% &  2.31\% & 1.345 &      &  -8.53\% & 0.367 & 0.00\% & 1.327 & 1.339 \\
+             & GMV(LW)             &  3.81\% &  4.01\% & 0.954 & 68.6 & -11.09\% & 0.344 & 0.01\% & 0.921 & 0.943 \\
+             & VMP(GMV(LW))        &  4.47\% &  3.65\% & 1.215 &      & -12.66\% & 0.353 & 0.01\% & 1.178 & 1.203 \\
+             & GMV(OAS)            &  3.36\% &  3.64\% & 0.925 & 69.3 & -10.10\% & 0.332 & 0.00\% & 0.893 & 0.915 \\
+             & VMP(GMV(OAS))       &  3.86\% &  3.18\% & 1.207 &      & -11.60\% & 0.333 & 0.00\% & 1.170 & 1.195 \\
+             & MSR(sample)         &  6.71\% &  7.58\% & 0.895 & 69.3 & -19.99\% & 0.336 & 0.05\% & 0.736 & 0.845 \\
+             & VMP(MSR(sample))    &  7.59\% &  5.78\% & 1.295 &      & -10.10\% & 0.751 & 0.05\% & 1.086 & 1.229 \\
+             & MSR(LW)             & 11.21\% & 10.56\% & 1.059 & 68.6 & -19.85\% & 0.565 & 0.05\% & 0.948 & 1.017 \\
+             & VMP(MSR(LW))        & 13.07\% & 10.34\% & 1.239 &      & -21.37\% & 0.612 & 0.05\% & 1.126 & 1.196 \\
+\midrule
+Constrained  & MSR\_C(LW)          & 10.52\% & 10.29\% & 1.024 & 66.8 & -19.48\% & 0.540 & 0.05\% & 0.897 & 0.977 \\
+MV (JPM §3)  & VMP(MSR\_C(LW))     & 12.27\% & 10.19\% & 1.187 &      & -18.38\% & 0.668 & 0.05\% & 1.058 & 1.139 \\
+             & MSR\_C(sample)      &  6.82\% &  8.01\% & 0.864 & 66.4 & -18.68\% & 0.365 & 0.05\% & 0.707 & 0.813 \\
+             & VMP(MSR\_C(sample)) &  7.70\% &  7.28\% & 1.055 &      & -13.19\% & 0.584 & 0.05\% & 0.882 & 0.999 \\
+             & MVO\_C(LW)          &  2.98\% &  4.02\% & 0.750 & 64.6 & -13.51\% & 0.221 & 0.00\% & 0.721 & 0.742 \\
+             & VMP(MVO\_C(LW))     &  3.22\% &  3.69\% & 0.877 &      & -14.25\% & 0.226 & 0.00\% & 0.845 & 0.868 \\
+             & MVO\_C(sample)      &  2.95\% &  3.94\% & 0.757 & 65.0 & -14.05\% & 0.210 & 0.00\% & 0.725 & 0.748 \\
+             & VMP(MVO\_C(sample)) &  2.99\% &  3.54\% & 0.850 &      & -14.70\% & 0.203 & 0.00\% & 0.814 & 0.840 \\
+\midrule
+Diversification & MDP(sample)      &  5.67\% &  5.13\% & 1.101 & 70.0 & -17.75\% & 0.320 & 0.03\% & 0.975 & 1.063 \\
+                & VMP(MDP(sample)) &  6.52\% &  4.70\% & 1.368 &      & -12.71\% & 0.513 & 0.03\% & 1.231 & 1.327 \\
+                & MDP(LW)          &  6.55\% &  5.57\% & 1.166 & 68.6 & -14.80\% & 0.443 & 0.01\% & 1.132 & 1.153 \\
+                & VMP(MDP(LW))     &  7.70\% &  5.52\% & 1.372 &      & -13.03\% & 0.591 & 0.01\% & 1.337 & 1.359 \\
+                & RP(sample)       & 11.65\% & 12.74\% & 0.929 & 67.9 & -33.10\% & 0.352 & 0.00\% & 0.928 & 0.929 \\
+                & VMP(RP(sample))  & 14.09\% & 12.60\% & 1.110 &      & -26.23\% & 0.537 & 0.00\% & 1.108 & 1.109 \\
+                & RP(LW)           & 11.62\% & 12.77\% & 0.926 & 67.9 & -32.90\% & 0.353 & 0.00\% & 0.923 & 0.925 \\
+                & VMP(RP(LW))      & 14.10\% & 12.62\% & 1.108 &      & -26.15\% & 0.539 & 0.00\% & 1.106 & 1.107 \\
+                & HRP(sample)      &  6.80\% &  6.50\% & 1.045 & 68.9 & -16.57\% & 0.410 & 0.04\% & 0.896 & 0.997 \\
+                & VMP(HRP(sample)) &  7.54\% &  6.36\% & 1.176 &      & -15.10\% & 0.500 & 0.04\% & 1.022 & 1.126 \\
+                & HRP(LW)          &  7.14\% &  6.51\% & 1.093 & 68.2 & -15.65\% & 0.457 & 0.03\% & 0.966 & 1.052 \\
+                & VMP(HRP(LW))     &  7.99\% &  6.40\% & 1.232 &      & -13.41\% & 0.596 & 0.03\% & 1.103 & 1.191 \\
+\midrule
+Regime Switch & SWITCH(sample)      &  8.31\% &  8.07\% & 1.029 & 70.7 & -19.04\% & 0.436 & 0.03\% & 0.928 & 0.999 \\
+              & VMP(SWITCH(sample)) &  9.27\% &  7.05\% & 1.293 &      & -13.11\% & 0.707 & 0.03\% & 1.178 & 1.258 \\
+              & SWITCH(LW)          &  9.55\% &  8.81\% & 1.080 & 70.0 & -20.16\% & 0.474 & 0.02\% & 1.023 & 1.059 \\
+              & VMP(SWITCH(LW))     & 10.60\% &  8.24\% & 1.265 &      & -17.39\% & 0.610 & 0.02\% & 1.203 & 1.242 \\
+\midrule
+TS Momentum & TSMOM(12m)          &  5.45\% &  6.93\% & 0.801 & 66.4 & -21.68\% & 0.252 & 0.03\% & 0.704 & 0.768 \\
+            & VMP(TSMOM(12m))     &  6.98\% &  6.58\% & 1.058 &      & -13.80\% & 0.506 & 0.03\% & 0.957 & 1.024 \\
+            & TSMOM(6m)           &  7.02\% &  7.25\% & 0.971 & 70.0 & -24.18\% & 0.290 & 0.05\% & 0.812 & 0.920 \\
+            & VMP(TSMOM(6m))      &  7.70\% &  6.75\% & 1.133 &      & -12.47\% & 0.618 & 0.05\% & 0.961 & 1.077 \\
+\midrule
+Black-Litterman & BL-Eq(sample)       & 12.48\% & 13.92\% & 0.915 & 67.9 & -37.86\% & 0.330 & 0.00\% & 0.915 & 0.915 \\
+                & VMP(BL-Eq(sample))  & 15.12\% & 13.41\% & 1.118 &      & -27.39\% & 0.552 & 0.00\% & 1.118 & 1.118 \\
+                & BL-Eq(LW)           & 12.48\% & 13.92\% & 0.915 & 67.9 & -37.86\% & 0.330 & 0.00\% & 0.915 & 0.915 \\
+                & VMP(BL-Eq(LW))      & 15.12\% & 13.41\% & 1.118 &      & -27.39\% & 0.552 & 0.00\% & 1.118 & 1.118 \\
+                & BL-Mom(LW)          & 12.57\% & 12.07\% & 1.042 & 67.9 & -21.34\% & 0.589 & 0.05\% & 0.938 & 1.002 \\
+                & VMP(BL-Mom(LW))     & 14.65\% & 11.81\% & 1.217 &      & -21.84\% & 0.671 & 0.05\% & 1.111 & 1.176 \\
+                & BL-Rev(LW)          & 12.09\% & 20.34\% & 0.663 & 63.9 & -51.42\% & 0.235 & 0.09\% & 0.550 & 0.616 \\
+                & VMP(BL-Rev(LW))     & 13.95\% & 18.02\% & 0.816 &      & -45.86\% & 0.304 & 0.09\% & 0.687 & 0.762 \\
+\midrule
+Factor & FF3-Mom             & 11.03\% & 17.52\% & 0.685 & 69.3 & -41.03\% & 0.269 & 0.20\% & 0.405 & 0.587 \\
+       & VMP(FF3-Mom)        & 12.37\% & 16.13\% & 0.804 &      & -29.61\% & 0.418 & 0.20\% & 0.500 & 0.698 \\
+       & FF3-LowVol          &  4.34\% &  4.25\% & 1.021 & 69.3 & -10.68\% & 0.406 & 0.00\% & 0.999 & 1.013 \\
+       & VMP(FF3-LowVol)     &  4.59\% &  3.92\% & 1.165 &      & -11.15\% & 0.412 & 0.00\% & 1.141 & 1.157 \\
+       & FF3-Quality         &  7.59\% &  9.59\% & 0.811 & 67.5 & -23.15\% & 0.328 & 0.04\% & 0.715 & 0.780 \\
+       & VMP(FF3-Quality)    &  8.59\% &  8.37\% & 1.027 &      & -17.42\% & 0.493 & 0.04\% & 0.916 & 0.991 \\
+       & FF3-Multi           &  7.95\% &  8.87\% & 0.907 & 68.2 & -19.85\% & 0.400 & 0.08\% & 0.691 & 0.833 \\
+       & VMP(FF3-Multi)      &  8.80\% &  8.48\% & 1.037 &      & -15.29\% & 0.575 & 0.08\% & 0.812 & 0.960 \\
+\midrule
+\multicolumn{11}{l}{\textit{Long-Short\textsuperscript{†}: zero borrow cost, unlimited short availability, no short rebate assumed.}} \\
+\midrule
+Long-Short & TSMOM-LS(12m)       &  3.67\% &  5.86\% & 0.645 & 62.5 & -16.42\% & 0.224 & 0.02\% & 0.550 & 0.613 \\
+           & VMP(TSMOM-LS(12m))  &  4.48\% &  5.44\% & 0.833 &      & -14.29\% & 0.313 & 0.02\% & 0.730 & 0.798 \\
+           & BL-Mom-LS(LW)       &  4.18\% &  4.65\% & 0.904 & 60.0 & -11.87\% & 0.352 & 0.04\% & 0.665 & 0.812 \\
+           & VMP(BL-Mom-LS(LW))  &  4.78\% &  4.58\% & 1.042 &      & -11.95\% & 0.400 & 0.04\% & 0.799 & 0.949 \\
+           & FF3-Mom-LS          &  0.53\% &  8.99\% & 0.103 & 53.9 & -26.97\% & 0.020 & 0.14\% & -0.290 & -0.049 \\
+           & VMP(FF3-Mom-LS)     & -0.73\% &  8.99\% & -0.037 &     & -35.32\% & -0.021 & 0.14\% & -0.430 & -0.190 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\footnotesize $\dagger$ Long-Short strategies (bottom block) assume zero borrow cost, unlimited short capacity, and no margin requirements. Net-of-cost columns apply the same 10 bps round-trip and stratified-cost schedules as long-only strategies, applied to gross turnover only (short-leg rebalancing costs are identical by construction).}
+\end{landscape}
+\clearpage
+```
+
 ![Cumulative wealth curves on a log-y axis, 2003–2026. Shaded regions mark the dot-com recovery (2003), GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return but BL-Mom(LW) suffered the deepest base-strategy drawdown (−21.34%, annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.](figures/cumulative_wealth.png)
 
 ![Underwater drawdown paths for the top 5 non-degenerate strategies plus the EW benchmark, 2003–2026. Shaded regions mark crisis periods. SWITCH(v2a) recovers fastest from the GFC; VMP(MDP(LW)) and VMP(MDP(sample)) exhibit the shallowest sustained drawdowns in 2022.](figures/underwater_drawdown.png)
 
 ![Pairwise return correlation matrix for all 62 strategies, hierarchically clustered with Ward linkage (2003–2026). Warm red clusters reveal families of highly correlated strategies (VMP variants cluster tightly with their base strategies); cool blue off-diagonal regions mark strategy pairs that provide genuine diversification.](figures/strategy_correlation_matrix.png)
 
-Across all 62 strategies, the top three by gross Sharpe are VMP(MDP(LW)) (1.372), VMP(MDP(sample)) (1.368), and VMP(GMV(sample)) (1.345) — all VMP variants of low-to-moderate turnover base strategies. VMP(GMV(sample)) is flagged as a degenerate artifact (see Findings 1 and 6.5 and Section 3.2). By net Sharpe after 10 bps round-trip costs, the leaders shift to VMP(MDP(LW)) (1.336), VMP(MDP(sample)) (1.227), and VMP(SWITCH(LW)) (1.201), reflecting turnover penalties on the higher-rotation sample-covariance variants. Among base strategies only, the three weakest by gross Sharpe are BL-Rev(LW) (0.663), FF3-Mom (0.685), and TSMOM(12m) (0.801) — strategies where return-chasing signals generate high turnover or deep drawdowns without commensurate compensation.
-
-The complete 62-strategy comparison table appears in Appendix A.
+![Asset-class allocation over time for four representative strategies (EW, MDP(LW), MSR(LW), SWITCH(LW)), 2003–2026. Monthly-resampled weights grouped into six asset classes; grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. MDP(LW) tilts toward fixed income during stress regimes; MSR(LW) concentrates in equities during expansion; SWITCH(LW) reallocates by regime signal.](figures/asset_class_allocation_timeline.png)
 
 ## Rankings
 
@@ -429,7 +517,7 @@ we assign per-asset round-trip costs: 2 bps for investment-grade fixed-income ET
 (SHY, IEF, TLT, AGG, HYG), 3 bps for broad US equity and sector ETFs (SPY, IWM,
 XLK, XLF, XLE, XLV, XLP, XLU), 5 bps for US large-cap single stocks, international
 equity ETFs, and commodity and FX instruments. The stratified
-net Sharpe is added as a column to Appendix A alongside the flat 10 bps column.
+net Sharpe is added as a column to Table 1 alongside the flat 10 bps column.
 
 Under stratified costs, virtually every strategy improves relative to the flat-10-bps
 benchmark because most assets in the universe are cheaper than 10 bps. The largest
@@ -797,7 +885,7 @@ is consistent across sub-periods: neither estimator dominates reliably.
 **BL-Mom return leadership** — BL-Mom(LW) remains the highest-return base strategy on
 the test period, consistent with Finding 9 at the full-sample level, although the
 specific return magnitude differs across periods as expected from the sub-period
-analysis in Appendix B.
+sub-period analysis.
 
 **Low-vol anomaly** — FF3-LowVol maintains competitive risk-adjusted performance on
 the test period, with Sharpe above EW, consistent with Finding 11. The anomaly
@@ -895,15 +983,33 @@ form a qualitatively different instrument for risk-budgeted mandates.
 
 ![Calendar-year returns for 24 representative strategies, 2003–2026 (* 2026 through April). Red cells = negative annual return; green cells = positive. The pattern of broad-based losses in 2008 and 2022 (rate shock) is unmistakable; the 2003 recovery is the only year with near-uniform positive returns across all strategy families. TSMOM(12m) and BL-Mom(LW) exhibit the largest year-to-year swings.](figures/calendar_returns_heatmap.png)
 
-![12-month rolling Sharpe ratio for six representative strategies (EW, MDP(LW), MSR(LW), SWITCH(LW), VMP(MDP(LW)), HRP(LW)), 2003–2026. Dashed line = Sharpe 1.0. Grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. All strategies produce rolling Sharpe well below 1.0 during crisis periods; VMP(MDP(LW)) exhibits the most consistently elevated rolling Sharpe across the full sample, while MSR(LW) shows the widest within-strategy variation.](figures/rolling_sharpe_small_multiples.png)
-
-The sub-period analysis (Appendix B) reveals that within-strategy variation across time
+The sub-period analysis reveals that within-strategy variation across time
 is substantially larger than the cross-strategy variation in the full-sample headline
 table — and this is the paper's most uncomfortable honest finding.
 
+Table 2 below reports annualized Sharpe ratios for 8 representative strategies across the five sub-periods discussed above.
+
+```{=latex}
+\footnotesize
+\begin{tabular}{l r r r r r}
+\toprule
+Strategy & 2003--2007 & 2008--2012 & 2013--2017 & 2018--2022 & 2023--2026 \\
+\midrule
+EW                   &  1.72 &  0.35 &  1.17 &  0.63 &  2.03 \\
+MSR(LW)              &  1.42 &  0.53 &  1.51 &  0.41 &  1.80 \\
+MSR(sample)          &  1.53 &  0.89 &  1.44 &  0.30 &  1.19 \\
+MDP(LW)              &  1.61 &  0.82 &  1.27 &  0.26 &  2.30 \\
+SWITCH(LW)           &  1.59 &  0.58 &  1.24 &  0.53 &  1.73 \\
+SWITCH(v2a)          &  1.24 &  1.23 &  1.36 &  0.48 &  2.01 \\
+VMP(MSR(LW))         &  1.57 &  0.70 &  1.46 &  0.50 &  2.18 \\
+VMP(MDP(LW))         &  1.87 &  1.02 &  1.26 &  0.56 &  2.43 \\
+\bottomrule
+\end{tabular}
+```
+
 MSR(LW), one of the better-performing non-degenerate base strategies in the full-sample
 table (Sharpe=1.059), ranges from 0.53 in 2008–2012 to 1.51 in 2013–2017 and 0.41 in
-2018–2022 (from the Appendix B sub-period table). This within-strategy range of 1.10
+2018–2022 (from Table 2). This within-strategy range of 1.10
 Sharpe points is large relative to the full-sample cross-strategy spread of approximately
 0.50 points (from BL-Rev(LW) at 0.663 to MDP(LW) at 1.167). VMP(MSR(LW)) similarly
 swings from 0.70 to 1.46 across the same windows. MDP(LW), which finishes near the full-sample median, leads the 2023–2026
@@ -920,8 +1026,9 @@ weakest sub-period (Sharpe=0.58) in the subsequent four years. The cross-period
 instability exceeding the full-sample cross-strategy spread is the strongest argument
 for treating headline rankings as evidence of family-level behavior patterns — VMP
 variants consistently improve within every sub-period, shrinkage consistently helps
-MSR — rather than as specific-strategy superiority claims. See Appendix B for the
-full sub-period table.
+MSR — rather than as specific-strategy superiority claims. See Table 2 above for the full sub-period table.
+
+![12-month rolling Sharpe ratio for six representative strategies (EW, MDP(LW), MSR(LW), SWITCH(LW), VMP(MDP(LW)), HRP(LW)), 2003–2026. Dashed line = Sharpe 1.0. Grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. All strategies produce rolling Sharpe well below 1.0 during crisis periods; VMP(MDP(LW)) exhibits the most consistently elevated rolling Sharpe across the full sample, while MSR(LW) shows the widest within-strategy variation.](figures/rolling_sharpe_small_multiples.png)
 
 
 \newpage
@@ -945,7 +1052,7 @@ regime-conditional rule derived from training data (2003–2022) matches the ori
 full-sample rule, providing the first clean OOS validation of the regime-switching
 approach.
 
-The most forceful caveat is temporal: within-strategy sub-period Sharpe variation (e.g., MSR(LW) ranging 0.41–1.80 across 5-year buckets) exceeds the full-sample cross-strategy spread, meaning that the headline ranking table describes family-level behavioral tendencies — VMP universally improves, shrinkage helps mean-variance but not HRP — rather than an enduring ordering of specific strategies. The OOS test period (2023–2026) confirms this: the family-level tendencies persist while the specific strategy rankings within the test period differ from the training-period ordering.
+The most forceful caveat is temporal: within-strategy sub-period Sharpe variation (e.g., MSR(LW) ranging 0.41–1.80 across 5-year buckets) exceeds the full-sample cross-strategy spread, meaning that the headline ranking table describes family-level behavioral tendencies — VMP universally improves, shrinkage consistently helps mean-variance families while HRP is approximately invariant to shrinkage choice — rather than an enduring ordering of specific strategies. The OOS test period (2023–2026) confirms this: the family-level tendencies persist while the specific strategy rankings within the test period differ from the training-period ordering.
 
 **Limitations.** All results are for a specific 29-ticker universe with US equity
 tilt; strategies exploiting cross-sectional dispersion (FF3, BL-Mom) may respond
@@ -960,11 +1067,11 @@ extension — ML signal strategies (Lasso, Random Forest, XGBoost) on the extend
 2003–2026 sample — will explore whether non-linear factor models improve on the
 classical signal baselines established here.
 
-**Long-short extensions (Appendix A, Long-Short block).** Three long-short variants
+**Long-short extensions (Table 1, Long-Short block).** Three long-short variants
 are added to quantify the long-only constraint gap identified in Findings 8 and 11:
 TSMOM-LS(12m), BL-Mom-LS(LW), and FF3-Mom-LS. All assume zero borrow cost, unlimited
 short availability, and no short rebate — conditions that overstate practical L/S
-returns; see the footnote in Appendix A. The results are mixed and universe-specific.
+returns; see the footnote in Table 1. The results are mixed and universe-specific.
 Finding 8 (TSMOM weakened by long-only constraint) does *not* vanish: TSMOM-LS(12m)
 achieves Sharpe 0.645, worse than TSMOM(12m) long-only (0.801). Activating the short
 leg in this mixed-asset universe shorts assets with negative 12-month momentum, which
@@ -995,232 +1102,101 @@ framework. Fifth, cryptocurrency re-entry via dedicated instruments (Bitcoin ETF
 CME futures) on a 2020-forward sub-panel would allow crypto coverage without
 survivorship bias.
 
+\newpage
+
 # References {.unnumbered}
 
 ::: {#refs}
 :::
 
-```{=latex}
-\clearpage
-```
+# List of Acronyms {-}
 
-# List of Acronyms {.unnumbered}
+## Portfolio construction methods {-}
 
-AGG
-: iShares Core U.S. Aggregate Bond ETF
+- **BL** — Black-Litterman portfolio construction model
+- **BL-Eq** — Black-Litterman with equilibrium-only views (P=0)
+- **BL-Mom** — Black-Litterman with momentum views
+- **BL-Rev** — Black-Litterman with mean-reversion views
+- **EW** — Equal-Weight (1/N) portfolio benchmark
+- **FF3** — Fama-French three-factor framework
+- **FF3-Mom** — Cross-sectional momentum factor portfolio
+- **FF3-LowVol** — Low-volatility factor portfolio
+- **FF3-Quality** — Quality-composite factor portfolio
+- **FF3-Multi** — Multi-factor composite portfolio
+- **GMV** — Global Minimum Variance portfolio
+- **HRP** — Hierarchical Risk Parity
+- **MDP** — Maximum Diversification Portfolio
+- **MSR** — Maximum Sharpe Ratio portfolio
+- **MSR_C** — Maximum Sharpe Ratio with per-asset bounds (constrained)
+- **MVO** — Mean-Variance Optimization
+- **MVO_C** — Mean-Variance Optimization with per-asset bounds (constrained)
+- **RP** — Risk Parity (Equal Risk Contribution)
+- **SWITCH** — Regime-conditional strategy-switching portfolio
+- **TSMOM** — Time-Series Momentum
+- **VMP** — Volatility-Managed Portfolio overlay (Moreira and Muir 2017)
+- **v1, v2a** — SWITCH rule versions (v1 = paam_lab baseline; v2a = refined)
 
-BL
-: Black-Litterman (model)
+## Covariance estimators {-}
 
-DBC
-: Invesco DB Commodity Index Tracking Fund
+- **LW** — Ledoit-Wolf linear shrinkage estimator
+- **OAS** — Oracle Approximating Shrinkage estimator
 
-EEM
-: iShares MSCI Emerging Markets ETF
+## Statistical methods {-}
 
-EFA
-: iShares MSCI EAFE ETF
+- **CI** — Confidence Interval
+- **IC** — Information Coefficient
+- **Memmel** — Memmel (2003) paired Sharpe-difference test
+- **OOS** — Out-of-Sample
 
-EW
-: Equal-Weight (1/N portfolio)
+## Universe tickers (29 assets) {-}
 
-FF3
-: Fama-French three-factor portfolio family
+- **AAPL** — Apple Inc.
+- **AGG** — iShares Core U.S. Aggregate Bond ETF
+- **BTC** — Bitcoin (excluded from this universe for survivorship hygiene)
+- **DBC** — Invesco DB Commodity Index Tracking Fund
+- **EEM** — iShares MSCI Emerging Markets ETF
+- **EFA** — iShares MSCI EAFE ETF
+- **EURUSD** — Euro/US Dollar exchange rate
+- **FXI** — iShares China Large-Cap ETF
+- **GLD** — SPDR Gold Shares ETF
+- **GOOGL** — Alphabet Inc. Class A
+- **HYG** — iShares iBoxx USD High Yield Corporate Bond ETF
+- **IEF** — iShares 7-10 Year Treasury Bond ETF
+- **IWM** — iShares Russell 2000 ETF
+- **JNJ** — Johnson & Johnson
+- **JPM** — JPMorgan Chase & Co. (ticker)
+- **MSFT** — Microsoft Corp.
+- **NVDA** — NVIDIA Corp.
+- **SHY** — iShares 1-3 Year Treasury Bond ETF
+- **SLV** — iShares Silver Trust
+- **SPY** — SPDR S&P 500 ETF Trust
+- **TLT** — iShares 20+ Year Treasury Bond ETF
+- **USO** — United States Oil Fund
+- **WMT** — Walmart Inc.
+- **XLE** — Energy Select Sector SPDR Fund
+- **XLF** — Financial Select Sector SPDR Fund
+- **XLK** — Technology Select Sector SPDR Fund
+- **XLP** — Consumer Staples Select Sector SPDR Fund
+- **XLU** — Utilities Select Sector SPDR Fund
+- **XLV** — Health Care Select Sector SPDR Fund
 
-FXI
-: iShares China Large-Cap ETF
+## Macro and data {-}
 
-GFC
-: Global Financial Crisis (2008–09)
+- **COVID** — COVID-19 pandemic crash period (2020-02 to 2020-04)
+- **CPI** — Consumer Price Index
+- **EODHD** — End-of-Day Historical Data (price vendor)
+- **ETF** — Exchange-Traded Fund
+- **FRED** — Federal Reserve Economic Data
+- **GDP** — Gross Domestic Product
+- **GFC** — Global Financial Crisis (2008–2009)
+- **NYSE** — New York Stock Exchange
+- **OHLCV** — Open, High, Low, Close, Volume (price data fields)
+- **VIX** — CBOE Volatility Index
 
-GLD
-: SPDR Gold Shares ETF
+## Other {-}
 
-GMV
-: Global Minimum Variance (portfolio)
-
-HRP
-: Hierarchical Risk Parity
-
-HYG
-: iShares iBoxx USD High Yield Corporate Bond ETF
-
-IEF
-: iShares 7–10 Year Treasury Bond ETF
-
-IWM
-: iShares Russell 2000 ETF
-
-LW
-: Ledoit-Wolf (linear shrinkage covariance estimator)
-
-MDP
-: Maximum Diversification Portfolio
-
-MSR
-: Maximum Sharpe Ratio (portfolio)
-
-MVO
-: Mean-Variance Optimisation
-
-OAS
-: Oracle Approximating Shrinkage (covariance estimator)
-
-OOS
-: Out-of-Sample
-
-RP
-: Risk Parity (Equal Risk Contribution)
-
-SHY
-: iShares 1–3 Year Treasury Bond ETF
-
-SPY
-: SPDR S&P 500 ETF Trust
-
-SWITCH
-: Regime-conditional switching strategy
-
-TLT
-: iShares 20+ Year Treasury Bond ETF
-
-TSMOM
-: Time-Series Momentum
-
-VMP
-: Volatility-Managed Portfolio
-
-```{=latex}
-\clearpage
-```
-
-# Appendix A — Full 62-Strategy Comparison Table {.unnumbered}
-
-The table below presents the complete performance record for all 62 strategies on the
-29-asset, 2003–2026 universe: the original 48 strategies (24 base strategies each
-paired with a VMP variant), 8 constrained MV variants (MSR\_C and MVO\_C with per-asset
-bounds [5\%, 40\%] following JPM (2022) §3 practice, base and VMP), and 6 long-short
-variants (3 base + 3 VMP). Strategies are organized by family, with
-each base strategy followed immediately by its VMP variant. Columns report annualized
-return (Ann Ret), annualized volatility (Ann Vol), gross Sharpe ratio (Sharpe), hit
-ratio (Hit\% = fraction of calendar months with positive return), maximum drawdown
-(Max DD), Calmar ratio, average daily one-way turnover (Turnover), Sharpe ratio net
-of a uniform 10 bps round-trip cost (Net 10bps), and Sharpe ratio net of
-asset-class-stratified transaction costs (Net Strat). Hit ratio is reported for base
-strategies only. All figures are computed over 2003-01-02 to 2026-04-30 with no
-lookahead.
-
-```{=latex}
-\footnotesize
-\begin{tabular}{p{1.4cm} p{3.2cm} r r r r r r r r r}
-\toprule
-Family & Strategy & Ann Ret & Ann Vol & Sharpe & Hit\% & Max DD & Calmar & Turnover & Net 10bps & NetStrat \\
-\midrule
-Classical MV & EW                  & 12.60\% & 13.89\% & 0.924 & 67.5 & -37.86\% & 0.333 & 0.00\% & 0.924 & 0.924 \\
-             & VMP(EW)             & 15.31\% & 13.37\% & 1.133 &      & -27.32\% & 0.560 & 0.00\% & 1.133 & 1.133 \\
-             & GMV(sample)         &  3.02\% &  3.16\% & 0.958 & 70.7 &  -9.62\% & 0.314 & 0.00\% & 0.944 & 0.953 \\
-             & VMP(GMV(sample))    &  3.13\% &  2.31\% & 1.345 &      &  -8.53\% & 0.367 & 0.00\% & 1.327 & 1.339 \\
-             & GMV(LW)             &  3.81\% &  4.01\% & 0.954 & 68.6 & -11.09\% & 0.344 & 0.01\% & 0.921 & 0.943 \\
-             & VMP(GMV(LW))        &  4.47\% &  3.65\% & 1.215 &      & -12.66\% & 0.353 & 0.01\% & 1.178 & 1.203 \\
-             & GMV(OAS)            &  3.36\% &  3.64\% & 0.925 & 69.3 & -10.10\% & 0.332 & 0.00\% & 0.893 & 0.915 \\
-             & VMP(GMV(OAS))       &  3.86\% &  3.18\% & 1.207 &      & -11.60\% & 0.333 & 0.00\% & 1.170 & 1.195 \\
-             & MSR(sample)         &  6.71\% &  7.58\% & 0.895 & 69.3 & -19.99\% & 0.336 & 0.05\% & 0.736 & 0.845 \\
-             & VMP(MSR(sample))    &  7.59\% &  5.78\% & 1.295 &      & -10.10\% & 0.751 & 0.05\% & 1.086 & 1.229 \\
-             & MSR(LW)             & 11.21\% & 10.56\% & 1.059 & 68.6 & -19.85\% & 0.565 & 0.05\% & 0.948 & 1.017 \\
-             & VMP(MSR(LW))        & 13.07\% & 10.34\% & 1.239 &      & -21.37\% & 0.612 & 0.05\% & 1.126 & 1.196 \\
-\midrule
-Constrained  & MSR\_C(LW)          & 10.52\% & 10.29\% & 1.024 & 66.8 & -19.48\% & 0.540 & 0.05\% & 0.897 & 0.977 \\
-MV (JPM §3)  & VMP(MSR\_C(LW))     & 12.27\% & 10.19\% & 1.187 &      & -18.38\% & 0.668 & 0.05\% & 1.058 & 1.139 \\
-             & MSR\_C(sample)      &  6.82\% &  8.01\% & 0.864 & 66.4 & -18.68\% & 0.365 & 0.05\% & 0.707 & 0.813 \\
-             & VMP(MSR\_C(sample)) &  7.70\% &  7.28\% & 1.055 &      & -13.19\% & 0.584 & 0.05\% & 0.882 & 0.999 \\
-             & MVO\_C(LW)          &  2.98\% &  4.02\% & 0.750 & 64.6 & -13.51\% & 0.221 & 0.00\% & 0.721 & 0.742 \\
-             & VMP(MVO\_C(LW))     &  3.22\% &  3.69\% & 0.877 &      & -14.25\% & 0.226 & 0.00\% & 0.845 & 0.868 \\
-             & MVO\_C(sample)      &  2.95\% &  3.94\% & 0.757 & 65.0 & -14.05\% & 0.210 & 0.00\% & 0.725 & 0.748 \\
-             & VMP(MVO\_C(sample)) &  2.99\% &  3.54\% & 0.850 &      & -14.70\% & 0.203 & 0.00\% & 0.814 & 0.840 \\
-\midrule
-Diversification & MDP(sample)      &  5.67\% &  5.13\% & 1.101 & 70.0 & -17.75\% & 0.320 & 0.03\% & 0.975 & 1.063 \\
-                & VMP(MDP(sample)) &  6.52\% &  4.70\% & 1.368 &      & -12.71\% & 0.513 & 0.03\% & 1.231 & 1.327 \\
-                & MDP(LW)          &  6.55\% &  5.57\% & 1.166 & 68.6 & -14.80\% & 0.443 & 0.01\% & 1.132 & 1.153 \\
-                & VMP(MDP(LW))     &  7.70\% &  5.52\% & 1.372 &      & -13.03\% & 0.591 & 0.01\% & 1.337 & 1.359 \\
-                & RP(sample)       & 11.65\% & 12.74\% & 0.929 & 67.9 & -33.10\% & 0.352 & 0.00\% & 0.928 & 0.929 \\
-                & VMP(RP(sample))  & 14.09\% & 12.60\% & 1.110 &      & -26.23\% & 0.537 & 0.00\% & 1.108 & 1.109 \\
-                & RP(LW)           & 11.62\% & 12.77\% & 0.926 & 67.9 & -32.90\% & 0.353 & 0.00\% & 0.923 & 0.925 \\
-                & VMP(RP(LW))      & 14.10\% & 12.62\% & 1.108 &      & -26.15\% & 0.539 & 0.00\% & 1.106 & 1.107 \\
-                & HRP(sample)      &  6.80\% &  6.50\% & 1.045 & 68.9 & -16.57\% & 0.410 & 0.04\% & 0.896 & 0.997 \\
-                & VMP(HRP(sample)) &  7.54\% &  6.36\% & 1.176 &      & -15.10\% & 0.500 & 0.04\% & 1.022 & 1.126 \\
-                & HRP(LW)          &  7.14\% &  6.51\% & 1.093 & 68.2 & -15.65\% & 0.457 & 0.03\% & 0.966 & 1.052 \\
-                & VMP(HRP(LW))     &  7.99\% &  6.40\% & 1.232 &      & -13.41\% & 0.596 & 0.03\% & 1.103 & 1.191 \\
-\midrule
-Regime Switch & SWITCH(sample)      &  8.31\% &  8.07\% & 1.029 & 70.7 & -19.04\% & 0.436 & 0.03\% & 0.928 & 0.999 \\
-              & VMP(SWITCH(sample)) &  9.27\% &  7.05\% & 1.293 &      & -13.11\% & 0.707 & 0.03\% & 1.178 & 1.258 \\
-              & SWITCH(LW)          &  9.55\% &  8.81\% & 1.080 & 70.0 & -20.16\% & 0.474 & 0.02\% & 1.023 & 1.059 \\
-              & VMP(SWITCH(LW))     & 10.60\% &  8.24\% & 1.265 &      & -17.39\% & 0.610 & 0.02\% & 1.203 & 1.242 \\
-\midrule
-TS Momentum & TSMOM(12m)          &  5.45\% &  6.93\% & 0.801 & 66.4 & -21.68\% & 0.252 & 0.03\% & 0.704 & 0.768 \\
-            & VMP(TSMOM(12m))     &  6.98\% &  6.58\% & 1.058 &      & -13.80\% & 0.506 & 0.03\% & 0.957 & 1.024 \\
-            & TSMOM(6m)           &  7.02\% &  7.25\% & 0.971 & 70.0 & -24.18\% & 0.290 & 0.05\% & 0.812 & 0.920 \\
-            & VMP(TSMOM(6m))      &  7.70\% &  6.75\% & 1.133 &      & -12.47\% & 0.618 & 0.05\% & 0.961 & 1.077 \\
-\midrule
-Black-Litterman & BL-Eq(sample)       & 12.48\% & 13.92\% & 0.915 & 67.9 & -37.86\% & 0.330 & 0.00\% & 0.915 & 0.915 \\
-                & VMP(BL-Eq(sample))  & 15.12\% & 13.41\% & 1.118 &      & -27.39\% & 0.552 & 0.00\% & 1.118 & 1.118 \\
-                & BL-Eq(LW)           & 12.48\% & 13.92\% & 0.915 & 67.9 & -37.86\% & 0.330 & 0.00\% & 0.915 & 0.915 \\
-                & VMP(BL-Eq(LW))      & 15.12\% & 13.41\% & 1.118 &      & -27.39\% & 0.552 & 0.00\% & 1.118 & 1.118 \\
-                & BL-Mom(LW)          & 12.57\% & 12.07\% & 1.042 & 67.9 & -21.34\% & 0.589 & 0.05\% & 0.938 & 1.002 \\
-                & VMP(BL-Mom(LW))     & 14.65\% & 11.81\% & 1.217 &      & -21.84\% & 0.671 & 0.05\% & 1.111 & 1.176 \\
-                & BL-Rev(LW)          & 12.09\% & 20.34\% & 0.663 & 63.9 & -51.42\% & 0.235 & 0.09\% & 0.550 & 0.616 \\
-                & VMP(BL-Rev(LW))     & 13.95\% & 18.02\% & 0.816 &      & -45.86\% & 0.304 & 0.09\% & 0.687 & 0.762 \\
-\midrule
-Factor & FF3-Mom             & 11.03\% & 17.52\% & 0.685 & 69.3 & -41.03\% & 0.269 & 0.20\% & 0.405 & 0.587 \\
-       & VMP(FF3-Mom)        & 12.37\% & 16.13\% & 0.804 &      & -29.61\% & 0.418 & 0.20\% & 0.500 & 0.698 \\
-       & FF3-LowVol          &  4.34\% &  4.25\% & 1.021 & 69.3 & -10.68\% & 0.406 & 0.00\% & 0.999 & 1.013 \\
-       & VMP(FF3-LowVol)     &  4.59\% &  3.92\% & 1.165 &      & -11.15\% & 0.412 & 0.00\% & 1.141 & 1.157 \\
-       & FF3-Quality         &  7.59\% &  9.59\% & 0.811 & 67.5 & -23.15\% & 0.328 & 0.04\% & 0.715 & 0.780 \\
-       & VMP(FF3-Quality)    &  8.59\% &  8.37\% & 1.027 &      & -17.42\% & 0.493 & 0.04\% & 0.916 & 0.991 \\
-       & FF3-Multi           &  7.95\% &  8.87\% & 0.907 & 68.2 & -19.85\% & 0.400 & 0.08\% & 0.691 & 0.833 \\
-       & VMP(FF3-Multi)      &  8.80\% &  8.48\% & 1.037 &      & -15.29\% & 0.575 & 0.08\% & 0.812 & 0.960 \\
-\midrule
-\multicolumn{11}{l}{\textit{Long-Short\textsuperscript{†}: zero borrow cost, unlimited short availability, no short rebate assumed.}} \\
-\midrule
-Long-Short & TSMOM-LS(12m)       &  3.67\% &  5.86\% & 0.645 & 62.5 & -16.42\% & 0.224 & 0.02\% & 0.550 & 0.613 \\
-           & VMP(TSMOM-LS(12m))  &  4.48\% &  5.44\% & 0.833 &      & -14.29\% & 0.313 & 0.02\% & 0.730 & 0.798 \\
-           & BL-Mom-LS(LW)       &  4.18\% &  4.65\% & 0.904 & 60.0 & -11.87\% & 0.352 & 0.04\% & 0.665 & 0.812 \\
-           & VMP(BL-Mom-LS(LW))  &  4.78\% &  4.58\% & 1.042 &      & -11.95\% & 0.400 & 0.04\% & 0.799 & 0.949 \\
-           & FF3-Mom-LS          &  0.53\% &  8.99\% & 0.103 & 53.9 & -26.97\% & 0.020 & 0.14\% & -0.290 & -0.049 \\
-           & VMP(FF3-Mom-LS)     & -0.73\% &  8.99\% & -0.037 &     & -35.32\% & -0.021 & 0.14\% & -0.430 & -0.190 \\
-\bottomrule
-\end{tabular}
-\vspace{2pt}
-{\footnotesize $\dagger$ Long-Short strategies (bottom block) assume zero borrow cost, unlimited short capacity, and no margin requirements. Net-of-cost columns apply the same 10 bps round-trip and stratified-cost schedules as long-only strategies, applied to gross turnover only (short-leg rebalancing costs are identical by construction).}
-\clearpage
-```
-
-# Appendix B — Sub-Period Sharpe Ratios (5-Year Buckets) {.unnumbered}
-
-The table below reports annualized Sharpe ratios for 8 representative strategies across five
-sub-periods. The 2003–2007 pre-GFC period is newly available from the extended sample.
-Sub-periods are defined by calendar year boundaries; the 2023–2026 column is partial
-(through April 2026, approximately 3.3 years). The cross-period variation reveals that
-relative rankings are not stable: MDP(LW) leads in the GFC recovery ($S=0.82$) and
-the 2023–2026 post-rate-shock period ($S=2.30$), while MSR(LW) was strongest in the
-pre-GFC expansion ($S=1.42$). VMP overlays consistently improve Sharpe within each
-sub-period. Strategies are reported on the 29-asset 2003–2026 universe; earlier period
-numbers differ from the 30-asset 2008–2026 report.
-
-```{=latex}
-\footnotesize
-\begin{tabular}{l r r r r r}
-\toprule
-Strategy & 2003--2007 & 2008--2012 & 2013--2017 & 2018--2022 & 2023--2026 \\
-\midrule
-EW                   &  1.72 &  0.35 &  1.17 &  0.63 &  2.03 \\
-MSR(LW)              &  1.42 &  0.53 &  1.51 &  0.41 &  1.80 \\
-MSR(sample)          &  1.53 &  0.89 &  1.44 &  0.30 &  1.19 \\
-MDP(LW)              &  1.61 &  0.82 &  1.27 &  0.26 &  2.30 \\
-SWITCH(LW)           &  1.59 &  0.58 &  1.24 &  0.53 &  1.73 \\
-SWITCH(v2a)          &  1.24 &  1.23 &  1.36 &  0.48 &  2.01 \\
-VMP(MSR(LW))         &  1.57 &  0.70 &  1.46 &  0.50 &  2.18 \\
-VMP(MDP(LW))         &  1.87 &  1.02 &  1.26 &  0.56 &  2.43 \\
-\bottomrule
-\end{tabular}
-\clearpage
-```
+- **EMH** — Efficient Market Hypothesis
+- **JPM** — JPMorgan (research reports; distinct from JPM ticker above)
+- **LS** — Long-Short
+- **ML** — Machine Learning
+- **TC** — Transaction Cost
