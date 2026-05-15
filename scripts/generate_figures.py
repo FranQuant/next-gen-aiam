@@ -477,5 +477,291 @@ fig.savefig(f"{OUT}/vmp_exposure_mechanism.svg", bbox_inches="tight")
 plt.close(fig)
 print("  → saved vmp_exposure_mechanism.{png,svg}")
 
-print("\nAll 4 figures generated successfully.")
+from scipy.cluster.hierarchy import linkage, leaves_list
+from scipy.spatial.distance import squareform
+
+# ── Figure 5: Calendar Returns Heatmap ─────────────────────────────────────────
+print("Figure 5: Calendar returns heatmap...")
+
+CAL_STRATS = [
+    ("EW",                  "EW"),
+    ("GMV(sample)",         "GMV(samp)"),
+    ("GMV(ledoit_wolf)",    "GMV(LW)"),
+    ("MSR(sample)",         "MSR(samp)"),
+    ("MSR(ledoit_wolf)",    "MSR(LW)"),
+    ("MDP(sample)",         "MDP(samp)"),
+    ("MDP(ledoit_wolf)",    "MDP(LW)"),
+    ("RP(sample)",          "RP(samp)"),
+    ("RP(ledoit_wolf)",     "RP(LW)"),
+    ("HRP(sample)",         "HRP(samp)"),
+    ("HRP(ledoit_wolf)",    "HRP(LW)"),
+    ("SWITCH(sample)",      "SWITCH(samp)"),
+    ("SWITCH(ledoit_wolf)", "SWITCH(LW)"),
+    ("TSMOM(12m)",          "TSMOM(12m)"),
+    ("TSMOM(6m)",           "TSMOM(6m)"),
+    ("BL-Eq(sample)",       "BL-Eq(samp)"),
+    ("BL-Eq(LW)",           "BL-Eq(LW)"),
+    ("BL-Mom(LW)",          "BL-Mom(LW)"),
+    ("BL-Rev(LW)",          "BL-Rev(LW)"),
+    ("FF3-Mom",             "FF3-Mom"),
+    ("FF3-LowVol",          "FF3-LowVol"),
+    ("FF3-Quality",         "FF3-Qlty"),
+    ("FF3-Multi",           "FF3-Multi"),
+]
+# 24th strategy: SWITCH(v2a)
+
+years = list(range(2003, 2027))
+cal_labels = [str(y) if y < 2026 else "2026*" for y in years]
+
+cal_rows = {}
+for col, disp in CAL_STRATS:
+    if col not in base.columns:
+        continue
+    r = base[col]
+    cal_rows[disp] = [(1 + r[r.index.year == y]).prod() - 1 if (r.index.year == y).any() else np.nan
+                      for y in years]
+
+sv2a_ann = [(1 + switch_v2a[switch_v2a.index.year == y]).prod() - 1
+            if (switch_v2a.index.year == y).any() else np.nan for y in years]
+cal_rows["SWITCH(v2a)"] = sv2a_ann
+
+df_cal = pd.DataFrame(cal_rows, index=cal_labels).T
+
+vmax_cal = 0.50
+Z_cal = df_cal.values.clip(-vmax_cal, vmax_cal)
+
+fig, ax = plt.subplots(figsize=(18, 9))
+im = ax.imshow(Z_cal, cmap="RdYlGn", vmin=-vmax_cal, vmax=vmax_cal, aspect="auto")
+plt.colorbar(im, ax=ax, label="Annual Return",
+             format=FuncFormatter(lambda x, _: f"{x:.0%}"), shrink=0.75)
+
+nstrats, nyears = Z_cal.shape
+for i in range(nstrats):
+    for j in range(nyears):
+        val = df_cal.iloc[i, j]
+        if not np.isnan(val):
+            brightness = (val + vmax_cal) / (2 * vmax_cal)
+            tc = "white" if brightness < 0.25 or brightness > 0.75 else "black"
+            ax.text(j, i, f"{val:.0%}", ha="center", va="center", fontsize=5, color=tc)
+
+ax.set_xticks(range(nyears))
+ax.set_xticklabels(cal_labels, rotation=45, ha="right", fontsize=7)
+ax.set_yticks(range(nstrats))
+ax.set_yticklabels(df_cal.index.tolist(), fontsize=7.5)
+ax.set_title(
+    "Calendar-Year Returns — 24 Strategies, 2003–2026  (* 2026 through April)",
+    fontsize=11, fontweight="bold",
+)
+
+fig.tight_layout()
+fig.savefig(f"{OUT}/calendar_returns_heatmap.png", dpi=300, bbox_inches="tight")
+fig.savefig(f"{OUT}/calendar_returns_heatmap.svg", bbox_inches="tight")
+plt.close(fig)
+print("  → saved calendar_returns_heatmap.{png,svg}")
+
+# ── Figure 6: Underwater Drawdown ───────────────────────────────────────────────
+print("Figure 6: Underwater drawdown...")
+
+UW_STRATS = [
+    (None,                     "SWITCH(v2a)",       FAMILY_COLORS["Regime"],          dict(lw=2.0, zorder=5)),
+    ("VMP(MDP(ledoit_wolf))",  "VMP(MDP(LW))",      FAMILY_COLORS["Diversification"], dict(lw=1.8, zorder=4)),
+    ("VMP(MDP(sample))",       "VMP(MDP(sample))",  FAMILY_COLORS["Diversification"], dict(lw=1.4, ls="--", zorder=4)),
+    ("MDP(ledoit_wolf)",       "MDP(LW)",           FAMILY_COLORS["Diversification"], dict(lw=1.2, ls=":", zorder=3)),
+    ("VMP(MSR(ledoit_wolf))",  "VMP(MSR(LW))",      FAMILY_COLORS["Classical MV"],   dict(lw=1.4, zorder=3)),
+    ("EW",                     "EW (benchmark)",    FAMILY_COLORS["EW (benchmark)"],  dict(lw=1.2, ls="-.", zorder=2)),
+]
+
+fig, ax = plt.subplots(figsize=(13, 6))
+
+for col, label, color, kw in UW_STRATS:
+    if col is None:
+        rets = switch_v2a.dropna()
+    elif col in base.columns:
+        rets = base[col].dropna()
+    elif col in vmp.columns:
+        rets = vmp[col].dropna()
+    else:
+        print(f"  WARNING: '{col}' not found, skipping.")
+        continue
+    cum = (1 + rets).cumprod()
+    dd  = (cum - cum.cummax()) / cum.cummax() * 100
+    ax.fill_between(dd.index, dd.values, 0, alpha=0.10, color=color)
+    ax.plot(dd.index, dd.values, color=color, label=label, **kw)
+
+for start, end, _ in CRISES:
+    ax.axvspan(start, end, color="grey", alpha=0.08, zorder=0)
+
+ax.set_xlabel("Date")
+ax.set_ylabel("Drawdown (%)")
+ax.set_title(
+    "Underwater Drawdown — Top 5 Strategies + EW Benchmark (2003–2026)",
+    fontsize=11, fontweight="bold",
+)
+ax.legend(ncol=2, fontsize=8, loc="lower left", framealpha=0.85)
+
+fig.tight_layout()
+fig.savefig(f"{OUT}/underwater_drawdown.png", dpi=300, bbox_inches="tight")
+fig.savefig(f"{OUT}/underwater_drawdown.svg", bbox_inches="tight")
+plt.close(fig)
+print("  → saved underwater_drawdown.{png,svg}")
+
+# ── Figure 7: 62×62 Hierarchically Clustered Correlation Matrix ─────────────────
+print("Figure 7: Strategy correlation matrix...")
+
+all_rets_dict = {}
+for col in base.columns:
+    all_rets_dict[display_name(col)] = base[col]
+for col in vmp.columns:
+    all_rets_dict[display_name(col)] = vmp[col]
+
+df_all = pd.DataFrame(all_rets_dict).dropna(how="all")
+corr = df_all.corr()
+
+dist_vec = squareform(np.clip(1 - corr.values, 0, None), checks=False)
+Z_link = linkage(dist_vec, method="ward")
+order  = leaves_list(Z_link)
+
+corr_c = corr.iloc[order, order]
+names  = corr_c.columns.tolist()
+
+fig, ax = plt.subplots(figsize=(15, 14))
+im = ax.imshow(corr_c.values, cmap="RdBu_r", vmin=-1, vmax=1, aspect="auto")
+plt.colorbar(im, ax=ax, shrink=0.65, label="Pearson Correlation")
+
+ax.set_xticks(range(len(names)))
+ax.set_xticklabels(names, rotation=90, fontsize=4)
+ax.set_yticks(range(len(names)))
+ax.set_yticklabels(names, fontsize=4)
+ax.set_title(
+    "Pairwise Return Correlation (Hierarchically Clustered, Ward Linkage) — All 62 Strategies, 2003–2026",
+    fontsize=10, fontweight="bold",
+)
+
+fig.tight_layout()
+fig.savefig(f"{OUT}/strategy_correlation_matrix.png", dpi=300, bbox_inches="tight")
+fig.savefig(f"{OUT}/strategy_correlation_matrix.svg", bbox_inches="tight")
+plt.close(fig)
+print("  → saved strategy_correlation_matrix.{png,svg}")
+
+# ── Figure 8: Block-Bootstrap Sharpe CIs ────────────────────────────────────────
+print("Figure 8: Bootstrap Sharpe CIs (may take ~30s)...")
+
+canon = pd.read_csv("data/cache/appendix_a_canonical.csv")
+top10_canon = (canon[canon["strategy"] != "VMP(GMV(sample))"]
+               .nlargest(10, "sharpe")[["strategy", "display", "sharpe"]])
+
+def block_bootstrap_sharpe(rets, block_size=252, n_boot=5000, seed=42):
+    rng  = np.random.default_rng(seed)
+    vals = rets.dropna().values
+    n    = len(vals)
+    boot = np.empty(n_boot)
+    for b in range(n_boot):
+        n_blocks = int(np.ceil(n / block_size))
+        starts   = rng.integers(0, max(1, n - block_size + 1), size=n_blocks)
+        sample   = np.concatenate([vals[s:s + block_size] for s in starts])[:n]
+        sigma    = sample.std()
+        boot[b]  = sample.mean() / sigma * np.sqrt(252) if sigma > 0 else 0.0
+    return np.percentile(boot, [2.5, 97.5])
+
+ci_rows = []
+for _, row in top10_canon.iterrows():
+    strat = row["strategy"]
+    if strat in base.columns:
+        rets = base[strat]
+    elif strat in vmp.columns:
+        rets = vmp[strat]
+    else:
+        continue
+    lo, hi = block_bootstrap_sharpe(rets)
+    ci_rows.append({"display": row["display"], "sharpe": row["sharpe"], "lo": lo, "hi": hi})
+
+df_ci = pd.DataFrame(ci_rows).sort_values("sharpe").reset_index(drop=True)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+for i, row in df_ci.iterrows():
+    ax.plot([row["lo"], row["hi"]], [i, i], color="#1f77b4", lw=2.5, solid_capstyle="round")
+    ax.scatter([row["sharpe"]], [i], color="#1f77b4", s=60, zorder=5)
+    ax.text(row["hi"] + 0.02, i, f"{row['sharpe']:.3f}", va="center", fontsize=8)
+
+ax.set_yticks(range(len(df_ci)))
+ax.set_yticklabels(df_ci["display"].tolist(), fontsize=8.5)
+ax.axvline(0, color="gray", lw=0.8, ls="--", alpha=0.5)
+ax.set_xlabel("Annualized Sharpe Ratio")
+ax.set_title(
+    "Block-Bootstrap 95% CIs — Top 10 Strategies by Gross Sharpe\n"
+    "(252-day blocks, 5,000 resamples; excludes degenerate VMP(GMV(sample)))",
+    fontsize=10, fontweight="bold",
+)
+
+fig.tight_layout()
+fig.savefig(f"{OUT}/bootstrap_sharpe_cis.png", dpi=300, bbox_inches="tight")
+fig.savefig(f"{OUT}/bootstrap_sharpe_cis.svg", bbox_inches="tight")
+plt.close(fig)
+print("  → saved bootstrap_sharpe_cis.{png,svg}")
+
+# ── Figure 9: Stratified vs Flat Cost Scatter ────────────────────────────────────
+print("Figure 9: Stratified vs flat costs scatter...")
+
+canon = pd.read_csv("data/cache/appendix_a_canonical.csv")
+
+FAMILY_COLOR_MAP2 = {
+    "Classical MV":    FAMILY_COLORS["Classical MV"],
+    "Constrained MV":  FAMILY_COLORS["Constrained MV"],
+    "Diversification": FAMILY_COLORS["Diversification"],
+    "Regime":          FAMILY_COLORS["Regime"],
+    "TSMOM":           FAMILY_COLORS["TSMOM"],
+    "Black-Litterman": FAMILY_COLORS["Black-Litterman"],
+    "FF3 Factor":      FAMILY_COLORS["FF3 Factor"],
+    "Long-Short":      FAMILY_COLORS["Long-Short"],
+    "EW":              FAMILY_COLORS["EW (benchmark)"],
+}
+
+fig, ax = plt.subplots(figsize=(9, 8))
+
+for family, grp in canon.groupby("family"):
+    color = FAMILY_COLOR_MAP2.get(family, "#aaaaaa")
+    base_grp = grp[~grp["is_vmp"]]
+    vmp_grp  = grp[grp["is_vmp"]]
+    if len(base_grp):
+        ax.scatter(base_grp["net_10bps"], base_grp["net_strat"],
+                   color=color, marker="o", s=45, zorder=4, label=family)
+    if len(vmp_grp):
+        ax.scatter(vmp_grp["net_10bps"], vmp_grp["net_strat"],
+                   color="none", marker="o", s=65, zorder=4,
+                   edgecolors=color, linewidths=1.5)
+
+xlim = [canon["net_10bps"].min() - 0.05, canon["net_10bps"].max() + 0.05]
+ylim = [canon["net_strat"].min() - 0.05, canon["net_strat"].max() + 0.05]
+lim  = [min(xlim[0], ylim[0]), max(xlim[1], ylim[1])]
+ax.plot(lim, lim, "k--", lw=0.8, alpha=0.5)
+ax.axhline(0, color="gray", lw=0.6, alpha=0.3)
+ax.axvline(0, color="gray", lw=0.6, alpha=0.3)
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+
+ax.set_xlabel("Net Sharpe — Flat 10 bps Round-Trip")
+ax.set_ylabel("Net Sharpe — Stratified Costs (2/3/5 bps by Asset Class)")
+ax.set_title(
+    "Stratified vs. Flat Transaction Costs — All 62 Strategies\n"
+    "(above diagonal: stratified cheaper; filled = base strategy, open ring = VMP variant)",
+    fontsize=10, fontweight="bold",
+)
+
+family_patches = [mpatches.Patch(color=FAMILY_COLOR_MAP2.get(f, "#aaaaaa"), label=f)
+                  for f in sorted(canon["family"].unique())]
+base_mk = plt.Line2D([0], [0], marker="o", color="gray", ls="",
+                      markersize=6, markerfacecolor="gray", label="Base strategy")
+vmp_mk  = plt.Line2D([0], [0], marker="o", color="gray", ls="",
+                      markersize=8, markerfacecolor="none",
+                      markeredgewidth=1.5, label="VMP variant")
+ax.legend(handles=family_patches + [base_mk, vmp_mk],
+          ncol=2, fontsize=7, loc="upper left", framealpha=0.85)
+
+fig.tight_layout()
+fig.savefig(f"{OUT}/stratified_vs_flat_costs.png", dpi=300, bbox_inches="tight")
+fig.savefig(f"{OUT}/stratified_vs_flat_costs.svg", bbox_inches="tight")
+plt.close(fig)
+print("  → saved stratified_vs_flat_costs.{png,svg}")
+
+print("\nAll 9 figures generated successfully.")
 print(f"Output directory: {OUT}")
