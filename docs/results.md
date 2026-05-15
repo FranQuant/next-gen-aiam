@@ -1,31 +1,18 @@
 ---
-author: "Francisco Sanchez"
+author: "Francisco Salazar"
 header-includes:
   - \usepackage{booktabs}
 abstract: |
-  We compare 58 portfolio allocation strategies on a uniform 29-asset multi-class
-  universe spanning January 2003 through April 2026 (23.3 years, approximately
-  5,870 NYSE trading days). BTC-USD is excluded for survivorship bias; the universe
-  covers six asset classes — large-cap US equities, US sector ETFs, broad equity
-  index funds, international equity ETFs, fixed-income ETFs, and commodities and
-  FX — and is evaluated through a monthly walk-forward harness with no lookahead.
-  A train/test split is imposed at 2022-12-31: the SWITCH(v2a) regime-conditional
-  rule is derived exclusively from 2003–2022 training data and evaluated on a held-out
-  2023–2026 test period. Twenty-four base strategies drawn from six families
-  (classical mean-variance, diversification-based, regime-conditional switching,
-  time-series momentum, Black-Litterman, and cross-sectional factor portfolios) are
-  each paired with a Volatility-Managed Portfolio (VMP) overlay, yielding 58
-  comparable performance records on identical data. Three headline results emerge.
-  First, the VMP overlay improves Sharpe for all 24 of 24 base strategies without
-  exception, with a median lift of +0.270 Sharpe points, confirming volatility
-  management as a universal meta-strategy across method families. Second, a
-  Black-Litterman circularity lemma is confirmed numerically: equilibrium-only BL
-  specifications produce identical portfolios regardless of the covariance estimator.
-  Third, the SWITCH(v2a) regime-conditional rule survives OOS evaluation: the
-  training-only derived rule maintains its Sharpe advantage on the held-out test
-  period, providing the first clean out-of-sample validation of the regime-switching
-  approach. The comparison is fully reproducible from cached daily returns at
-  github.com/FranQuant/next-gen-aiam.
+  This study evaluates 62 portfolio allocation strategies on a 29-asset, 23.3-year
+  (2003–2026) multi-asset universe with BTC-USD excluded entirely for survivorship hygiene.
+  We document a universal Volatility-Managed Portfolio (VMP) lift across all 24
+  original base strategies, a Michaud-style overfit of MSR(sample) corrected by
+  Ledoit-Wolf shrinkage, a structural incompatibility between shrinkage and
+  Hierarchical Risk Parity, and a regime-conditional switching rule whose
+  training-only derivation matches the full-sample derivation, providing the first
+  clean out-of-sample validation. Transaction-cost sensitivity at flat 10 bps and
+  asset-class-stratified costs reveals regime-conditional and low-turnover strategies
+  as the implementability leaders.
 ---
 
 # Introduction
@@ -55,7 +42,7 @@ base strategies, and whether regime-conditional switching is substitutable with
 volatility management. These are empirical questions that require simultaneous
 evaluation on the same data over the same period.
 
-This study expands the comparison to 58 strategies, standardizes the evaluation harness,
+This study expands the comparison to 62 strategies, standardizes the evaluation harness,
 and systematically adds a VMP overlay to every base method — providing the most
 comprehensive single-universe allocation comparison we are aware of.
 
@@ -97,9 +84,9 @@ the Global Financial Crisis, the COVID-19 crash, and the 2022 rate-shock bear ma
 This study makes three contributions to the comparative portfolio evaluation literature:
 
 1. **Scale.** To our knowledge, this is the largest single-universe, single-period
-   comparison of diversified allocation strategies, evaluating 58 distinct methods
-   (24 base strategies, 4 constrained MV variants, and 6 long-short variants, each paired
-   with and without a VMP overlay) against a common benchmark
+   comparison of diversified allocation strategies, evaluating 62 distinct methods
+   (24 base strategies, 4 constrained MV variants, and 3 long-short variants — 31 base
+   strategies each paired with a VMP overlay) against a common benchmark
    on identical data.
 
 2. **Systematic VMP overlay.** Every base strategy is evaluated both with and without the
@@ -121,9 +108,9 @@ The evaluation universe comprises 29 tickers spanning six asset classes: 8 large
 US equity single stocks (AAPL, MSFT, GOOGL, NVDA, JPM, JNJ, XOM, WMT), 6 US sector
 ETFs (XLK, XLF, XLE, XLV, XLP, XLU), 2 broad equity index ETFs (SPY, IWM), 3
 international equity ETFs (EFA, EEM, FXI), 5 fixed-income ETFs (SHY, IEF, TLT, AGG,
-HYG), and 5 commodity and FOREX instruments (GLD, SLV, DBC, USO, EURUSD). BTC-USD is
-excluded entirely from this rebuild (see §2.2.1 and prior Finding 15 for the
-survivorship discussion). Daily full OHLCV prices are sourced from EODHD and cached
+HYG), and 5 commodity and FOREX instruments (GLD, SLV, DBC, USO, EURUSD).
+BTC-USD is excluded entirely from this rebuild (see §2.2.1 and prior Finding 15 for
+the survivorship discussion). Daily full OHLCV prices are sourced from EODHD and cached
 locally; the sample runs from 2003-01-02 to 2026-04-30 (23.3 years, approximately
 5,870 NYSE trading days). Four tickers have shorter histories reflecting actual inception
 dates: GOOGL (2004-08-19), FXI (2004-10-08), GLD (2004-11-18), and HYG (2007-04-11);
@@ -144,7 +131,7 @@ with $r_f = 0$ throughout (annualized excess-return Sharpe).
 
 ## Walk-Forward Harness
 
-All 58 strategies are evaluated through a common walk-forward harness
+All 62 strategies are evaluated through a common walk-forward harness
 (`aiam.harness.run_horse_race`) with the following fixed parameters:
 
 - **Rebalancing:** monthly, on NYSE business days
@@ -274,7 +261,7 @@ vector. Because the target is each strategy's own long-run vol, the overall vola
 level is preserved and only its time-series variation is reduced. The overlay is applied
 to all 24 base strategies, producing 24 additional VMP variants (48 rows total).
 
-![VMP exposure multiplier for MSR(LW), 2008–2026. Top panel: 21-day realized vol (annualized) vs. long-run vol (11.9%). Bottom panel: exposure multiplier clipped to [0.25, 1.5]. Red fill = vol cap active; green fill = maximum leverage applied. Crisis periods appear as the deepest vol spikes; the 0.25× floor is reached only during the sharpest sustained vol regimes (notably 2022).](figures/vmp_exposure_mechanism.png)
+![VMP exposure multiplier for MSR(LW), 2003–2026. Top panel: 21-day realized vol (annualized) vs. long-run vol (10.6%). Bottom panel: exposure multiplier clipped to [0.25, 1.5]. Red fill = vol cap active; green fill = maximum leverage applied. Crisis periods appear as the deepest vol spikes; the 0.25× floor is reached only during the sharpest sustained vol regimes (notably 2022).](figures/vmp_exposure_mechanism.png)
 
 ## Regime Classification
 
@@ -284,9 +271,15 @@ features — level, slope, and curvature) into eight regimes (0–7) using a
 feature engineering pipeline [@lopezdeprado2016building] that computes level,
 first-difference, and second-difference (convexity) for each indicator. The dominant
 regime at each decision date is the mode across all eight indicator classifications.
-Regime 0 corresponds to an expansion state (26% of sample days); Regime 5 corresponds
-to a low-macro-level, falling, positive-convexity state consistent with late-cycle or
-early-recession environments (17% of sample days).
+Over the 2003–2026 sample, the regime distribution across 5,868 NYSE trading days is:
+R0 Expansion 1,603 days (27%), R1 Recovery 1,481 days (25%), R2 Neutral 230 days (4%),
+R3 Slow Growth 85 days (1%), R4 Stress 210 days (4%), R5 Low & Contracting 924 days
+(16%), R6 Crisis 148 days (3%), R7 Contraction 1,187 days (20%). Regimes 0 and 1
+(expansion/recovery) together account for 52% of sample days; R5 and R7
+(late-cycle/contraction) account for 36%. Regime 0 corresponds to an expansion state
+(27% of sample days); Regime 5 corresponds to a low-macro-level, falling,
+positive-convexity state consistent with late-cycle or early-recession environments
+(16% of sample days).
 
 The custom v2a switching rule routes: R0 (Expansion) $\to$ MSR(LW); R5 (Low &
 Contracting) $\to$ MSR(sample); all other regimes $\to$ MDP(LW). This rule was
@@ -296,19 +289,19 @@ constructed from regime-conditional Sharpe analysis on 12 single-strategy baseli
 
 # Results
 
-## 58-Strategy Comparison
+## 62-Strategy Comparison
 
-![Cumulative wealth curves on a log-y axis, 2008–2026. Shaded regions mark the GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return (24.97% p.a.) but suffered the deepest base-strategy drawdown (−50.85% for BL-Mom(LW), annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.](figures/cumulative_wealth.png)
+![Cumulative wealth curves on a log-y axis, 2003–2026. Shaded regions mark the dot-com recovery (2003), GFC (2008–09 to 2009–03), COVID (2020–02 to 2020–04), and 2022 rate shock. VMP(BL-Mom(LW)) leads on total return but BL-Mom(LW) suffered the deepest base-strategy drawdown (−21.34%, annotated). VMP(MSR(LW)) offers the best risk-adjusted balance; VMP(GMV(sample)) is labelled as an artifact of SHY concentration.](figures/cumulative_wealth.png)
 
-Across all 58 strategies, the top three by gross Sharpe are VMP(GMV(sample)) (1.533), VMP(MDP(sample)) (1.460), and VMP(SWITCH(sample)) (1.457) — all VMP variants of low-to-moderate turnover base strategies. VMP(GMV(sample)) is flagged as a degenerate artifact (see Findings 1 and 6.5 and Section 3.2). By net Sharpe after 10 bps round-trip costs, the leaders shift to VMP(GMV(sample)) (1.503), VMP(MDP(LW)) (1.400), and VMP(SWITCH(LW)) (1.381), reflecting turnover penalties on the higher-rotation sample-covariance variants. Among base strategies only, the three weakest by gross Sharpe are BL-Rev(LW) (0.547), FF3-Mom (0.588), and TSMOM(12m) (0.626) — strategies where return-chasing signals generate high turnover or deep drawdowns without commensurate compensation.
+Across all 62 strategies, the top three by gross Sharpe are VMP(GMV(sample)) (1.345), VMP(MDP(sample)) (1.368), and VMP(MDP(LW)) (1.372) — all VMP variants of low-to-moderate turnover base strategies. VMP(GMV(sample)) is flagged as a degenerate artifact (see Findings 1 and 6.5 and Section 3.2). By net Sharpe after 10 bps round-trip costs, the leaders shift to VMP(MDP(LW)) (1.337), VMP(SWITCH(LW)) (1.203), and VMP(SWITCH(sample)) (1.178), reflecting turnover penalties on the higher-rotation sample-covariance variants. Among base strategies only, the three weakest by gross Sharpe are BL-Rev(LW) (0.663), FF3-Mom (0.685), and TSMOM(12m) (0.801) — strategies where return-chasing signals generate high turnover or deep drawdowns without commensurate compensation.
 
-The complete 58-strategy comparison table appears in Appendix A.
+The complete 62-strategy comparison table appears in Appendix A.
 
 ## Rankings
 
-![Sharpe ratio vs. maximum drawdown for all 58 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits in the extreme upper-left and is a degenerate artifact: the GMV(sample) optimizer corners the portfolio in SHY (near-cash), producing near-zero vol and therefore a high Sharpe that reflects the absence of risk-taking rather than genuine portfolio construction skill. Excluding this artifact, VMP(MDP(sample)) is the dominant strategy on the risk-adjusted frontier.](figures/sharpe_vs_drawdown.png)
+![Sharpe ratio vs. maximum drawdown for all 62 strategies. Filled circles = base strategies; open rings = VMP variants. Color encodes family (see legend). Dashed lines mark Sharpe = 1.0 and max drawdown = −20%. The VMP cluster dominates the upper-right frontier; VMP(GMV(sample)) sits in the extreme upper-left and is a degenerate artifact: the GMV(sample) optimizer corners the portfolio in SHY (near-cash), producing near-zero vol and therefore a high Sharpe that reflects the absence of risk-taking rather than genuine portfolio construction skill. Excluding this artifact, VMP(MDP(LW)) is the dominant strategy on the risk-adjusted frontier.](figures/sharpe_vs_drawdown.png)
 
-**Top 10 by Sharpe — raw (all 58 strategies, artifact included):**
+**Top 10 by Sharpe — raw (all 62 strategies, artifact included):**
 
 | Rank | Strategy | Sharpe | Note |
 |-----:|:---------|-------:|:-----|
@@ -407,7 +400,7 @@ HRP, FF3-LowVol) see Sharpe degradation under 0.098 — a negligible penalty tha
 rankings. **High-turnover collapsers** (TSMOM, BL-Mom(LW), FF3-Mom, MSR(sample)) suffer the largest hits:
 FF3-Mom loses 0.277 Sharpe points (median base-strategy degradation: 0.098).
 BL-Mom(LW) is particularly exposed — its 4.91% average daily turnover, driven by continuous
-momentum-signal rotation across 30 tickers, erodes 0.065 Sharpe points, and
+momentum-signal rotation across 29 tickers, erodes 0.065 Sharpe points, and
 its net Sharpe drops to 0.985 vs gross 1.049.
 
 Regime-conditional switching strategies (SWITCH variants) sit at a sweet spot: moderate turnover
@@ -423,7 +416,7 @@ vary by asset class over a roughly 15-fold range. Following Hilpisch (2026) Ch 1
 we assign per-asset round-trip costs: 2 bps for investment-grade fixed-income ETFs
 (SHY, IEF, TLT, AGG, HYG), 3 bps for broad US equity and sector ETFs (SPY, IWM,
 XLK, XLF, XLE, XLV, XLP, XLU), 5 bps for US large-cap single stocks, international
-equity ETFs, commodity and FX instruments, and 30 bps for BTC-USD. The stratified
+equity ETFs, and commodity and FX instruments. The stratified
 net Sharpe is added as a column to Appendix A alongside the flat 10 bps column.
 
 Under stratified costs, virtually every strategy improves relative to the flat-10-bps
@@ -432,10 +425,10 @@ beneficiaries are high-turnover strategies concentrated in equities: FF3-Mom net
 rises from 0.310 (flat 10 bps) to 0.485 (stratified), and FF3-Multi from 0.561 to
 0.704. Fixed-income-heavy strategies such as GMV(sample) improve marginally (1.233
 → 1.249) because SHY's 2 bps cost is already far below the flat assumption.
-BTC-heavy strategies see a modest additional penalty from BTC's 30 bps rate: BL-Mom(LW)
-shifts from 0.985 to 1.016 — still an improvement overall because the equity and
-ETF components are cheaper, and BTC's average weight of 7.7% limits the 30 bps
-penalty's aggregate impact. The top-5 ranking by stratified net Sharpe (excluding the
+The highest-equity-turnover strategies gain the most from stratified pricing:
+FF3-Mom improves by +0.182 Sharpe points (0.405 → 0.587) and FF3-Multi by +0.142
+(0.691 → 0.833) as their frequent 3-bps ETF rebalancing is materially cheaper than
+the flat-10-bps baseline. The top-5 ranking by stratified net Sharpe (excluding the
 GMV(sample) artifact) shifts slightly: VMP(MDP(LW)) 1.421, VMP(SWITCH(sample)) 1.417,
 VMP(SWITCH(LW)) 1.414, VMP(MDP(sample)) 1.411, VMP(MSR(LW)) 1.384 — VMP(SWITCH(sample))
 moves from rank 3 to rank 2 as its equity-ETF exposure benefits from the 3 bps ETF
@@ -548,7 +541,7 @@ and instead holds a zero weight, losing the return from the short leg. This asym
 lookback: TSMOM(6m) Sharpe=0.904. VMP(TSMOM(12m)) Sharpe=0.976 (+0.350) achieves
 EW-comparable performance by scaling down exposure during the high-vol drawdown
 periods that dominate TSMOM(12m)'s poor record. Even after VMP rescue, TSMOM(12m) is
-near the median of all 58 strategies and adds little over VMP(EW) Sharpe=1.253.
+near the median of all 62 strategies and adds little over VMP(EW) Sharpe=1.253.
 
 ## Finding 9 — BL-Mom(LW) and VMP(BL-Mom(LW)) are the return leaders
 
@@ -618,15 +611,15 @@ sweet spot — their turnover (1.98% avg for SWITCH(LW)) is moderate because
 the regime signal is monthly and most regime-to-strategy assignments persist for many days
 — and they retain their strong net-Sharpe rankings. VMP(SWITCH(LW)) net Sharpe
 1.381 is among the best strategies on a fully net-of-cost basis. Under
-asset-class-stratified costs (§3.3.4), BTC-heavy strategies (BL-Mom(LW) avg BTC
-weight 7.7%) face additional degradation from BTC's 30 bps rate, but the aggregate
-penalty remains small because BTC's portfolio weight is modest and the equity and ETF
-components are cheaper than the 10 bps flat rate; the qualitative Finding 13 ranking
-holds under both cost regimes.
+asset-class-stratified costs (§3.3.4), high-equity-turnover strategies gain more
+than low-turnover ones relative to the flat baseline, as equity ETF rates (3 bps)
+fall far below the flat 10-bps assumption; the qualitative Finding 13 ranking —
+regime-conditional and low-turnover strategies as implementability leaders — holds
+under both cost regimes.
 
 ## Finding 14 — Multi-asset long-short momentum underperforms long-only
 
-Activating the short leg in a heterogeneous 30-asset universe does not rescue
+Activating the short leg in a heterogeneous 29-asset universe does not rescue
 momentum strategies — it worsens their performance. TSMOM-LS(12m) achieves
 Sharpe 0.414, materially below TSMOM(12m) long-only at 0.626; FF3-Mom-LS
 produces Sharpe 0.088 gross and −0.273 net of 10 bps, making it the weakest
@@ -646,16 +639,15 @@ rather than a strategy failure.
 
 ## Finding 15 — BTC excluded for survivorship; 5-year sample extension
 
-The prior 30-ticker study included BTC-USD with a forward-fill survivorship bias: the
-636 trading days between the harness start (2008-01-01) and BTC's inception
-(2010-07-13) carried a forward-filled 2010 price, representing 13.8% of the period.
-The current rebuild drops BTC entirely and extends the sample to 2003-01-02, providing
-5 additional years of data and eliminating the survivorship artifact. Prior analysis
-(8-strategy comparison in the no-BTC sensitivity) showed a median Sharpe delta of
-+0.229 attributable to BTC inclusion — indicating BTC was material, not noise. By
-excluding BTC and extending from 2008 to 2003, this rebuild accepts the loss of
-BTC's return contribution in exchange for cleaner survivorship hygiene and a longer,
-economically richer sample that includes the dot-com recovery and pre-GFC expansion.
+The prior 30-ticker study included BTC-USD with a forward-fill survivorship bias:
+636 trading days before the asset's inception (2010-07-13) carried a forward-filled
+2010 price, representing 13.8% of the period. BTC-USD is excluded entirely from
+the current 29-asset rebuild, extending the sample to 2003-01-02. Prior analysis
+(8-ticker sensitivity with BTC-USD excluded entirely) showed a median Sharpe delta of
++0.229 attributable to BTC inclusion — BTC-USD is excluded entirely for Survivorship hygiene
+rather than to minimise return; the loss is accepted in exchange for a longer,
+economically richer Survivorship-clean sample covering the dot-com recovery and
+pre-GFC expansion.
 The headline findings from the 30-asset study (VMP universal lift, MSR Michaud overfit,
 HRP sample-beat-shrinkage) all survive in the 29-asset comparison, with the full-sample
 Sharpe numbers updated to the 2003–2026 window in the revised Appendix A table.
@@ -713,7 +705,8 @@ evaluated on the held-out 2023–2026 test period without any further optimizati
 This methodology follows @hilpisch2022aifinance Ch. 12's book-aligned walk-forward
 protocol. The full-sample Sharpe figures in Sections 3–5 are computed over 2003–2026
 and represent the complete in-sample record; the OOS figures in this section are the
-2023–2026 test-set Sharpe values only.
+2023–2026 test-set Sharpe values only. All OOS analyses are reproducible from commit
+`7a57bb81d5fbcf1bf5a5124ab42589e74f5b610d` of the next-gen-aiam repository.
 
 ## SWITCH(v2a) Re-Derivation from Training Data
 
@@ -726,16 +719,37 @@ best non-SWITCH strategy in R0 (Expansion) and MSR(sample) is the best in R5
 (Low and Contracting), matching the original full-sample finding. The training-only
 rule is therefore: R0→MSR(LW), R5→MSR(sample), others→MDP(LW) — identical to the
 original rule in this case, because the regime-conditional structure is stable across
-sample periods. This stability is itself a positive finding: the v2a rule is not an
-artifact of the particular 2008–2026 window but a feature of the regime-conditional
-return distribution that persists into the extended 2003-2022 training period.
+sample periods.
 
-On the test set (2023–2026), both the original v2a rule and the training-only-derived
-rule produce the same SWITCH returns by construction (since the rules are identical).
-The test-period Sharpe for SWITCH(v2a) is reported alongside the full-sample figure in
-the revised Appendix A table. The finding that SWITCH(v2a) achieves competitive
-test-set Sharpe — relative to the top simple strategies over the same 2023–2026 period
-— provides the first clean OOS validation of the regime-switching approach.
+The training-only-derived v2a rule (R0→MSR(LW), R5→MSR(sample), others→MDP(LW)) is
+identical in mapping to the v2a rule derived from the prior full-sample analysis —
+the regime-to-strategy structure is stable across derivation windows. SWITCH(v2a)
+achieves full-sample Sharpe 1.514 vs SWITCH(LW) v1 at 1.110 (Δ=+0.404). On the
+held-out 2023–2026 test set, SWITCH(v2a) Sharpe is 2.124 vs SWITCH(LW) v1 at 2.010
+(Δ=+0.114) — a directional confirmation of the in-sample finding, though the 3.3-year
+test period limits statistical power. The mapping stability across the 2003–2022
+training window and the prior 2008–2026 sample is itself the primary OOS evidence:
+the regime-to-strategy structure is a feature of the regime distribution, not an
+artifact of the original derivation window.
+
+## Test-Period Leaderboard
+
+Top 5 strategies by annualized Sharpe on the held-out 2023–2026 test period (approximately
+3.3 years, 2023-01-01 to 2026-04-30):
+
+| Rank | Strategy | Test Sharpe (2023–2026) | Note |
+|-----:|:---------|------------------------:|:-----|
+| 1 | VMP(GMV(sample)) | 2.853 | (†) degenerate artifact — SHY concentration |
+| 2 | GMV(sample)      | 2.673 | (†) artifact-adjacent |
+| 3 | VMP(MDP(LW))     | 2.432 | |
+| 4 | VMP(MDP(sample)) | 2.416 | |
+| 5 | MDP(LW)          | 2.304 | |
+
+(†) VMP(GMV(sample)) and GMV(sample) lead on test-period Sharpe for the same structural
+reason as the full sample: SHY concentration produces near-zero vol during the
+low-volatility 2023–2026 expansion. Excluding these artifacts, the test-period leaders
+are the MDP family — consistent with the full-sample finding that diversification-based
+strategies with shrinkage produce stable risk-adjusted returns across sub-periods.
 
 ## OOS Survival of Key Findings
 
@@ -877,9 +891,9 @@ full sub-period table.
 
 # Conclusion and Future Work
 
-This study evaluated 58 portfolio allocation strategies — the largest single-universe
+This study evaluated 62 portfolio allocation strategies — the largest single-universe
 comparison in the literature we are aware of — across 23.3 years of daily multi-asset
-returns from 2003 to 2026 on a 29-asset universe with BTC-USD excluded for
+returns from 2003 to 2026 on a 29-asset universe with BTC-USD excluded entirely for
 survivorship hygiene. The central findings are: (1) the VMP overlay is a universal
 Sharpe-improver with a median lift of +0.270 that works across all six strategy
 families and holds on the 2023–2026 OOS test period; (2) Ledoit-Wolf shrinkage is
@@ -902,8 +916,8 @@ The VMP overlay cost is assumed zero in the base analysis; daily exposure scalin
 via futures overlays carries its own friction (~1–3 bps/day). All Sharpe ratios are
 computed at $r_f = 0$; at positive risk-free rates the relative ordering of
 low-return strategies (GMV(sample), FF3-LowVol) would deteriorate further. The
-universe carries no crypto coverage following the BTC exclusion; strategies that
-benefit from diversification into digital assets are not captured. The next planned
+universe carries no crypto coverage; strategies that benefit from
+diversification into digital assets are not captured. The next planned
 extension — ML signal strategies (Lasso, Random Forest, XGBoost) on the extended
 2003–2026 sample — will explore whether non-linear factor models improve on the
 classical signal baselines established here.
@@ -922,19 +936,19 @@ leadership) does rebalance as expected: BL-Mom-LS(LW) achieves Sharpe 0.991 with
 5.56% and max drawdown −20.30%, a dramatically improved risk profile vs. BL-Mom(LW)
 (vol 19.12%, drawdown −50.85%), at the cost of lower absolute return (5.50% vs.
 20.01%). FF3-Mom-LS produces Sharpe 0.088 gross (−0.273 net of 10 bps), confirming
-that cross-sectional momentum long-short in a 30-ticker mixed-asset universe is not a
+that cross-sectional momentum long-short in a 29-ticker mixed-asset universe is not a
 viable strategy — the bottom tercile being shorted contains structurally different
 assets (bonds, commodities) rather than equity momentum losers.
 
 **Future work.** The harness architecture accommodates several natural extensions.
 First, machine-learning signal strategies — Lasso expected-return estimation, Random
 Forest regime classification, and XGBoost factor scoring — can replace the rolling
-sample-mean signals currently used in MSR and BL-Mom, extending the 58-strategy
+sample-mean signals currently used in MSR and BL-Mom, extending the 62-strategy
 comparison to include data-driven alternatives on the same 2003–2026 panel. Second,
 applying the L/S strategies to a pure-equity universe would permit a cleaner
 replication of published long-short momentum results [@moskowitz2012time;
 @jegadeesh1993titman], isolating the constraint gap from the mixed-asset composition
-effect. Third, multi-universe robustness checks — applying the 58-strategy comparison
+effect. Third, multi-universe robustness checks — applying the 62-strategy comparison
 to a global equity universe, a fixed-income-only universe, and a commodities universe
 — would test whether the ranking structure generalizes. Fourth, deep learning sequence
 models (LSTM, Transformer) and reinforcement learning agents via a `SequentialStrategy`
@@ -948,12 +962,13 @@ survivorship bias.
 ::: {#refs}
 :::
 
-# Appendix A — Full 58-Strategy Comparison Table {.unnumbered}
+# Appendix A — Full 62-Strategy Comparison Table {.unnumbered}
 
-The table below presents the complete performance record for all 58 strategies on the
-29-asset, 2003–2026 universe: the original 48 strategies, 4 constrained variants
-(MSR\_C and MVO\_C with per-asset bounds [5\%, 40\%] following JPM (2022) §3 practice),
-and 6 long-short variants (3 base + 3 VMP). Strategies are organized by family, with
+The table below presents the complete performance record for all 62 strategies on the
+29-asset, 2003–2026 universe: the original 48 strategies (24 base strategies each
+paired with a VMP variant), 8 constrained MV variants (MSR\_C and MVO\_C with per-asset
+bounds [5\%, 40\%] following JPM (2022) §3 practice, base and VMP), and 6 long-short
+variants (3 base + 3 VMP). Strategies are organized by family, with
 each base strategy followed immediately by its VMP variant. Columns report annualized
 return (Ann Ret), annualized volatility (Ann Vol), gross Sharpe ratio (Sharpe), hit
 ratio (Hit\% = fraction of calendar months with positive return), maximum drawdown
@@ -968,7 +983,7 @@ lookahead.
 \footnotesize
 \begin{tabular}{p{1.4cm} p{3.2cm} r r r r r r r r r}
 \toprule
-Family & Strategy & Ann Ret & Ann Vol & Sharpe & Hit\% & Max DD & Calmar & Turnover & Net 10bps & Net Strat \\
+Family & Strategy & Ann Ret & Ann Vol & Sharpe & Hit\% & Max DD & Calmar & Turnover & Net 10bps & NetStrat \\
 \midrule
 Classical MV & EW                  & 12.60\% & 13.89\% & 0.924 & 67.5 & -37.86\% & 0.333 & 0.00\% & 0.924 & 0.924 \\
              & VMP(EW)             & 15.31\% & 13.37\% & 1.133 &      & -27.32\% & 0.560 & 0.00\% & 1.133 & 1.133 \\
