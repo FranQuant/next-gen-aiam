@@ -474,10 +474,11 @@ Sharpe=0.896, and VMP(MDP(sample)) Sharpe=1.460 > MDP(LW) Sharpe=1.182.
 
 ## Finding 8 — TSMOM(12m) is the weakest base strategy; VMP rescues by +0.350
 
-TSMOM(12m) Sharpe=0.626 is the lowest base-strategy Sharpe in the table. The
-long-only constraint is the primary culprit: when the 12-month momentum signal is
-negative for an asset, the strategy cannot short it and instead holds a zero weight,
-losing the return from the short leg. This asymmetry is partially mitigated at shorter
+TSMOM(12m) Sharpe=0.626 is the lowest base-strategy Sharpe in the table.
+Long-only is one contributor; in a multi-asset universe, the cross-sectional
+composition of the short leg compounds the problem (see Finding 14). When the
+12-month momentum signal is negative for an asset, the strategy cannot short it
+and instead holds a zero weight, losing the return from the short leg. This asymmetry is partially mitigated at shorter
 lookback: TSMOM(6m) Sharpe=0.904. VMP(TSMOM(12m)) Sharpe=0.976 (+0.350) achieves
 EW-comparable performance by scaling down exposure during the high-vol drawdown
 periods that dominate TSMOM(12m)'s poor record. Even after VMP rescue, TSMOM(12m) is
@@ -549,6 +550,26 @@ sweet spot — their turnover (1.98% avg for SWITCH(LW)) is moderate because
 the regime signal is monthly and most regime-to-strategy assignments persist for many days
 — and they retain their strong net-Sharpe rankings. VMP(SWITCH(LW)) net Sharpe
 1.381 is among the best strategies on a fully net-of-cost basis.
+
+## Finding 14 — Multi-asset long-short momentum underperforms long-only
+
+Activating the short leg in a heterogeneous 30-asset universe does not rescue
+momentum strategies — it worsens their performance. TSMOM-LS(12m) achieves
+Sharpe 0.414, materially below TSMOM(12m) long-only at 0.626; FF3-Mom-LS
+produces Sharpe 0.088 gross and −0.273 net of 10 bps, making it the weakest
+strategy in the study on a cost-adjusted basis. The mechanism is compositional:
+in a universe spanning equities, fixed income, and commodities, assets with
+negative 12-month momentum frequently include bonds and commodities in the midst
+of their respective drawdown periods — asset classes that subsequently
+mean-revert and impose losses on the short leg. This directly contradicts the
+conclusions of @moskowitz2012time, whose TSMOM results were derived from a
+futures universe dominated by equity index and currency contracts where the short
+leg captures genuine momentum losers rather than structurally mean-reverting
+asset classes. The exception is BL-Mom-LS(LW) (Sharpe 0.991 vs. BL-Mom(LW)
+long-only at 1.049), which uses Bayesian view-tilting to selectively short
+underweighted assets and avoids the crude composition problem of rank-based
+shorting; the modest Sharpe gap reflects a deliberate risk-profile trade-off
+rather than a strategy failure.
 
 
 # Statistical Robustness {#sec:robustness}
@@ -654,6 +675,11 @@ cost-adjusted table. The transaction-cost ladder is ultimately the implementabil
 filter for institutional adoption: strategies must survive from gross Sharpe to
 net-of-friction Sharpe to risk-budget approval, and only the structural methods
 (diversification-based, regime-conditional) pass all three screens reliably.
+The long-short BL-Mom-LS(LW) variant illustrates that L/S benefit in this
+universe is not Sharpe enhancement but risk-profile transformation: its Sharpe
+(0.991) is nearly identical to BL-Mom(LW) long-only (1.049), yet vol collapses
+from 19.12% to 5.56% and max drawdown from −50.85% to −20.30%, making the L/S
+form a qualitatively different instrument for risk-budgeted mandates.
 
 
 # Conclusion and Future Work
