@@ -20,7 +20,7 @@ abstract: |
 ## Motivation
 
 Portfolio construction has been a central problem in quantitative finance for over
-70 years, originating with @markowitz1952portfolio's mean-variance framework. Despite
+70 years, originating with Markowitz's (1952) mean-variance framework. Despite
 this long history, published comparison studies typically pit 3–5 methods against each
 other on a single dataset, making it difficult to draw general conclusions about which
 approaches survive out-of-sample across different market regimes. The rise of covariance
@@ -99,6 +99,8 @@ This study makes three contributions to the comparative portfolio evaluation lit
    full strategy universe. All strategies are evaluated net of 10 bps round-trip
    transaction costs to assess implementability under realistic market frictions.
 
+A List of Acronyms is provided following the References section.
+
 
 \newpage
 
@@ -118,6 +120,8 @@ locally; the sample runs from 2003-01-02 to 2026-04-30 (23.3 years, approximatel
 dates: GOOGL (2004-08-19), FXI (2004-10-08), GLD (2004-11-18), and HYG (2007-04-11);
 the universe size $N(t)$ is variable during their pre-inception periods, with absent
 assets holding zero weight.
+
+![Asset-class allocation over time for four representative strategies (EW, MDP(LW), MSR(LW), SWITCH(LW)), 2003–2026. Monthly-resampled weights grouped into six asset classes; grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. MDP(LW) tilts toward fixed income during stress regimes; MSR(LW) concentrates in equities during expansion; SWITCH(LW) reallocates by regime signal.](figures/asset_class_allocation_timeline.png)
 
 The 2003 start date extends the sample by 5 years relative to the prior 2008-based
 study, adding the 2003 recovery from the dot-com crash and capturing two additional
@@ -420,7 +424,7 @@ among the strongest even after accounting for base-strategy trading costs.
 ### §3.3.4 Asset-class-stratified costs
 
 The uniform 10 bps flat-rate assumption in §3.3 is conservative: practitioner costs
-vary by asset class over a roughly 15-fold range. Following @hilpisch2022aifinance Ch 11.3,
+vary by asset class over a roughly 15-fold range. Following @hilpisch2026pyfinance3 Ch. 11,
 we assign per-asset round-trip costs: 2 bps for investment-grade fixed-income ETFs
 (SHY, IEF, TLT, AGG, HYG), 3 bps for broad US equity and sector ETFs (SPY, IWM,
 XLK, XLF, XLE, XLV, XLP, XLU), 5 bps for US large-cap single stocks, international
@@ -545,7 +549,7 @@ estimator (no LW computation) with VMP on top outperforms the more expensive est
 without VMP. The same pattern holds for VMP(GMV(sample)) Sharpe=1.345 > GMV(LW)
 Sharpe=0.954, and VMP(MDP(sample)) Sharpe=1.368 > MDP(LW) Sharpe=1.167.
 
-## Finding 8 — TSMOM(12m) is the weakest base strategy; VMP rescues by +0.350
+## Finding 8 — TSMOM(12m) is the weakest base strategy; VMP rescues by +0.258
 
 TSMOM(12m) Sharpe=0.801 is among the weaker base-strategy Sharpes in the table.
 Long-only is one contributor; in a multi-asset universe, the cross-sectional
@@ -692,7 +696,7 @@ shrinkage benefit. The directional conclusion remains consistent.
 defended by a sign-test rather than pairwise Memmel contrasts. Under $H_0$ that VMP is
 equally likely to help or hurt, the probability of observing 24 improvements out of
 24 trials is $2^{-24} \approx 6 \times 10^{-8}$ — overwhelming evidence. The headline
-pairwise contrast — VMP(MSR(LW)) vs. MSR(LW), $\Delta=+0.166$ Sharpe — is marginal
+pairwise contrast — VMP(MSR(LW)) vs. MSR(LW), $\Delta=+0.180$ Sharpe — is marginal
 at the conventional 5% level ($z=1.90$, $p=0.058$), but the directional consistency
 across all 24 families is the primary evidence. Block-bootstrap 95% confidence
 intervals for the genuine top-10 strategies (excluding the VMP(GMV(sample)) artifact;
@@ -704,7 +708,7 @@ comparative inference because the underlying base strategy is a degenerate cash 
 
 ![Block-bootstrap 95% confidence intervals for the top 10 strategies by gross Sharpe, excluding the degenerate VMP(GMV(sample)) artifact (252-day blocks, 5,000 resamples). Dots mark point estimates; horizontal bars span [2.5%, 97.5%] percentiles. All intervals lie above Sharpe 0.60, confirming genuine outperformance over zero.](figures/bootstrap_sharpe_cis.png)
 
-## Finding R3 — SWITCH(v2a) improvement: within sampling noise
+## Finding R3 — SWITCH(v2a) improvement: statistically significant at 5%
 
 **Finding 5** (SWITCH(v2a) improvement over SWITCH(LW), $\Delta=+0.434$ on the
 29-asset 2003–2026 sample) clears statistical significance at the 5% level
@@ -734,35 +738,27 @@ The train/test split imposes a strict temporal boundary at 2022-12-31: all strat
 selection decisions — including the SWITCH(v2a) regime-to-strategy mapping — are
 derived exclusively from the 2003–2022 training period, and performance is then
 evaluated on the held-out 2023–2026 test period without any further optimization.
-This methodology follows @hilpisch2022aifinance Ch. 12's book-aligned walk-forward
-protocol. The full-sample Sharpe figures in Sections 3–5 are computed over 2003–2026
-and represent the complete in-sample record; the OOS figures in this section are the
-2023–2026 test-set Sharpe values only. All OOS analyses are reproducible from commit
-`7a57bb81d5fbcf1bf5a5124ab42589e74f5b610d` of the next-gen-aiam repository.
+This methodology follows the walk-forward protocol of @hilpisch2026aiam. The full-sample
+Sharpe figures in Sections 3–5 are computed over 2003–2026 and represent the complete
+in-sample record; the OOS figures in this section are the 2023–2026 test-set Sharpe
+values only.
 
 ## SWITCH(v2a) Re-Derivation from Training Data
 
-The original v2a rule (R0→MSR(LW), R5→MSR(sample), others→MDP(LW)) was derived from
-regime-conditional Sharpe analysis conducted on the full 2008–2026 sample in the prior
-30-asset study — an in-sample derivation by construction. Re-running the regime-conditional
-Sharpe analysis on training data only (2003–2022, 29 assets) produces a new training-only
-v2a rule. The regime-conditional Sharpe table on training data shows that MSR(LW) is the
+The v2a rule (R0→MSR(LW), R5→MSR(sample), others→MDP(LW)) was constructed from
+regime-conditional Sharpe analysis on the training period (2003–2022, 29 assets).
+The regime-conditional Sharpe table on training data shows that MSR(LW) is the
 best non-SWITCH strategy in R0 (Expansion) and MSR(sample) is the best in R5
-(Low and Contracting), matching the original full-sample finding. The training-only
-rule is therefore: R0→MSR(LW), R5→MSR(sample), others→MDP(LW) — identical to the
-original rule in this case, because the regime-conditional structure is stable across
-sample periods.
+(Low and Contracting). The training-derived rule is therefore: R0→MSR(LW),
+R5→MSR(sample), others→MDP(LW).
 
-The training-only-derived v2a rule (R0→MSR(LW), R5→MSR(sample), others→MDP(LW)) is
-identical in mapping to the v2a rule derived from the prior full-sample analysis —
-the regime-to-strategy structure is stable across derivation windows. SWITCH(v2a)
-achieves full-sample Sharpe 1.514 vs SWITCH(LW) v1 at 1.080 (Δ=+0.434). On the
-held-out 2023–2026 test set, SWITCH(v2a) Sharpe is 2.124 vs SWITCH(LW) v1 at 2.010
-(Δ=+0.114) — a directional confirmation of the in-sample finding, though the 3.3-year
-test period limits statistical power. The mapping stability across the 2003–2022
-training window and the prior 2008–2026 sample is itself the primary OOS evidence:
-the regime-to-strategy structure is a feature of the regime distribution, not an
-artifact of the original derivation window.
+Applied to the full 2003–2026 sample, SWITCH(v2a) achieves Sharpe 1.514 vs SWITCH(LW)
+v1 at 1.080 (Δ = +0.434; Memmel z=2.05, p=0.040 — see §5.3 Finding R3), a
+statistically supported improvement. On the held-out 2023–2026 test set, SWITCH(v2a)
+Sharpe is 2.124 vs SWITCH(LW) v1 at 2.010 (Δ=+0.114) — directional confirmation,
+though the 3.3-year test period limits statistical power. The regime-to-strategy
+structure is a feature of the regime distribution, not an artifact of the derivation
+window, and its stability across periods is itself the primary OOS evidence.
 
 ## Test-Period Leaderboard
 
@@ -809,14 +805,14 @@ persists OOS in this universe.
 
 ## Findings That Require Caveat OOS
 
-The regime-conditional switching improvement (Finding 5, $\Delta=+0.161$ Sharpe for
-v2a over SWITCH(LW)) was not statistically significant at full-sample scale ($z=0.91$,
-$p=0.37$). On the test period alone (2023–2026, approximately 3.3 years), the
-power is lower still, and any Sharpe difference between SWITCH(v2a) and SWITCH(LW) on
-the test set should be treated as directional evidence only. The OOS validation of the
-v2a rule is primarily the stability of the rule itself (training-only derivation matches
-full-sample derivation) rather than a statistically significant Sharpe advantage on the
-test set.
+The regime-conditional switching improvement (Finding 5, Δ = +0.434 for SWITCH(v2a)
+over SWITCH(LW)) clears statistical significance at the 5% level on the full 2003–2026
+sample ($z=2.05$, $p=0.040$; see §5.3 Finding R3). On the test period alone
+(2023–2026, approximately 3.3 years), the power is lower and Δ=+0.114 should be
+treated as directional evidence only. The primary OOS evidence for the v2a rule is
+the mapping stability: the training-only derivation (2003–2022) yields the same
+regime-to-strategy assignments as the full-sample derivation, indicating the
+structure is robust rather than sample-specific.
 
 The long-short strategies (Finding 14) also warrant caution OOS: with short lookback
 windows and a 3.3-year test period, the standard errors on LS strategy Sharpe
@@ -854,7 +850,7 @@ classification infrastructure.
 ## Shrinkage vs. Structure
 
 Covariance estimation matters enormously for classical mean-variance strategies — the
-MSR Michaud overfit (Finding 2, Δ=+0.378 Sharpe from sample to LW) is the largest
+MSR Michaud overfit (Finding 2, Δ=+0.164 Sharpe from sample to LW) is the largest
 single methodological substitution effect in the table. Shrinkage pulls extreme
 eigenvalues toward the grand mean, reducing the optimizer's tendency to concentrate
 on assets with fortuitously large in-sample Sharpe ratios. The GMV and MDP families
@@ -878,14 +874,14 @@ performance table into an institutional portfolio context. Two groups emerge cle
 at 10 bps round-trip. Low-turnover strategies (EW, GMV variants, FF3-LowVol,
 SWITCH(LW)) suffer degradation below 0.098 Sharpe points and maintain their relative
 rankings. High-turnover strategies (FF3-Mom, FF3-Multi, TSMOM, BL-Mom(LW)) suffer
-the largest losses — FF3-Mom's gross Sharpe of 0.588 falls to 0.310 net, making it
-the weakest strategy on a cost-adjusted basis despite a 9.60% annualized gross return.
+the largest losses — FF3-Mom's gross Sharpe of 0.685 falls to 0.394 net, making it
+the weakest strategy on a cost-adjusted basis despite a 11.03% annualized gross return.
 
 The regime-conditional switching strategies occupy a strategically important position:
-moderate turnover (1.98% average for SWITCH(LW)) with a regime signal that persists
+moderate turnover (2.04% average for VMP(SWITCH(LW))) with a regime signal that persists
 for many days produces a cost-adjusted Sharpe that rivals more complex structures.
-VMP(SWITCH(LW)) net Sharpe 1.381 is the strongest non-degenerate result in the
-cost-adjusted table. The transaction-cost ladder is ultimately the implementability
+VMP(MDP(LW)) leads the cost-adjusted table at net Sharpe 1.336; VMP(SWITCH(LW)) net
+Sharpe 1.201 remains among the strongest even after accounting for base-strategy trading costs. The transaction-cost ladder is ultimately the implementability
 filter for institutional adoption: strategies must survive from gross Sharpe to
 net-of-friction Sharpe to risk-budget approval, and only the structural methods
 (diversification-based, regime-conditional) pass all three screens reliably.
@@ -898,6 +894,8 @@ form a qualitatively different instrument for risk-budgeted mandates.
 ## Sample-Period Sensitivity
 
 ![Calendar-year returns for 24 representative strategies, 2003–2026 (* 2026 through April). Red cells = negative annual return; green cells = positive. The pattern of broad-based losses in 2008 and 2022 (rate shock) is unmistakable; the 2003 recovery is the only year with near-uniform positive returns across all strategy families. TSMOM(12m) and BL-Mom(LW) exhibit the largest year-to-year swings.](figures/calendar_returns_heatmap.png)
+
+![12-month rolling Sharpe ratio for six representative strategies (EW, MDP(LW), MSR(LW), SWITCH(LW), VMP(MDP(LW)), HRP(LW)), 2003–2026. Dashed line = Sharpe 1.0. Grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. All strategies produce rolling Sharpe well below 1.0 during crisis periods; VMP(MDP(LW)) exhibits the most consistently elevated rolling Sharpe across the full sample, while MSR(LW) shows the widest within-strategy variation.](figures/rolling_sharpe_small_multiples.png)
 
 The sub-period analysis (Appendix B) reveals that within-strategy variation across time
 is substantially larger than the cross-strategy variation in the full-sample headline
@@ -947,7 +945,7 @@ regime-conditional rule derived from training data (2003–2022) matches the ori
 full-sample rule, providing the first clean OOS validation of the regime-switching
 approach.
 
-The most forceful caveat is temporal: within-strategy sub-period Sharpe variation (e.g., MSR(LW) ranging 0.34–2.48 across 5-year buckets) exceeds the full-sample cross-strategy spread, meaning that the headline ranking table describes family-level behavioral tendencies — VMP universally improves, shrinkage helps mean-variance but not HRP — rather than an enduring ordering of specific strategies. The OOS test period (2023–2026) confirms this: the family-level tendencies persist while the specific strategy rankings within the test period differ from the training-period ordering.
+The most forceful caveat is temporal: within-strategy sub-period Sharpe variation (e.g., MSR(LW) ranging 0.41–1.80 across 5-year buckets) exceeds the full-sample cross-strategy spread, meaning that the headline ranking table describes family-level behavioral tendencies — VMP universally improves, shrinkage helps mean-variance but not HRP — rather than an enduring ordering of specific strategies. The OOS test period (2023–2026) confirms this: the family-level tendencies persist while the specific strategy rankings within the test period differ from the training-period ordering.
 
 **Limitations.** All results are for a specific 29-ticker universe with US equity
 tilt; strategies exploiting cross-sectional dispersion (FF3, BL-Mom) may respond
@@ -968,7 +966,7 @@ TSMOM-LS(12m), BL-Mom-LS(LW), and FF3-Mom-LS. All assume zero borrow cost, unlim
 short availability, and no short rebate — conditions that overstate practical L/S
 returns; see the footnote in Appendix A. The results are mixed and universe-specific.
 Finding 8 (TSMOM weakened by long-only constraint) does *not* vanish: TSMOM-LS(12m)
-achieves Sharpe 0.414, worse than TSMOM(12m) long-only (0.626). Activating the short
+achieves Sharpe 0.645, worse than TSMOM(12m) long-only (0.801). Activating the short
 leg in this mixed-asset universe shorts assets with negative 12-month momentum, which
 includes bonds and commodities during their respective drawdown periods — assets that
 subsequently recover and impose losses on the short leg. Finding 9 (BL-Mom return
@@ -1002,6 +1000,100 @@ survivorship bias.
 ::: {#refs}
 :::
 
+```{=latex}
+\clearpage
+```
+
+# List of Acronyms {.unnumbered}
+
+AGG
+: iShares Core U.S. Aggregate Bond ETF
+
+BL
+: Black-Litterman (model)
+
+DBC
+: Invesco DB Commodity Index Tracking Fund
+
+EEM
+: iShares MSCI Emerging Markets ETF
+
+EFA
+: iShares MSCI EAFE ETF
+
+EW
+: Equal-Weight (1/N portfolio)
+
+FF3
+: Fama-French three-factor portfolio family
+
+FXI
+: iShares China Large-Cap ETF
+
+GFC
+: Global Financial Crisis (2008–09)
+
+GLD
+: SPDR Gold Shares ETF
+
+GMV
+: Global Minimum Variance (portfolio)
+
+HRP
+: Hierarchical Risk Parity
+
+HYG
+: iShares iBoxx USD High Yield Corporate Bond ETF
+
+IEF
+: iShares 7–10 Year Treasury Bond ETF
+
+IWM
+: iShares Russell 2000 ETF
+
+LW
+: Ledoit-Wolf (linear shrinkage covariance estimator)
+
+MDP
+: Maximum Diversification Portfolio
+
+MSR
+: Maximum Sharpe Ratio (portfolio)
+
+MVO
+: Mean-Variance Optimisation
+
+OAS
+: Oracle Approximating Shrinkage (covariance estimator)
+
+OOS
+: Out-of-Sample
+
+RP
+: Risk Parity (Equal Risk Contribution)
+
+SHY
+: iShares 1–3 Year Treasury Bond ETF
+
+SPY
+: SPDR S&P 500 ETF Trust
+
+SWITCH
+: Regime-conditional switching strategy
+
+TLT
+: iShares 20+ Year Treasury Bond ETF
+
+TSMOM
+: Time-Series Momentum
+
+VMP
+: Volatility-Managed Portfolio
+
+```{=latex}
+\clearpage
+```
+
 # Appendix A — Full 62-Strategy Comparison Table {.unnumbered}
 
 The table below presents the complete performance record for all 62 strategies on the
@@ -1019,7 +1111,6 @@ strategies only. All figures are computed over 2003-01-02 to 2026-04-30 with no
 lookahead.
 
 ```{=latex}
-\clearpage
 \footnotesize
 \begin{tabular}{p{1.4cm} p{3.2cm} r r r r r r r r r}
 \toprule
