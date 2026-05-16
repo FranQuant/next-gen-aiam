@@ -2,34 +2,76 @@
 __pycache__/
 *.py[cod]
 *$py.class
-.venv/
-venv/
-*.egg-info/
+*.so
+.Python
 build/
+develop-eggs/
 dist/
-.pytest_cache/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+.installed.cfg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
 
 # Jupyter
 .ipynb_checkpoints/
+notebooks/Untitled*.ipynb
+notebooks/*-checkpoint.ipynb
+*.ipynb_meta
 
-# IDE / OS
+# Testing & coverage
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# Editors
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# OS
 .DS_Store
-
-# Data cache — locally fetched EODHD parquet
-data/cache/
-
-# Raw data exports (portability CSVs, potentially large)
-data/raw/
+.AppleDouble
+.LSOverride
+Thumbs.db
+desktop.ini
 
 # Secrets / env
 .env
 .envrc
-
-# Logs
-*.log
-private_notes/
 .env.local
 .env.*.local
 .env*
+
+# Logs
+*.log
+
+# Project-specific — internal working documents (NOT distributed)
+private_notes/
+docs/execution_packets/
+
+# Project-specific — generated artifacts (rebuilt by scripts)
+docs/results.aux
+docs/results.log
+docs/results.out
+docs/results.toc
+*.tex.bak
+
+# Data cache — locally fetched EODHD parquet (handled in dataset publication pass)
+data/cache/
+
+# Raw data exports (portability CSVs, potentially large)
+data/raw/
