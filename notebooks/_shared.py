@@ -141,6 +141,35 @@ def max_drawdown(r):
     cum = (1 + r.dropna()).cumprod()
     return ((cum - cum.cummax()) / cum.cummax()).min()
 
+def load_panel_for_ml(horizon: int = 21) -> "pd.DataFrame":
+    """Build long-form (Date, Asset) MultiIndex panel ready for ML training.
+
+    Returns DataFrame with columns: mom_252, mom_21, vol_60, 7 asset-class one-hots,
+    target_21d. Rows with NaN targets dropped. Bridge for Session 2b notebook.
+    """
+    from aiam.features.technical import momentum, volatility
+    from aiam.features.technical import forward_returns as fwd_ret
+    from aiam.features.asset_class import asset_class_one_hot
+
+    ret = pd.read_parquet(ROOT / "data/cache/returns_29_2003_2026.parquet")
+    ret.index = pd.to_datetime(ret.index)
+    ret.index.name = "Date"
+    ret.columns.name = "Asset"
+
+    frames = {
+        "mom_252":     momentum(ret, 252),
+        "mom_21":      momentum(ret, 21),
+        "vol_60":      volatility(ret, 60),
+        "target_21d":  fwd_ret(ret, horizon),
+    }
+    panel = pd.concat({k: v.stack() for k, v in frames.items()}, axis=1)
+    panel.index.names = ["Date", "Asset"]
+
+    oh = asset_class_one_hot(ret.columns.tolist())
+    panel = panel.join(oh, on="Asset")
+    return panel.dropna(subset=["target_21d"])
+
+
 def build_all_stats(base, vmp):
     records = []
     for col in base.columns:
