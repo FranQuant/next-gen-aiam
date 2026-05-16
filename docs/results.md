@@ -2,6 +2,8 @@
 author: "Francisco Salazar"
 header-includes:
   - \usepackage{booktabs}
+  - \usepackage{longtable}
+  - \usepackage{pdflscape}
   - \raggedbottom
 abstract: |
   This study evaluates 62 portfolio allocation strategies on a 29-asset, 23.3-year

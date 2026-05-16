@@ -780,10 +780,10 @@ def plot_allocation_timeline():
     AC_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#9467bd", "#d62728", "#8c564b"]
 
     PANELS = [
-        ("EW",                   "EW",         "EW_29assets_2003_2026.parquet"),
-        ("MDP(LW)",              "MDP(LW)",    "MDP_ledoit_wolf_29assets_2003_2026.parquet"),
-        ("MSR(LW)",              "MSR(LW)",    "MSR_ledoit_wolf_29assets_2003_2026.parquet"),
-        ("SWITCH(LW)",           "SWITCH(LW)", "SWITCH_ledoit_wolf_29assets_2003_2026.parquet"),
+        ("EW",          "EW",          "EW_29assets_2003_2026.parquet"),
+        ("MDP(LW)",     "MDP(LW)",     "MDP_ledoit_wolf_29assets_2003_2026.parquet"),
+        ("MSR(LW)",     "MSR(LW)",     "MSR_ledoit_wolf_29assets_2003_2026.parquet"),
+        ("SWITCH(v2a)", "SWITCH(v2a)", "SWITCH_v2a.parquet"),
     ]
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
