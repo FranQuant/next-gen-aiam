@@ -30,11 +30,11 @@ Train/validation/test split (paper-locked): `TRAIN_END=2022-12-31`, `TEST_START=
 
 | Feature | Mean Importance |
 |---|---|
-| vol_252 | 0.01630 |
-| vol_60 | 0.01301 |
-| mom_63 | 0.01088 |
-| atr_14_ratio | 0.00826 |
-| mom_252 | 0.00756 |
+| vol_252 | 0.01747 |
+| vol_60 | 0.01292 |
+| mom_63 | 0.01059 |
+| atr_14_ratio | 0.00776 |
+| mom_252 | 0.00704 |
 
 Momentum (252-day) and volatility features dominate. Asset-class dummies carry moderate importance, confirming within-class heterogeneity is informative. Short-horizon momentum (mom_21) ranks near the bottom, matching its near-zero IC from Session 1.5B.
 
@@ -50,26 +50,3 @@ Momentum (252-day) and volatility features dominate. Asset-class dummies carry m
 **Session 3 (DL):** MLP/LSTM/Transformer architectures should aim to beat the best Approach B Sharpe here. The weak single-fit finding suggests time-varying architectures (LSTM with rolling context, Transformer attention) may be needed.
 
 **Session 2c (optional rolling refit):** A walk-forward refit (e.g., annual refit on expanding window) would turn the single-fit experiment into a production-grade backtesting framework and likely close the gap vs. classical baselines.
-
-## VMP Overlay + Ensemble Extensions (Session 2c-A)
-
-Two additive enhancements applied to existing single-fit ML strategies:
-
-- **VMP overlay** wraps each of the 6 ML strategies with the same volatility-managed portfolio scaling used in the paper's 31 VMP variants. Target = each strategy's long-run realized vol; lookback 21d, clip (0.25, 1.5).
-- **Ensemble predictions** = equal-weighted average of Lasso/RF/XGBoost μ̂. Wired through both SignalTilt and MSR portfolio construction.
-
-Extended comparison: 11 → 19 strategies.
-
-| Strategy | Family | Ann Ret | Ann Vol | Sharpe | Max DD |
-|---|---|---|---|---|---|
-| MSR(Ensemble_μ̂) | ML (ensemble) | 0.166 | 0.060 | 2.579 | -0.059 |
-| VMP(MDP(LW)) | Classical | 0.149 | 0.058 | 2.422 | -0.048 |
-| MSR(RF_μ̂) | ML (single-fit) | 0.209 | 0.081 | 2.394 | -0.068 |
-| SignalTilt(XGB) | ML (single-fit) | 0.707 | 0.245 | 2.304 | -0.226 |
-| VMP(SignalTilt(XGB)) | ML + VMP | 0.720 | 0.250 | 2.292 | -0.205 |
-
-**Headline observations:**
-
-- **MSR(Ensemble_μ̂) tops the leaderboard at Sharpe 2.579**, narrowly beating VMP(MDP(LW)) at 2.422. The ensemble averages out model-specific noise in μ̂ estimates, improving signal quality without any additional training.
-- **VMP-wrapping ML strategies provides mixed results.** VMP overlay mildly hurt most ML variants (e.g., VMP(SignalTilt(XGB)) = 2.292 vs SignalTilt(XGB) = 2.304; VMP(MSR(RF_μ̂)) = 2.177 vs MSR(RF_μ̂) = 2.394). The underlying ML strategies already carry high vol; the VMP clipping does not consistently add value here unlike on the classical strategies.
-- **SignalTilt(Ensemble) = 2.183 underperforms individual SignalTilt(XGB) = 2.304**, suggesting that averaging the z-scored tilt signals dilutes XGBoost's edge rather than compounding it. The ensemble benefit is concentrated in the MSR (mean-estimate) path.
