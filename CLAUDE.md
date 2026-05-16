@@ -157,7 +157,7 @@ Every Claude Code prompt should include:
 
 **Session 1 (done) — static baselines paper.** 62 strategies on 29-asset 2003-2026 universe. Paper at commit `60b6830`. Notebooks split (commits `efda396` → `e9bc679` → `60b6830`). Repo cleanup pass A (`df0e490`) + pass B (`e4b07ba`). Dataset publication (`bdd8636`).
 
-**Session 1.5B (next) — feature engineering.** `src/aiam/features/technical.py` mirroring Hilpisch §19.2 SignalEngine API: `momentum(returns, lookback)`, `volatility(returns, lookback)`, `forward_returns(returns, horizon)`, `zscore(series, window)`, `information_coefficient(signal, forward_ret)`. OHLCV-based features: RSI, ATR, Bollinger, gap, volume. Plus `src/aiam/evaluation/ic.py` (IC diagnostic) and `src/aiam/strategy/signal_tilt.py` (SignalTilt baseline). Forward-return target: `rets.shift(-h).rolling(h).sum()`. ETA: 3-4h agent work.
+**Session 1.5B (done) — feature engineering.** `src/aiam/features/technical.py` (SignalEngine + 9 functions), `src/aiam/evaluation/ic.py` (IC + ic_summary), `src/aiam/strategy/signal_tilt.py` (SignalTilt + momentum_signal_fn). 44 tests, all passing. Validated on 29-asset live data (commit `803fc00`). See Validation Findings below.
 
 **Session 2 — ML strategies.** Lasso, Random Forest, XGBoost expected-return estimation. `TimeSeriesSplit` cross-validation, no-look-ahead. New notebook `notebooks/03_ml_strategies.ipynb`. ETA: 6-10h.
 
@@ -170,3 +170,20 @@ Every Claude Code prompt should include:
 - `src/aiam/harness/horse_race.py` line 12: `_PRICES_CACHE` points to `prices_30.parquet` but the 29-asset pipeline uses `prices_29.parquet`. No correctness impact (cache regenerates if absent), but should be updated.
 - `scripts/build_all_strategies_29.py` lines 54-67: SWITCH(sample)/SWITCH(LW) canonical routing uses R0→EW (v1-style baseline), distinct from SWITCH(v2a)'s R0→MSR(LW). Add an inline comment clarifying this distinction.
 - `scripts/generate_figures.py` module-level docstring: verify it says "Generate 11 publication-quality figures" (was "Generate 4" originally, updated in pass-7 but worth re-confirming).
+
+All three resolved in commit `803fc00` (Session 1.5B).
+
+## Validation Findings
+
+**Session 1.5B feature library validation (29-asset 2003-2026 universe):**
+
+- **252-day momentum**: mean IC = +0.073 (t = 15.5), hit rate 60.4%. In expected range for a diversified cross-asset universe.
+- **21-day momentum**: mean IC = +0.019 (t = 4.4), near zero. Expected — short-horizon momentum is weak / reversal-prone.
+- **60-day volatility**: mean IC = **+0.125** (t = 25.5), hit rate 63.5%. **Positive**, not negative as the equity-only low-vol anomaly would suggest. On this cross-asset universe, the **cross-asset risk premium dominates** the intra-equity low-vol effect. Robust across sub-periods (2003-09: +0.145; 2016-22: +0.152; 2023-26: +0.168) and sub-universes (equities +0.096; bonds +0.078; alts +0.054). The low-vol anomaly is an intra-equity-class phenomenon; on a cross-asset universe, raw vol is a positive signal.
+- **SignalTilt(momentum_252, tilt=0.5)**: ΔSharpe = +0.267 vs EW (Sharpe 1.156 vs 0.889), confirming the feature plumbing works end-to-end. Partly attributable to momentum + high-vol name overlap (tech equities dominate both).
+
+**Implications for Session 2 ML:**
+- Do not impose "low-vol = good" as a prior. Feed raw volatility as a feature alongside an asset-class indicator; let the model learn within-class vs cross-class structure.
+- Momentum and volatility are structurally correlated on this universe and window. Treat as collinear features in Lasso; check feature-importance interpretation carefully.
+
+Full validation report: [`docs/validation/session_1.5b_feature_library.md`](docs/validation/session_1.5b_feature_library.md).
