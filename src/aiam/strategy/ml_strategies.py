@@ -28,6 +28,7 @@ class _MLSignalBase(PointInTimeStrategy):
         feature_cols: list[str],
         train_end: str = "2022-12-31",
         validation_share: float = 0.15,
+        tilt_strength: float = 0.5,
     ) -> None:
         dates = feature_panel.index.get_level_values(0).unique().sort_values()
         train_end_ts = pd.Timestamp(train_end)
@@ -57,6 +58,7 @@ class _MLSignalBase(PointInTimeStrategy):
         self._feature_cols = feature_cols
         self._feature_panel = feature_panel
         self._test_dates = test_dates
+        self.tilt_strength = tilt_strength
 
         self.fit()
         self._cache_test_predictions()
@@ -91,7 +93,7 @@ class _MLSignalBase(PointInTimeStrategy):
         score = score.reindex(assets).fillna(0.0)
         std = score.std()
         zs = (score - score.mean()) / std if std > 1e-12 else pd.Series(0.0, index=assets)
-        w = (base_w + 0.5 * zs).clip(lower=0.0)
+        w = (base_w + self.tilt_strength * zs).clip(lower=0.0)
         total = w.sum()
         return (w / total if total > 1e-12 else base_w).rename(asof)
 
