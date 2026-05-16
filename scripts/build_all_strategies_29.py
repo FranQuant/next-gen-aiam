@@ -2,8 +2,8 @@
 Master harness — run all 31 strategies on the 29-asset, 2003-2026 universe.
 
 Produces:
-  data/cache/portfolio_returns/58strategies_29assets_2003_2026.parquet   (31 base)
-  data/cache/portfolio_returns/58strategies_vmp_29assets_2003_2026.parquet (31 VMP)
+  data/cache/portfolio_returns/31strategies_29assets_2003_2026.parquet   (31 base)
+  data/cache/portfolio_returns/31strategies_vmp_29assets_2003_2026.parquet (31 VMP)
   data/cache/portfolio_weights/<strategy>_29assets_2003_2026.parquet     (per strategy)
 
 First valid portfolio date ≈ 2004-01-01 (252-day lookback for MV families).
@@ -40,8 +40,8 @@ from aiam.strategy.tsmom import TSMOM
 
 PRICES_CACHE = Path("data/cache/prices_29.parquet")
 REGIME_CACHE = Path("data/cache/regime_signals_2003_2026.parquet")
-OUT_BASE = Path("data/cache/portfolio_returns/58strategies_29assets_2003_2026.parquet")
-OUT_VMP = Path("data/cache/portfolio_returns/58strategies_vmp_29assets_2003_2026.parquet")
+OUT_BASE = Path("data/cache/portfolio_returns/31strategies_29assets_2003_2026.parquet")
+OUT_VMP = Path("data/cache/portfolio_returns/31strategies_vmp_29assets_2003_2026.parquet")
 WEIGHTS_SUFFIX = "29assets_2003_2026"
 START = "2003-01-02"  # first NYSE trading day; bdate_range includes Jan 1 (holiday) otherwise
 END = "2026-04-30"

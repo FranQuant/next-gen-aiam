@@ -56,10 +56,10 @@ DISPLAY = {
 FAMILY_ORDER = {
     "Classical MV":    ["EW", "GMV(sample)", "GMV(ledoit_wolf)", "GMV(oas)", "MSR(sample)", "MSR(ledoit_wolf)"],
     "Diversification": ["MDP(sample)", "MDP(ledoit_wolf)", "RP(sample)", "RP(ledoit_wolf)", "HRP(sample)", "HRP(ledoit_wolf)"],
-    "Regime":          ["SWITCH(sample)", "SWITCH(ledoit_wolf)"],
+    "Regime Switch":   ["SWITCH(sample)", "SWITCH(ledoit_wolf)"],
     "TSMOM":           ["TSMOM(12m)", "TSMOM(6m)"],
     "Black-Litterman": ["BL-Eq(sample)", "BL-Eq(LW)", "BL-Mom(LW)", "BL-Rev(LW)"],
-    "FF3 Factor":      ["FF3-Mom", "FF3-LowVol", "FF3-Quality", "FF3-Multi"],
+    "Factor":          ["FF3-Mom", "FF3-LowVol", "FF3-Quality", "FF3-Multi"],
 }
 
 # ── Load returns ───────────────────────────────────────────────────────────────

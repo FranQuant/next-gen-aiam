@@ -20,8 +20,8 @@ from scipy import stats
 warnings.filterwarnings("ignore")
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-BASE = pd.read_parquet("data/cache/portfolio_returns/58strategies_29assets_2003_2026.parquet")
-VMP  = pd.read_parquet("data/cache/portfolio_returns/58strategies_vmp_29assets_2003_2026.parquet")
+BASE = pd.read_parquet("data/cache/portfolio_returns/31strategies_29assets_2003_2026.parquet")
+VMP  = pd.read_parquet("data/cache/portfolio_returns/31strategies_vmp_29assets_2003_2026.parquet")
 SW   = pd.read_parquet("data/cache/portfolio_returns/switch_v2a_oos_29assets.parquet")
 
 # Regime signal — fill forward from monthly to daily
@@ -225,7 +225,7 @@ for col in BASE.columns:
             "ann_ret":    ann_return(vr),
             "ann_vol":    ann_vol(vr),
             "sharpe":     ann_sharpe(vr),
-            "hit_pct":    np.nan,  # VMP hit% not computed per task
+            "hit_pct":    "—",  # VMP hit% not applicable
             "max_dd":     max_drawdown(vr),
             "calmar":     calmar(vr),
             "turnover":   to_pct,

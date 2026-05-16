@@ -81,10 +81,10 @@ matplotlib.rcParams.update({
 FAMILY_COLORS = {
     "Classical MV":    "#1f77b4",
     "Diversification": "#2ca02c",
-    "Regime":          "#9467bd",
+    "Regime Switch":   "#9467bd",
     "TSMOM":           "#ff7f0e",
     "Black-Litterman": "#d62728",
-    "FF3 Factor":      "#8c564b",
+    "Factor":          "#8c564b",
     "EW (benchmark)":  "#333333",
 }
 
@@ -101,18 +101,18 @@ FAMILY_MAP = {
     "RP(ledoit_wolf)":  "Diversification",
     "HRP(sample)":      "Diversification",
     "HRP(ledoit_wolf)": "Diversification",
-    "SWITCH(sample)":   "Regime",
-    "SWITCH(ledoit_wolf)": "Regime",
+    "SWITCH(sample)":   "Regime Switch",
+    "SWITCH(ledoit_wolf)": "Regime Switch",
     "TSMOM(12m)":       "TSMOM",
     "TSMOM(6m)":        "TSMOM",
     "BL-Eq(sample)":    "Black-Litterman",
     "BL-Eq(LW)":        "Black-Litterman",
     "BL-Mom(LW)":       "Black-Litterman",
     "BL-Rev(LW)":       "Black-Litterman",
-    "FF3-Mom":          "FF3 Factor",
-    "FF3-LowVol":       "FF3 Factor",
-    "FF3-Quality":      "FF3 Factor",
-    "FF3-Multi":        "FF3 Factor",
+    "FF3-Mom":          "Factor",
+    "FF3-LowVol":       "Factor",
+    "FF3-Quality":      "Factor",
+    "FF3-Multi":        "Factor",
 }
 
 DISPLAY = {
@@ -304,10 +304,10 @@ code("""\
 FAMILY_ORDER = [
     ("Classical MV",    ["EW", "GMV(sample)", "GMV(ledoit_wolf)", "GMV(oas)", "MSR(sample)", "MSR(ledoit_wolf)"]),
     ("Diversification", ["MDP(sample)", "MDP(ledoit_wolf)", "RP(sample)", "RP(ledoit_wolf)", "HRP(sample)", "HRP(ledoit_wolf)"]),
-    ("Regime",          ["SWITCH(sample)", "SWITCH(ledoit_wolf)"]),
+    ("Regime Switch",   ["SWITCH(sample)", "SWITCH(ledoit_wolf)"]),
     ("TSMOM",           ["TSMOM(12m)", "TSMOM(6m)"]),
     ("Black-Litterman", ["BL-Eq(sample)", "BL-Eq(LW)", "BL-Mom(LW)", "BL-Rev(LW)"]),
-    ("FF3 Factor",      ["FF3-Mom", "FF3-LowVol", "FF3-Quality", "FF3-Multi"]),
+    ("Factor",          ["FF3-Mom", "FF3-LowVol", "FF3-Quality", "FF3-Multi"]),
 ]
 
 rows = []
@@ -395,10 +395,10 @@ F1_STRATS = [
     ("EW",                    "EW (benchmark)",     FAMILY_COLORS["EW (benchmark)"],  dict(lw=2.4, ls="--", zorder=5)),
     ("VMP(MSR(ledoit_wolf))", "VMP(MSR(LW))",        FAMILY_COLORS["Classical MV"],    dict(lw=1.8, zorder=4)),
     ("VMP(BL-Mom(LW))",       "VMP(BL-Mom(LW))",    FAMILY_COLORS["Black-Litterman"], dict(lw=1.8, zorder=4)),
-    (None,                    "SWITCH(v2a)",          FAMILY_COLORS["Regime"],          dict(lw=1.6, zorder=3)),
+    (None,                    "SWITCH(v2a)",          FAMILY_COLORS["Regime Switch"],          dict(lw=1.6, zorder=3)),
     ("BL-Mom(LW)",            "BL-Mom(LW)",          FAMILY_COLORS["Black-Litterman"], dict(lw=1.2, ls=":", zorder=3)),
     ("VMP(GMV(sample))",      "VMP(GMV(sample))",   FAMILY_COLORS["Classical MV"],    dict(lw=1.2, ls="-.", zorder=2)),
-    ("FF3-LowVol",            "FF3-LowVol",          FAMILY_COLORS["FF3 Factor"],      dict(lw=1.5, zorder=3)),
+    ("FF3-LowVol",            "FF3-LowVol",          FAMILY_COLORS["Factor"],      dict(lw=1.5, zorder=3)),
 ]
 
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -712,7 +712,7 @@ REP6_COLS = [
     ("GMV(ledoit_wolf)",      "GMV(LW)",        FAMILY_COLORS["Classical MV"]),
     ("MSR(ledoit_wolf)",      "MSR(LW)",        FAMILY_COLORS["Classical MV"]),
     ("MDP(ledoit_wolf)",      "MDP(LW)",        FAMILY_COLORS["Diversification"]),
-    (None,                    "SWITCH(v2a)",    FAMILY_COLORS["Regime"]),
+    (None,                    "SWITCH(v2a)",    FAMILY_COLORS["Regime Switch"]),
     ("VMP(BL-Mom(LW))",       "VMP(BL-Mom(LW))",FAMILY_COLORS["Black-Litterman"]),
 ]
 
@@ -951,7 +951,7 @@ fig, (ax_hist, ax_box) = plt.subplots(1, 2, figsize=(16, 8))
 
 # Histogram — all strategies overlaid
 for col, ts in turnover_series.items():
-    fam = FAMILY_MAP.get([k for k, v in DISPLAY.items() if v == col][0], "EW (benchmark)") if col != "SWITCH(v2a)" else "Regime"
+    fam = FAMILY_MAP.get([k for k, v in DISPLAY.items() if v == col][0], "EW (benchmark)") if col != "SWITCH(v2a)" else "Regime Switch"
     ax_hist.hist(ts.values, bins=50, alpha=0.25, color=FAMILY_COLORS.get(fam, "gray"), density=True)
 ax_hist.set_xlabel("Daily One-Way Turnover (%)")
 ax_hist.set_ylabel("Density")

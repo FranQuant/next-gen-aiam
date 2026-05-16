@@ -20,7 +20,7 @@ from aiam.evaluation.performance import performance_stats
 from aiam.evaluation.regime_conditional import regime_conditional_performance
 from aiam.evaluation.switch_assembly import assemble_switch_returns
 
-PORTFOLIO_CACHE = Path("data/cache/portfolio_returns/58strategies_29assets_2003_2026.parquet")
+PORTFOLIO_CACHE = Path("data/cache/portfolio_returns/31strategies_29assets_2003_2026.parquet")
 REGIME_CACHE = Path("data/cache/regime_signals_2003_2026.parquet")
 OUT_PATH = Path("data/cache/portfolio_returns/switch_v2a_oos_29assets.parquet")
 

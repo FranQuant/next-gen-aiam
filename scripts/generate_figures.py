@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate 4 publication-quality figures for docs/results.md."""
+"""Generate 11 publication-quality figures for docs/results.md."""
 
 import numpy as np
 import pandas as pd
@@ -33,10 +33,10 @@ FAMILY_COLORS = {
     "Classical MV":    "#1f77b4",
     "Constrained MV":  "#17becf",
     "Diversification": "#2ca02c",
-    "Regime":          "#9467bd",
+    "Regime Switch":   "#9467bd",
     "TSMOM":           "#ff7f0e",
     "Black-Litterman": "#d62728",
-    "FF3 Factor":      "#8c564b",
+    "Factor":          "#8c564b",
     "Long-Short":      "#bcbd22",
     "EW (benchmark)":  "#333333",
 }
@@ -55,8 +55,8 @@ os.makedirs(OUT, exist_ok=True)
 
 # ── Load data ──────────────────────────────────────────────────────────────────
 print("Loading data...")
-base = pd.read_parquet("data/cache/portfolio_returns/58strategies_29assets_2003_2026.parquet")
-vmp  = pd.read_parquet("data/cache/portfolio_returns/58strategies_vmp_29assets_2003_2026.parquet")
+base = pd.read_parquet("data/cache/portfolio_returns/31strategies_29assets_2003_2026.parquet")
+vmp  = pd.read_parquet("data/cache/portfolio_returns/31strategies_vmp_29assets_2003_2026.parquet")
 sw_oos = pd.read_parquet("data/cache/portfolio_returns/switch_v2a_oos_29assets.parquet")
 regime_sig = pd.read_parquet("data/cache/regime_signals_2003_2026.parquet")["dominant_regime"].dropna()
 
@@ -88,13 +88,13 @@ F1_STRATEGIES = [
      dict(lw=1.8, zorder=4)),
     ("VMP(BL-Mom(LW))",        "VMP(BL-Mom(LW))",         FAMILY_COLORS["Black-Litterman"],
      dict(lw=1.8, zorder=4)),
-    (None,                     "SWITCH(v2a)",              FAMILY_COLORS["Regime"],
+    (None,                     "SWITCH(v2a)",              FAMILY_COLORS["Regime Switch"],
      dict(lw=1.6, zorder=3)),
     ("BL-Mom(LW)",             "BL-Mom(LW)",              FAMILY_COLORS["Black-Litterman"],
      dict(lw=1.2, ls=":", zorder=3)),
     ("VMP(GMV(sample))",       "VMP(GMV(sample)) [art.]", FAMILY_COLORS["Classical MV"],
      dict(lw=1.2, ls="-.", zorder=2)),
-    ("FF3-LowVol",             "FF3-LowVol",              FAMILY_COLORS["FF3 Factor"],
+    ("FF3-LowVol",             "FF3-LowVol",              FAMILY_COLORS["Factor"],
      dict(lw=1.5, zorder=3)),
 ]
 
@@ -171,18 +171,18 @@ FAMILY_MAP = {
     "RP(ledoit_wolf)":     "Diversification",
     "HRP(sample)":         "Diversification",
     "HRP(ledoit_wolf)":    "Diversification",
-    "SWITCH(sample)":      "Regime",
-    "SWITCH(ledoit_wolf)": "Regime",
+    "SWITCH(sample)":      "Regime Switch",
+    "SWITCH(ledoit_wolf)": "Regime Switch",
     "TSMOM(12m)":          "TSMOM",
     "TSMOM(6m)":           "TSMOM",
     "BL-Eq(sample)":       "Black-Litterman",
     "BL-Eq(LW)":           "Black-Litterman",
     "BL-Mom(LW)":          "Black-Litterman",
     "BL-Rev(LW)":          "Black-Litterman",
-    "FF3-Mom":             "FF3 Factor",
-    "FF3-LowVol":          "FF3 Factor",
-    "FF3-Quality":         "FF3 Factor",
-    "FF3-Multi":           "FF3 Factor",
+    "FF3-Mom":             "Factor",
+    "FF3-LowVol":          "Factor",
+    "FF3-Quality":         "Factor",
+    "FF3-Multi":           "Factor",
     "MSR_C(ledoit_wolf)":  "Constrained MV",
     "MSR_C(sample)":       "Constrained MV",
     "MVO_C(ledoit_wolf)":  "Constrained MV",
@@ -563,7 +563,7 @@ print("  → saved calendar_returns_heatmap.{png,svg}")
 print("Figure 6: Underwater drawdown...")
 
 UW_STRATS = [
-    (None,                     "SWITCH(v2a)",       FAMILY_COLORS["Regime"],          dict(lw=2.0, zorder=5)),
+    (None,                     "SWITCH(v2a)",       FAMILY_COLORS["Regime Switch"],   dict(lw=2.0, zorder=5)),
     ("VMP(MDP(ledoit_wolf))",  "VMP(MDP(LW))",      FAMILY_COLORS["Diversification"], dict(lw=1.8, zorder=4)),
     ("VMP(MDP(sample))",       "VMP(MDP(sample))",  FAMILY_COLORS["Diversification"], dict(lw=1.4, ls="--", zorder=4)),
     ("MDP(ledoit_wolf)",       "MDP(LW)",           FAMILY_COLORS["Diversification"], dict(lw=1.2, ls=":", zorder=3)),
@@ -708,10 +708,10 @@ FAMILY_COLOR_MAP2 = {
     "Classical MV":    FAMILY_COLORS["Classical MV"],
     "Constrained MV":  FAMILY_COLORS["Constrained MV"],
     "Diversification": FAMILY_COLORS["Diversification"],
-    "Regime":          FAMILY_COLORS["Regime"],
+    "Regime Switch":   FAMILY_COLORS["Regime Switch"],
     "TSMOM":           FAMILY_COLORS["TSMOM"],
     "Black-Litterman": FAMILY_COLORS["Black-Litterman"],
-    "FF3 Factor":      FAMILY_COLORS["FF3 Factor"],
+    "Factor":          FAMILY_COLORS["Factor"],
     "Long-Short":      FAMILY_COLORS["Long-Short"],
     "EW":              FAMILY_COLORS["EW (benchmark)"],
 }
@@ -763,5 +763,153 @@ fig.savefig(f"{OUT}/stratified_vs_flat_costs.svg", bbox_inches="tight")
 plt.close(fig)
 print("  → saved stratified_vs_flat_costs.{png,svg}")
 
-print("\nAll 9 figures generated successfully.")
+# ── Figure 10: Asset-Class Allocation Timeline ─────────────────────────────────
+def plot_allocation_timeline():
+    print("Figure 10: Asset-class allocation timeline...")
+
+    ASSET_CLASSES = {
+        "US Single Stocks":  ["AAPL.US", "MSFT.US", "GOOGL.US", "NVDA.US",
+                               "JPM.US", "JNJ.US", "XOM.US", "WMT.US"],
+        "US Sector ETFs":    ["XLK.US", "XLF.US", "XLE.US", "XLV.US", "XLP.US", "XLU.US"],
+        "Broad Equity ETFs": ["SPY.US", "IWM.US"],
+        "Intl Equity ETFs":  ["EFA.US", "EEM.US", "FXI.US"],
+        "Fixed Income":      ["SHY.US", "IEF.US", "TLT.US", "AGG.US", "HYG.US"],
+        "Commodities+FX":    ["GLD.US", "SLV.US", "DBC.US", "USO.US", "EURUSD"],
+    }
+
+    AC_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#9467bd", "#d62728", "#8c564b"]
+
+    PANELS = [
+        ("EW",                   "EW",         "EW_29assets_2003_2026.parquet"),
+        ("MDP(LW)",              "MDP(LW)",    "MDP_ledoit_wolf_29assets_2003_2026.parquet"),
+        ("MSR(LW)",              "MSR(LW)",    "MSR_ledoit_wolf_29assets_2003_2026.parquet"),
+        ("SWITCH(LW)",           "SWITCH(LW)", "SWITCH_ledoit_wolf_29assets_2003_2026.parquet"),
+    ]
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
+    axes_flat = axes.flatten()
+    ac_labels = list(ASSET_CLASSES.keys())
+
+    legend_patches = [mpatches.Patch(color=AC_COLORS[i], label=ac_labels[i])
+                      for i in range(len(ac_labels))]
+
+    for idx, (col, title, fname) in enumerate(PANELS):
+        ax = axes_flat[idx]
+        fpath = f"data/cache/portfolio_weights/{fname}"
+        try:
+            w = pd.read_parquet(fpath)
+        except Exception as e:
+            ax.text(0.5, 0.5, f"{title}\nweights not cached\n({e})",
+                    ha="center", va="center", transform=ax.transAxes, fontsize=9)
+            ax.set_title(title, fontsize=10, fontweight="bold")
+            continue
+
+        # Resample to monthly mean
+        w_monthly = w.resample("ME").mean()
+
+        # Build asset-class aggregated weights
+        ac_data = {}
+        for ac, assets in ASSET_CLASSES.items():
+            cols = [a for a in assets if a in w_monthly.columns]
+            ac_data[ac] = w_monthly[cols].sum(axis=1) if cols else pd.Series(0.0, index=w_monthly.index)
+
+        df_ac = pd.DataFrame(ac_data)
+
+        # Normalize rows to sum to 1 (handle tiny rounding)
+        row_sums = df_ac.sum(axis=1).replace(0, np.nan)
+        df_ac = df_ac.div(row_sums, axis=0).fillna(0)
+
+        bottom = pd.Series(0.0, index=df_ac.index)
+        for i, ac in enumerate(ac_labels):
+            ax.fill_between(df_ac.index, bottom, bottom + df_ac[ac],
+                            color=AC_COLORS[i], alpha=0.85, linewidth=0)
+            bottom = bottom + df_ac[ac]
+
+        ax.set_title(title, fontsize=10, fontweight="bold")
+        ax.set_ylim(0, 1)
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x:.0%}"))
+        ax.tick_params(axis="x", rotation=30)
+
+    fig.legend(handles=legend_patches, loc="lower center", ncol=6, fontsize=8,
+               bbox_to_anchor=(0.5, -0.02), framealpha=0.9)
+    fig.suptitle("Asset-Class Allocation Timeline — 4 Strategies (2003–2026)", fontsize=12, fontweight="bold")
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
+    fig.savefig(f"{OUT}/asset_class_allocation_timeline.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print("  → saved asset_class_allocation_timeline.png")
+
+
+# ── Figure 11: Rolling Sharpe Small Multiples ────────────────────────────────────
+def plot_rolling_sharpe_small_multiples():
+    print("Figure 11: Rolling Sharpe small multiples...")
+
+    STRATS = [
+        ("EW",                  "EW",              "base",  "EW (benchmark)"),
+        ("MDP(ledoit_wolf)",    "MDP(LW)",         "base",  "Diversification"),
+        ("MSR(ledoit_wolf)",    "MSR(LW)",         "base",  "Classical MV"),
+        ("SWITCH(ledoit_wolf)", "SWITCH(LW)",      "base",  "Regime Switch"),
+        ("VMP(MDP(ledoit_wolf))", "VMP(MDP(LW))", "vmp",   "Diversification"),
+        ("HRP(ledoit_wolf)",    "HRP(LW)",         "base",  "Diversification"),
+    ]
+
+    CRISIS_SHADING = [
+        (pd.Timestamp("2008-09-01"), pd.Timestamp("2009-03-31"), "GFC"),
+        (pd.Timestamp("2020-02-01"), pd.Timestamp("2020-04-30"), "COVID"),
+        (pd.Timestamp("2022-01-01"), pd.Timestamp("2022-10-31"), "Rate Shock"),
+    ]
+
+    fig, axes = plt.subplots(2, 3, figsize=(14, 8), sharex=True, sharey=False)
+    axes_flat = axes.flatten()
+
+    for idx, (col, title, src, family) in enumerate(STRATS):
+        ax = axes_flat[idx]
+        color = FAMILY_COLORS.get(family, "#aaaaaa")
+
+        if src == "base":
+            rets = base[col] if col in base.columns else None
+        else:
+            rets = vmp[col] if col in vmp.columns else None
+
+        if rets is None:
+            ax.text(0.5, 0.5, f"{title}\nnot found", ha="center", va="center",
+                    transform=ax.transAxes, fontsize=9)
+            continue
+
+        roll_sharpe = (rets.rolling(252).mean() / rets.rolling(252).std() * np.sqrt(252))
+
+        for start, end, _ in CRISIS_SHADING:
+            ax.axvspan(start, end, color="grey", alpha=0.12, zorder=0)
+
+        ax.plot(roll_sharpe.index, roll_sharpe.values, color=color, lw=1.2, zorder=3)
+        ax.axhline(1.0, color="black", ls="--", lw=0.8, alpha=0.6, zorder=2)
+        ax.axhline(0.0, color="gray", ls=":", lw=0.6, alpha=0.4, zorder=1)
+
+        ax.set_title(title, fontsize=10, fontweight="bold")
+        ax.set_ylabel("Rolling Sharpe (252d)", fontsize=8)
+        ax.tick_params(axis="x", rotation=30, labelsize=7)
+
+        # Label crisis shading on first panel
+        if idx == 0:
+            ylim = ax.get_ylim()
+            for start, end, lbl in CRISIS_SHADING:
+                mid = start + (end - start) / 2
+                ax.text(mid, ylim[0] + 0.05 * (ylim[1] - ylim[0]), lbl,
+                        fontsize=5.5, ha="center", va="bottom",
+                        color="dimgray", style="italic")
+
+    fig.suptitle("252-Day Rolling Sharpe — 6 Strategies (2003–2026)\n"
+                 "(Dashed = Sharpe 1.0; grey shading = GFC / COVID / Rate Shock)",
+                 fontsize=11, fontweight="bold")
+    fig.tight_layout()
+    fig.savefig(f"{OUT}/rolling_sharpe_small_multiples.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print("  → saved rolling_sharpe_small_multiples.png")
+
+
+print("Figure 10: Asset-class allocation timeline...")
+plot_allocation_timeline()
+print("Figure 11: Rolling Sharpe small multiples...")
+plot_rolling_sharpe_small_multiples()
+
+print("\nAll 11 figures generated successfully.")
 print(f"Output directory: {OUT}")

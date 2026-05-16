@@ -101,10 +101,10 @@ print(f"Saved: {out1}")
 
 # ── FIGURE 2 — Rolling 12-month Sharpe small multiples ──────────────────────────
 returns_all = pd.read_parquet(
-    RETURNS_DIR / "58strategies_29assets_2003_2026.parquet"
+    RETURNS_DIR / "31strategies_29assets_2003_2026.parquet"
 )
 returns_vmp = pd.read_parquet(
-    RETURNS_DIR / "58strategies_vmp_29assets_2003_2026.parquet"
+    RETURNS_DIR / "31strategies_vmp_29assets_2003_2026.parquet"
 )
 rets = pd.concat([returns_all, returns_vmp], axis=1)
 
