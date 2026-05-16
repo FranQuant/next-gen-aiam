@@ -31,7 +31,7 @@ from aiam.harness.horse_race import run_horse_race
 from aiam.strategy.black_litterman import BlackLitterman
 from aiam.strategy.factor_portfolio import FactorPortfolio, MultiFactorPortfolio
 
-PRICES_CACHE = "data/cache/prices_30.parquet"
+PRICES_CACHE = "data/cache/prices_29.parquet"
 START = "2008-01-01"
 END = "2026-04-30"
 

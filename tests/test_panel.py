@@ -3,7 +3,7 @@ import pytest
 
 from aiam.data.panel import Panel
 
-PRICES_PATH = "data/cache/prices_30.parquet"
+PRICES_PATH = "data/cache/prices_29.parquet"
 
 
 @pytest.fixture(scope="module")

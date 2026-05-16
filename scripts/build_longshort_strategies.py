@@ -19,7 +19,7 @@ from aiam.strategy.black_litterman import BlackLitterman
 from aiam.strategy.factor_portfolio import FF3MomLongShort
 from aiam.strategy.tsmom import TSMOM
 
-PRICES_CACHE = "data/cache/prices_30.parquet"
+PRICES_CACHE = "data/cache/prices_29.parquet"
 S28_CACHE = "data/cache/portfolio_returns/28strategies_2008_2026.parquet"
 S31_CACHE = "data/cache/portfolio_returns/31strategies_2008_2026.parquet"
 S31_VMP  = "data/cache/portfolio_returns/31strategies_vmp_2008_2026.parquet"

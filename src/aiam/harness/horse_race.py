@@ -9,7 +9,7 @@ from aiam.evaluation.performance import performance_stats
 from aiam.strategy.base import Strategy
 
 _WEIGHTS_DIR = Path("data/cache/portfolio_weights")
-_PRICES_CACHE = Path("data/cache/prices_30.parquet")
+_PRICES_CACHE = Path("data/cache/prices_29.parquet")
 
 
 def _weights_path(strategy_name: str, suffix: str = "2008_2026") -> Path:

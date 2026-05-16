@@ -18,7 +18,7 @@ from aiam.harness.horse_race import run_horse_race
 from aiam.strategy.max_sharpe_constrained import MaximumSharpeConstrained
 from aiam.strategy.mvo_constrained import MVOConstrained
 
-PRICES_CACHE = "data/cache/prices_30.parquet"
+PRICES_CACHE = "data/cache/prices_29.parquet"
 S24_CACHE = "data/cache/portfolio_returns/24strategies_2008_2026.parquet"
 S28_CACHE = "data/cache/portfolio_returns/28strategies_2008_2026.parquet"
 S28_VMP  = "data/cache/portfolio_returns/28strategies_vmp_2008_2026.parquet"

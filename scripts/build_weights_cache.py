@@ -1,7 +1,7 @@
 """Populate data/cache/portfolio_weights/ for all 24 base strategies.
 
 Skips any strategy whose weight file already exists and is newer than
-data/cache/prices_30.parquet (mtime-check invalidation).
+data/cache/prices_29.parquet (mtime-check invalidation).
 
 Run time: ~10-20 minutes for all 24 strategies on first execution.
 """
@@ -29,7 +29,7 @@ from aiam.strategy.risk_parity import RiskParity
 from aiam.strategy.switching import SwitchingStrategy
 from aiam.strategy.tsmom import TSMOM
 
-PRICES_CACHE = "data/cache/prices_30.parquet"
+PRICES_CACHE = "data/cache/prices_29.parquet"
 REGIME_CACHE = "data/cache/regime_signals.parquet"
 START = "2008-01-01"
 END = "2026-04-30"

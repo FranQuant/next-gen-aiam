@@ -16,7 +16,7 @@ from aiam.strategy.hierarchical_risk_parity import HierarchicalRiskParity
 from aiam.strategy.risk_parity import RiskParity
 from aiam.strategy.switching import SwitchingStrategy
 
-CACHE = "data/cache/prices_30.parquet"
+CACHE = "data/cache/prices_29.parquet"
 REGIME_CACHE = "data/cache/regime_signals.parquet"
 PORTFOLIO_CACHE = "data/cache/portfolio_returns/14strategies_2008_2026.parquet"
 START = "2008-01-01"

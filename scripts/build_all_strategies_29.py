@@ -51,6 +51,14 @@ _mom_strat  = FactorPortfolio(signal_fn=momentum_signal, lookback=756, weighting
 _lv_strat   = FactorPortfolio(signal_fn=low_vol_signal,  lookback=756, weighting="inverse_vol")
 _qual_strat = FactorPortfolio(signal_fn=quality_signal,  lookback=756, weighting="inverse_vol")
 
+# NOTE: SWITCH(sample) and SWITCH(LW) here use the v1-style canonical routing
+# (R0→EW, R5→MSR(cov), default→MDP(cov)). This is the baseline routing in the
+# 62-strategy comparison.
+#
+# SWITCH(v2a) — the regime-conditional strategy that produced Sharpe 1.514 in
+# paper §5.3 — uses a different routing (R0→MSR(LW), R5→MSR(sample),
+# default→MDP(LW)) and is built separately via scripts/build_switch_oos.py and
+# scripts/build_switch_v2a_weights.py.
 _switch_sample_rule = {
     0: EqualWeight(),
     1: MostDiversified(sample_cov), 2: MostDiversified(sample_cov),
