@@ -417,7 +417,7 @@ Long-Short$^{\dag}$ & TSMOM-LS(12m) & 3.67\% & 5.86\% & 0.645 & 62.5 & -16.42\% 
 
 ![Pairwise return correlation matrix for all 62 strategies, hierarchically clustered with Ward linkage (2003–2026). Warm red clusters reveal families of highly correlated strategies (VMP variants cluster tightly with their base strategies); cool blue off-diagonal regions mark strategy pairs that provide genuine diversification.](figures/strategy_correlation_matrix.png)
 
-![Asset-class allocation over time for four representative strategies (EW, MDP(LW), MSR(LW), SWITCH(LW)), 2003–2026. Monthly-resampled weights grouped into six asset classes; grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. MDP(LW) tilts toward fixed income during stress regimes; MSR(LW) concentrates in equities during expansion; SWITCH(LW) reallocates by regime signal.](figures/asset_class_allocation_timeline.png)
+![Asset-class allocation over time for four representative strategies (EW, MDP(LW), MSR(LW), SWITCH(v2a)), 2003–2026. Monthly-resampled weights grouped into six asset classes; grey shading = GFC (2008–09), COVID (2020-02 to 2020-04), and 2022 rate shock. MDP(LW) tilts toward fixed income during stress regimes; MSR(LW) concentrates in equities during expansion; SWITCH(v2a) reallocates by regime signal (R0→MSR(LW), R5→MSR(sample), default→MDP(LW)).](figures/asset_class_allocation_timeline.png)
 
 ## Rankings
 
