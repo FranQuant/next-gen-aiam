@@ -178,6 +178,7 @@ class XGBSignalStrategy(_MLSignalBase):
             n_estimators=self.n_estimators,
             learning_rate=self.learning_rate,
             max_depth=self.max_depth,
+            early_stopping_rounds=20,
             random_state=42,
             n_jobs=-1,
             tree_method="hist",
