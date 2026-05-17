@@ -12,12 +12,12 @@ def panel():
 
 
 def test_construction_and_universe(panel):
-    assert len(panel.universe) == 30
+    assert len(panel.universe) == 29
 
 
 def test_slice_shape_and_asof(panel):
     result = panel.slice(asof="2024-01-15", kind="prices", lookback=60)
-    assert result.shape == (60, 30)
+    assert result.shape == (60, 29)
     assert result.index.max() <= pd.Timestamp("2024-01-15")
 
 

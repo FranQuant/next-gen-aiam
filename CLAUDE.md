@@ -4,14 +4,15 @@
 next-gen-aiam — a comparative model harness for AI-driven asset management. Common data panel (EODHD), uniform `Strategy` interface, side-by-side comparison of classical methods, regime models, ML, DL, and RL on the same 29-asset 2003-2026 universe.
 
 ## Status
-Session 1 closed (May 2026). The static-baselines deliverable is complete:
-- Paper (38 pages, 11 figures) at `docs/results.pdf` — 62 strategies on 29-asset 2003-2026 universe
-- Reproducibility notebooks: `01_paper_reproduction.ipynb` + `02_practitioner_analytics.ipynb`
-- Production pipeline in `scripts/` and `src/aiam/`
-- Published datasets in `data/published/` (three-level reproduction: master table / strategy returns / OHLCV input)
-- Test suite covering 11 components
+Sessions 1 + 1.5B + 2 closed (May 2026). Current state at commit `edf88c9`:
+- Paper (38 pages, 11 figures) at `docs/results.pdf` — 62-strategy comparative harness on 29-asset 2003-2026 universe
+- Notebooks: `01_paper_reproduction.ipynb` + `02_practitioner_analytics.ipynb` + `03_ml_strategies.ipynb`
+- ML scaffolding: `src/aiam/ml/`, `src/aiam/features/asset_class.py`, `src/aiam/strategy/ml_strategies.py`
+- Notebook 03 fully populated: 17 sections, 9+ figures, 28-strategy extended comparison (single-fit + VMP + ensemble + walk-forward)
+- Published datasets in `data/published/` (5 artifacts + README)
+- Test suite: 124 tests, all passing
 
-Next: Session 1.5B (feature engineering for ML strategies).
+Next: Session 3 — DL strategies (MLP, LSTM, Transformer). Sharpe bar to clear: 2.579 from MSR(Ensemble_μ̂).
 
 ## Environment
 
@@ -19,6 +20,8 @@ Next: Session 1.5B (feature engineering for ML strategies).
     source .venv/bin/activate
 
 Python: 3.12 (M4 Mac).
+
+On Apple Silicon (M4 Mac), `brew install libomp` is required before `pip install xgboost` due to OpenMP linkage.
 
     pip install -r requirements.txt
     pip install -e ".[dev]"
@@ -159,9 +162,9 @@ Every Claude Code prompt should include:
 
 **Session 1.5B (done) — feature engineering.** `src/aiam/features/technical.py` (SignalEngine + 9 functions), `src/aiam/evaluation/ic.py` (IC + ic_summary), `src/aiam/strategy/signal_tilt.py` (SignalTilt + momentum_signal_fn). 44 tests, all passing. Validated on 29-asset live data (commit `803fc00`). See Validation Findings below.
 
-**Session 2 — ML strategies.** Lasso, Random Forest, XGBoost expected-return estimation. `TimeSeriesSplit` cross-validation, no-look-ahead. New notebook `notebooks/03_ml_strategies.ipynb`. ETA: 6-10h.
+**Session 2 (done) — ML strategies.** Lasso, RF, XGBoost expected-return estimation in single-fit and walk-forward regimes. Sub-passes: 2a (scaffolding: `src/aiam/ml/`, `src/aiam/strategy/ml_strategies.py`), 2b (notebook 03, Approaches A + B), 2c-A (VMP overlay + ensemble), 2c-B (walk-forward refit, default vs val-optimal HPs), 2c-C (HP sensitivity diagnostic), 2c-D (visualization polish). Final commit `edf88c9`. Headline: MSR(Ensemble_μ̂) Sharpe 2.579, beating all classical baselines OOS.
 
-**Session 3 — DL strategies.** MLP, LSTM, Transformer sequence models. `notebooks/04_dl_strategies.ipynb`.
+**Session 3 — DL strategies.** MLP, LSTM, Transformer sequence models. `notebooks/04_dl_strategies.ipynb`. Sharpe bar to beat: 2.579 (MSR(Ensemble_μ̂) from Session 2). Natural DL angle: capture temporal patterns and cross-asset attention that tree-based models miss.
 
 **Session 4 — RL strategies.** PPO, SAC agents via `SequentialStrategy.step()`. `notebooks/05_rl_strategies.ipynb`.
 
@@ -187,3 +190,24 @@ All three resolved in commit `803fc00` (Session 1.5B).
 - Momentum and volatility are structurally correlated on this universe and window. Treat as collinear features in Lasso; check feature-importance interpretation carefully.
 
 Full validation report: [`docs/validation/session_1.5b_feature_library.md`](docs/validation/session_1.5b_feature_library.md).
+
+---
+
+**Session 2 ML strategies — final synthesis (29-asset 2003-2026 universe, test period 2023–2026):**
+
+1. **MSR(ML μ̂) is the value extractor.** Approach A (MSR with ML-predicted μ̂) outperforms Approach B (SignalTilt wrapping) for Lasso and RF. Best single-fit results: MSR(RF_μ̂) 2.394, MSR(Lasso_μ̂) 2.272. Exception: XGB where SignalTilt(XGB) 2.304 edges MSR(XGB_μ̂) 2.180, explained by the optimizer amplifying XGB's noisy predictions. MSR wrapping works best when predictions are well-calibrated.
+
+2. **Ensemble is the headline result.** MSR(Ensemble_μ̂) Sharpe **2.579** tops the 28-strategy extended comparison, beating the next-best classical strategy VMP(MDP(LW)) at 2.422 and all single-model ML entries. Equal-weighted average of Lasso + RF + XGB predictions fed into MSR; no retraining required. Ensemble reduces idiosyncratic model noise and stabilizes the optimizer inputs.
+
+3. **VMP overlay does not help ML strategies.** VMP-wrapped ML variants consistently rank below their un-wrapped counterparts: VMP(SignalTilt(XGB)) 2.292 < SignalTilt(XGB) 2.304; VMP(MSR(RF_μ̂)) 2.177 < MSR(RF_μ̂) 2.394. VMP helps classical strategies (whose returns are noisier) but ML strategies already apply a form of signal normalization; the additional vol-scaling layer adds friction without signal.
+
+4. **HP sensitivity: sharp val/OOS disagreement for XGB.** XGB default (depth=6) shows catastrophic validation overfitting — `best_iteration=0`, val_IC = 0.013 — yet ranks near the top OOS at Sharpe 2.304. The 2019–2022 validation window (COVID + rate-hike cycle) is poorly representative of 2023–2026 (post-shock environment). Generalizes across models: val_IC ranking (Lasso > RF > XGB) disagrees with OOS Sharpe ranking (XGB > RF > Lasso for SignalTilt). HP validation must be treated skeptically on this regime-shifted universe.
+
+5. **Walk-forward refit underperforms single-fit.** All 9 walk-forward strategies (annual refit, trailing 10-year window, default and val-optimal HPs) rank below their single-fit counterparts. Best WF: SignalTilt(WF-lasso-default) 2.033 vs single-fit SignalTilt(Lasso) 2.140. Single-fit models trained through 2020 encode the COVID + early rate-shock regime in their feature weighting; the test period (2023–2026) remains a post-shock environment where that memory is an asset. Rolling refits that drop 2003–2010 lose regime diversity. Default HPs beat val-optimal for Lasso in WF (validation bias confirmed) but not for RF or XGB.
+
+**Implications for Session 3 DL:**
+- Use single-fit methodology for the first DL pass. Walk-forward underperformed here; don't repeat without specific motivation.
+- Test both MSR(DL μ̂) and SignalTilt(DL) wrappers — the winner is model-dependent.
+- Skip VMP-wrapping for DL unless a specific reason emerges.
+- Plan to ensemble DL models (MLP + LSTM + Transformer) as the headline DL strategy.
+- Sharpe bar: 2.579. DL angle: sequence dependencies and cross-asset attention that tree-based models miss.
