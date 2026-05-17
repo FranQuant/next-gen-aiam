@@ -51,40 +51,41 @@ Momentum (252-day) and volatility features dominate. Asset-class dummies carry m
 
 **Session 2c (optional rolling refit):** A walk-forward refit (e.g., annual refit on expanding window) would turn the single-fit experiment into a production-grade backtesting framework and likely close the gap vs. classical baselines.
 
-## Hyperparameter Sensitivity (Session 2c-C)
+## Walk-Forward Refit (Session 2c-B)
 
-Validation-set grid search (val window: ~2019-10 → 2022-12-30) confirms whether the JPM/Hilpisch defaults are near-optimal on this 29-asset universe.
+Annual refit on rolling 10-year window, 4 refit dates (2023-01-02, 2024-01-02, 2025-01-02, 2026-01-02). Two HP regimes compared:
 
-### Lasso grid (4 α values)
-```
-  alpha  val_IC  n_nonzero
-0.00001 0.11189         16
-0.00010 0.11218         15
-0.00100 0.13142          4
-0.01000     NaN          0
-```
+- **WF-default** uses Hilpisch/JPM defaults from §4–§6 (Lasso α=1e-4; RF 100 trees, depth=8; XGB 300 rounds, depth=6)
+- **WF-val-optimal** uses validation-tuned HPs from §16 (Lasso α=1e-3; RF 50 trees, depth=6; XGB 200 rounds, depth=4)
 
-### Random Forest grid (3 configs)
-```
- n_estimators  max_depth  val_IC
-           50          6 0.05616
-          100          8 0.03781
-          200         10 0.03277
-```
+### Walk-Forward vs Single-Fit Sharpe Comparison
 
-### XGBoost grid (4 configs)
-```
- n_est   lr  depth  best_iter  val_IC
-   200 0.05      4         21 0.08602
-   300 0.05      6          0 0.01259
-   500 0.03      6          0 0.01259
-   300 0.10      4         10 0.07779
-```
+| Model | Single-fit | WF-default | WF-val-optimal |
+|---|---|---|---|
+| Lasso | 2.140 | **2.033** | 2.006 |
+| RF    | 2.252 | 1.617 | **1.751** |
+| XGB   | 2.304 | 1.777 | **1.860** |
 
-**Verdict:** Defaults are NOT near-optimal on the validation window.
+### Walk-Forward Strategy Results (test period 2023–2026)
 
-- **Lasso**: α=1e-3 beats the default α=1e-4 by +0.019 val_IC (+17%); default is slightly under-regularized.
-- **RF**: Shallower/smaller (50 trees, depth=6) beats default (100, depth=8) by +0.018 (+48%). The JPM large-universe depth=8 overfits on the 29-asset dataset.
-- **XGBoost**: Default depth=6 shows `best_iter=0` (catastrophic early-stop overfitting on val). depth=4 achieves val_IC 0.086 vs 0.013 (+0.073, +583%). Despite this, the depth=6 model ranked #3 OOS (Sharpe 2.304) — val/OOS regime shift is the key tension.
+| Strategy | Ann Ret | Ann Vol | Sharpe | Max DD |
+|---|---|---|---|---|
+| SignalTilt(WF-lasso-default)    | 0.552 | 0.229 | 2.033 | -0.231 |
+| SignalTilt(WF-lasso-val-opt)    | 0.566 | 0.238 | 2.006 | -0.229 |
+| MSR(WF-lasso-default_μ̂)        | 0.246 | 0.114 | 1.987 | -0.141 |
+| MSR(WF-xgb-default_μ̂)          | 0.238 | 0.111 | 1.984 | -0.097 |
+| SignalTilt(WF-xgb-val-opt)      | 0.454 | 0.214 | 1.860 | -0.264 |
+| MSR(WF-rf-default_μ̂)           | 0.248 | 0.120 | 1.913 | -0.104 |
+| SignalTilt(WF-xgb-default)      | 0.370 | 0.187 | 1.777 | -0.169 |
+| SignalTilt(WF-rf-val-opt)       | 0.470 | 0.236 | 1.751 | -0.250 |
+| SignalTilt(WF-rf-default)       | 0.394 | 0.221 | 1.617 | -0.229 |
 
-**Decision**: OOS comparison (19-strategy table) unchanged. Session 2c-B walk-forward should use: α=1e-3 (Lasso), (50, depth=6) RF, (200, lr=0.05, depth=4) XGB.
+### Findings
+
+**Walk-forward did not beat single-fit.** All 9 WF strategies ranked below their single-fit counterparts. Single-fit models trained on 2003–2020 (including COVID stress + the early rate-hike regime) appear to encode regime-appropriate feature weighting better than WF models trained on the trailing 10 years only. The 3.3-year prediction gap did not cause detectable model decay on this test period.
+
+**Validation-bias test result: mixed.** For Lasso, default HPs beat val-optimal in walk-forward (2.033 vs 2.006) — consistent with the hypothesis that §16 HP selection over-optimised on the COVID/rate-shock validation window. For RF and XGB, val-optimal HPs won (+0.134 and +0.083 Sharpe) — the §16 tuning generalised in the walk-forward setting for tree-based models. Validation bias is model-specific.
+
+**MSR(WF-*) vs MSR(single-fit).** Walk-forward refit degraded MSR performance more than SignalTilt, consistent with MSR amplifying the higher estimation noise in smaller WF training windows (Michaud 1989).
+
+**Regime interpretation.** The superior performance of single-fit models suggests the 2020–2022 stress period is predictive of 2023–2026 cross-sectional structure — the test period is still a post-rate-shock environment where the single-fit model's memory of that regime is an asset, not a liability.
