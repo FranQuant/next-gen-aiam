@@ -160,3 +160,26 @@ def test_ensemble_predict_weights_sums_to_one(ensemble_strat):
 def test_ensemble_empty_strategies_raises():
     with pytest.raises(ValueError, match="non-empty"):
         EnsembleDLSignalStrategy([])
+
+
+def test_ensemble_weighted_single_model(mlp_strat, lstm_strat):
+    """weights=[1, 0] gives predictions equal to the first strategy at common indices."""
+    ens = EnsembleDLSignalStrategy([mlp_strat, lstm_strat], weights=[1.0, 0.0])
+    common = mlp_strat.predictions.index.intersection(lstm_strat.predictions.index)
+    pd.testing.assert_series_equal(
+        ens.predictions.loc[common].sort_index(),
+        mlp_strat.predictions.loc[common].sort_index().rename("pred"),
+        rtol=1e-5,
+    )
+
+
+def test_ensemble_equal_weights_is_default(mlp_strat, lstm_strat):
+    """No weights → stored weights are all 1/n."""
+    ens = EnsembleDLSignalStrategy([mlp_strat, lstm_strat])
+    assert all(abs(w - 0.5) < 1e-9 for w in ens.weights)
+
+
+def test_ensemble_weights_bad_sum_raises(mlp_strat, lstm_strat):
+    """Weights not summing to 1.0 raise ValueError."""
+    with pytest.raises(ValueError, match="sum to 1.0"):
+        EnsembleDLSignalStrategy([mlp_strat, lstm_strat], weights=[0.6, 0.6])

@@ -299,7 +299,7 @@ class TransformerSignalStrategy(_DLSignalBase):
 
 
 class EnsembleDLSignalStrategy(PointInTimeStrategy):
-    """Equal-weighted average of multiple DL signal strategies fed into a signal-tilt wrapper.
+    """Weighted average of multiple DL signal strategies fed into a signal-tilt wrapper.
 
     Decision 6 (option a): library class rather than notebook-level construction.
     Session 3c recommendation: consolidate with ML ensemble into a shared aiam.strategy.ensemble module.
@@ -309,15 +309,29 @@ class EnsembleDLSignalStrategy(PointInTimeStrategy):
         self,
         strategies: list[_DLSignalBase],
         tilt_strength: float = 0.5,
+        weights: list[float] | None = None,
     ) -> None:
         if not strategies:
             raise ValueError("strategies must be non-empty")
+        n = len(strategies)
+        if weights is None:
+            self.weights = [1.0 / n] * n
+        else:
+            if len(weights) != n:
+                raise ValueError(f"weights length {len(weights)} != strategies length {n}")
+            if abs(sum(weights) - 1.0) > 1e-6:
+                raise ValueError(f"weights must sum to 1.0, got {sum(weights):.6f}")
+            self.weights = list(weights)
         self.strategies = strategies
         self.tilt_strength = tilt_strength
 
         all_preds = [s.predictions for s in strategies]
         stacked = pd.concat(all_preds, axis=1, join="inner")
-        self.predictions = stacked.mean(axis=1).rename("pred")
+        self.predictions = pd.Series(
+            np.average(stacked.values, axis=1, weights=self.weights).astype("float32"),
+            index=stacked.index,
+            name="pred",
+        )
         self.predictions.index.names = ["Date", "Asset"]
 
     def _predict_weights(self, panel: Panel, asof: pd.Timestamp) -> pd.Series:

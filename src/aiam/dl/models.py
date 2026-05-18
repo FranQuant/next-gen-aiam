@@ -74,7 +74,7 @@ class TransformerRegressor(nn.Module):
         nhead: int = 4,
         num_layers: int = 2,
         dropout: float = 0.10,
-        max_lookback: int = 512,
+        max_lookback: int = 64,
     ) -> None:
         super().__init__()
         if d_model % nhead != 0:

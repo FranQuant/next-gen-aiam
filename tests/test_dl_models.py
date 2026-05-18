@@ -47,14 +47,14 @@ def test_transformer_has_pos_embed():
     model = TransformerRegressor(n_features=N_FEAT, d_model=8, nhead=2, num_layers=1)
     assert hasattr(model, "pos_embed")
     assert isinstance(model.pos_embed, torch.nn.Parameter)
-    assert model.pos_embed.shape == (1, 512, 8)
+    assert model.pos_embed.shape == (1, 64, 8)
 
 
 def test_transformer_param_count():
     model = TransformerRegressor(n_features=17, d_model=32, nhead=4, num_layers=2)
     n_params = sum(p.numel() for p in model.parameters())
-    # pos_embed adds 512 * 32 = 16_384 to the previous 26_017 → 42_401
-    assert n_params == 42401
+    # pos_embed adds 64 * 32 = 2_048 to the previous 26_017 → 28_065
+    assert n_params == 28_065
 
 
 def test_mlp_param_count():
