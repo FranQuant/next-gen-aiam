@@ -26,6 +26,9 @@ pandas_market_calendars>=4.3
 # ML
 xgboost>=2.0
 
+# DL
+torch>=2.0
+
 # dev tools
 pytest>=8.0
 nbstripout>=0.7
