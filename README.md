@@ -23,6 +23,12 @@ See [`data/published/README.md`](data/published/README.md) for full instructions
 - Installable package: `aiam` (`src/aiam/`)
 - Data source: EODHD
 
+## Notebooks
+
+| Notebook | Description | Open |
+|---|---|---|
+| `notebooks/04b_dl_strategies_cuda.ipynb` | Session 3c-full: DL strategies (MLP/LSTM/Transformer) on CUDA, 10 seeds | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/FranQuant/next-gen-aiam/blob/main/notebooks/04b_dl_strategies_cuda.ipynb) |
+
 ## Planned layout
 
     src/aiam/         # library — strategies, data, evaluation, harness

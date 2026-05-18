@@ -164,9 +164,23 @@ Every Claude Code prompt should include:
 
 **Session 2 (done) — ML strategies.** Lasso, RF, XGBoost expected-return estimation in single-fit and walk-forward regimes. Sub-passes: 2a (scaffolding: `src/aiam/ml/`, `src/aiam/strategy/ml_strategies.py`), 2b (notebook 03, Approaches A + B), 2c-A (VMP overlay + ensemble), 2c-B (walk-forward refit, default vs val-optimal HPs), 2c-C (HP sensitivity diagnostic), 2c-D (visualization polish). Final commit `edf88c9`. Headline: MSR(Ensemble_μ̂) Sharpe 2.579, beating all classical baselines OOS.
 
-**Session 3 — DL strategies.** MLP, LSTM, Transformer sequence models. `notebooks/04_dl_strategies.ipynb`. Sharpe bar to beat: 2.579 (MSR(Ensemble_μ̂) from Session 2). Natural DL angle: capture temporal patterns and cross-asset attention that tree-based models miss.
+**Session 3 (done) — DL strategies.** MLP, LSTM, Transformer sequence models. Status: complete. Best DL Sharpe 2.320 (`MSR(MLP_μ̂)`), rank 4/38. ML ensemble bar 2.579 not cleared (gap −0.259).
 
-Session 3a scaffolding complete (commit `4077968`): `src/aiam/dl/` (workflow.py, models.py), `src/aiam/strategy/dl_strategies.py`, 35 tests (161 total). Architecture: MLPRegressor 1,121 params; LSTMRegressor 4,153 params; TransformerRegressor 42,401 params (includes learnable pos_embed of shape (1, 512, d_model), std=0.02 init). Multi-seed ensemble (default 5 seeds) baked into all strategy classes. EnsembleDLSignalStrategy at library level. OMP_NUM_THREADS=1 in conftest.py required for PyTorch + XGBoost coexistence on Apple Silicon.
+Sub-sessions:
+- 3a — DL scaffolding (commit `4077968`): `src/aiam/dl/` (workflow.py, models.py), `src/aiam/strategy/dl_strategies.py`, 35 tests. Architecture: MLP 1,121 params; LSTM 4,153 params; Transformer 42,401 params. Multi-seed ensemble (default 5 seeds). EnsembleDLSignalStrategy at library level.
+- 3a-fix — Learnable positional embeddings (commit `43bb2a6`): `TransformerRegressor.pos_embed` shape (1, 512, d_model) → (1, 64, d_model) in 3c-lite.
+- 3b — DL experiment on M4, 5 seeds (commit `b2df2b9`): `notebooks/04_dl_strategies.ipynb`. Transformer truncated to 15 epochs.
+- 3c-lite — M4 iterations (commit `77c4576`): pos_embed=64, weighted ensemble, MLP 10 seeds, 166 tests total.
+- 3c-full — CUDA proper (commits `18f92b0` + `be7e6fb`): `notebooks/04b_dl_strategies_cuda.ipynb`, 10 seeds all architectures, Transformer 80 epochs. Compute: NVIDIA RTX PRO 6000 Blackwell, total 10:23. Results in `results/cuda/`.
+- Phase 5 — Session 3 closeout: `docs/handoff/session_3_findings.md`, verdict fix in 04b, Colab badge.
+
+Key numbers (test period 2023–2026, 38-strategy combined comparison):
+- Best DL: `MSR(MLP_μ̂)` 2.320 (gap to ML bar: −0.259)
+- DL stability (10 seeds): MLP 2.204 ± 0.148; LSTM 1.996 ± 0.184; Transformer 2.136 ± 0.154
+- MSR-vs-SignalTilt asymmetry replicated 3× (Sessions 3b, 3c-lite, 3c-full)
+- Weighted ensemble (IC-derived weights) adds ≤0.008 Sharpe vs equal-weighted — within noise
+
+Session 3d (cross-asset Transformer) documented as optional future work in `docs/handoff/session_3_findings.md`.
 
 **Session 4 — RL strategies.** PPO, SAC agents via `SequentialStrategy.step()`. `notebooks/05_rl_strategies.ipynb`.
 
