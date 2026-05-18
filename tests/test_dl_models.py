@@ -43,6 +43,20 @@ def test_transformer_nhead_mismatch_raises():
         TransformerRegressor(n_features=N_FEAT, d_model=7, nhead=4)
 
 
+def test_transformer_has_pos_embed():
+    model = TransformerRegressor(n_features=N_FEAT, d_model=8, nhead=2, num_layers=1)
+    assert hasattr(model, "pos_embed")
+    assert isinstance(model.pos_embed, torch.nn.Parameter)
+    assert model.pos_embed.shape == (1, 512, 8)
+
+
+def test_transformer_param_count():
+    model = TransformerRegressor(n_features=17, d_model=32, nhead=4, num_layers=2)
+    n_params = sum(p.numel() for p in model.parameters())
+    # pos_embed adds 512 * 32 = 16_384 to the previous 26_017 → 42_401
+    assert n_params == 42401
+
+
 def test_mlp_param_count():
     model = MLPRegressor(n_features=4, hidden_dims=(4,), dropout=0.0)
     n_params = sum(p.numel() for p in model.parameters())

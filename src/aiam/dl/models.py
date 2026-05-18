@@ -61,9 +61,10 @@ class _TransformerBlock(nn.Module):
 class TransformerRegressor(nn.Module):
     """Per-asset Transformer encoder: (batch, lookback, n_features) → (batch,).
 
-    Projects n_features → d_model, runs num_layers of self-attention, takes last position.
-    NOT cross-asset: each asset's sequence is processed independently.
-    Uses manual MHA+FFN blocks instead of nn.TransformerEncoder (avoids Apple Silicon segfault).
+    Projects n_features → d_model, adds learnable positional embeddings, runs num_layers of
+    self-attention, takes last position. NOT cross-asset: each asset's sequence is processed
+    independently. Uses manual MHA+FFN blocks instead of nn.TransformerEncoder (avoids Apple
+    Silicon segfault).
     """
 
     def __init__(
@@ -73,17 +74,20 @@ class TransformerRegressor(nn.Module):
         nhead: int = 4,
         num_layers: int = 2,
         dropout: float = 0.10,
+        max_lookback: int = 512,
     ) -> None:
         super().__init__()
         if d_model % nhead != 0:
             raise ValueError(f"d_model={d_model} must be divisible by nhead={nhead}")
         self.input_proj = nn.Linear(n_features, d_model)
+        self.pos_embed = nn.Parameter(torch.empty(1, max_lookback, d_model))
+        nn.init.normal_(self.pos_embed, std=0.02)
         self.blocks = nn.ModuleList([_TransformerBlock(d_model, nhead, dropout) for _ in range(num_layers)])
         self.drop = nn.Dropout(dropout)
         self.head = nn.Linear(d_model, 1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        z = self.input_proj(x)
+        z = self.input_proj(x) + self.pos_embed[:, : x.size(1), :]
         for block in self.blocks:
             z = block(z)
         return self.head(self.drop(z[:, -1, :])).squeeze(-1)

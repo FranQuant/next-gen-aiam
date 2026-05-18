@@ -166,6 +166,8 @@ Every Claude Code prompt should include:
 
 **Session 3 — DL strategies.** MLP, LSTM, Transformer sequence models. `notebooks/04_dl_strategies.ipynb`. Sharpe bar to beat: 2.579 (MSR(Ensemble_μ̂) from Session 2). Natural DL angle: capture temporal patterns and cross-asset attention that tree-based models miss.
 
+Session 3a scaffolding complete (commit `4077968`): `src/aiam/dl/` (workflow.py, models.py), `src/aiam/strategy/dl_strategies.py`, 35 tests (161 total). Architecture: MLPRegressor 1,121 params; LSTMRegressor 4,153 params; TransformerRegressor 42,401 params (includes learnable pos_embed of shape (1, 512, d_model), std=0.02 init). Multi-seed ensemble (default 5 seeds) baked into all strategy classes. EnsembleDLSignalStrategy at library level. OMP_NUM_THREADS=1 in conftest.py required for PyTorch + XGBoost coexistence on Apple Silicon.
+
 **Session 4 — RL strategies.** PPO, SAC agents via `SequentialStrategy.step()`. `notebooks/05_rl_strategies.ipynb`.
 
 ## Known issues (defer to Session 1.5B)
