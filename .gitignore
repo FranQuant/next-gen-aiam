@@ -75,3 +75,27 @@ data/cache/
 
 # Raw data exports (portability CSVs, potentially large)
 data/raw/
+
+# Claude Code working directory
+.claude/
+
+# Local-only reference notebooks (Hilpisch chapter prototypes, not for public consumption)
+docs/handoff/15_deep_learning_cross_sectional_panel_data.ipynb
+docs/handoff/16_sequence_models_temporal_deep_learning.ipynb
+
+# Internal working artifacts — kept local, not for public repo
+CLAUDE.md
+docs/handoff/session_2_to_3.md
+docs/validation/
+docs/architecture.md
+docs/refs.bib
+
+# Archived/superseded notebooks — local-only
+notebooks/_archived_*.ipynb
+
+# Jupyter auto-save junk
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Ad-hoc one-off scripts — local-only
+scripts/_add_*.py
