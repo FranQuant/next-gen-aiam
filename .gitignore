@@ -99,3 +99,7 @@ notebooks/_archived_*.ipynb
 
 # Ad-hoc one-off scripts — local-only
 scripts/_add_*.py
+
+# Local-only reference notebooks (proof-of-concept HTMLs)
+notebooks/_local_*.html
+notebooks/_local_*.ipynb
