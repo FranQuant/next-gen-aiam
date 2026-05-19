@@ -72,6 +72,8 @@ docs/results.toc
 
 # Data cache — locally fetched EODHD parquet (handled in dataset publication pass)
 data/cache/
+# Intraday cache (regenerated from EODHD; published CSV is the reproducible artifact)
+data/cache/intraday_*.parquet
 
 # Raw data exports (portability CSVs, potentially large)
 data/raw/
