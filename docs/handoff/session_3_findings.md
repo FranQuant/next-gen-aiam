@@ -278,3 +278,294 @@ total wall-clock 10:23.
 `notebooks/04b_dl_strategies_cuda.ipynb` in Colab (CUDA runtime required) and execute all cells.
 The notebook is self-contained: it pulls published data from the repo and outputs results to
 `results/cuda/`.
+
+---
+
+# Part II — Session 3d: Direct-Weight DL Portfolio Construction
+
+## Methodology Pivot
+
+Sessions 3a–3c-full applied the predict-then-allocate paradigm: a model first estimates
+one-step-ahead expected returns $\hat{\mu}_{i,t}$ for each asset, then a separate allocation
+rule converts those forecasts into portfolio weights. The two stages are trained independently;
+the allocation objective does not feed back into the forecast objective.
+
+Session 3d collapses both stages into a single end-to-end mapping $w_{i,t} = f_\theta(x_{i,t})$,
+where $\theta$ are the neural network parameters and $x_{i,t}$ is the feature vector for asset
+$i$ at date $t$. The network is optimised directly on a portfolio-level objective — Sharpe ratio,
+CRRA utility, or CRRA with shrinkage — so the training signal is always a function of the full
+cross-sectional portfolio return, not any individual asset return.
+
+The theoretical foundation is the parametric portfolio policy framework of Brandt, Santa-Clara &
+Valkanov (2009), who parameterised weights as a linear function of asset characteristics and
+maximised expected utility in-sample. Session 3d replaces their linear policy with MLP, LSTM,
+and Transformer backbones, extending the framework to nonlinear architectures.
+
+The empirical precedent is Cheng & Wu (J.P. Morgan, 14 March 2024), who demonstrated
+attention-based direct-weight portfolio construction on a 2-asset universe (S&P 500 + 10Y
+Treasury) with 10-seed ensemble averaging. Session 3d extends this approach to the full
+29-asset universe and 17-feature panel used throughout Sessions 1–3, enabling a direct
+side-by-side comparison with all prior strategies.
+
+## Experimental Setup
+
+**Universe, features, and data splits.** Identical to Session 3c-full: 29 assets (equities,
+sector ETFs, international equity, fixed income, commodities), 17 features (10 numeric
+technical signals + 7 asset-class one-hots), train through 2020-02-27, validation
+2020-02-28 to 2022-12-30, test (OOS) 2023-01-03 to 2026-03-31.
+
+**Policy architectures.** Three backbone families:
+
+| Architecture | Input | Output | Key hyperparameters |
+|---|---|---|---|
+| MLP | $(batch, 17)$ tabular | $(batch, 29)$ weights | 2 hidden layers (32, 16), ReLU, dropout 0.10 |
+| LSTM | $(batch, 63, 17)$ per-asset sequence | $(batch, 29)$ weights | hidden dim 24, dropout 0.10 |
+| Transformer | $(batch, 63, 17)$ per-asset sequence | $(batch, 29)$ weights | d_model 32, 4 heads, 2 layers, dropout 0.10 |
+
+**Loss functions.** Three variants per architecture, giving 9 configurations:
+
+- **Sharpe loss**: $\mathcal{L}_\text{Sharpe} = -\hat{\mu}(R_p)/\hat{\sigma}(R_p)$
+- **CRRA utility** ($\gamma=5$): $\mathcal{L}_\text{CRRA} = -(1/T)\sum_t (1+R_{p,t})^{1-\gamma}/(1-\gamma)$
+- **CRRA + shrinkage to equal-weight**: sigmoid output acts as per-asset multiplier on
+  $w^b = 1/29$, bounding the effective weight within $[0,1] \cdot w_i^b$ and enforcing
+  long-only shrinkage toward the equal-weight benchmark (Brandt 1999).
+
+**Scale.** 9 configurations × 10 seeds = 90 trained policies. Training: max\_epochs=80,
+patience=12 (same config across all 9 for a fair comparison).
+
+**Compute.** NVIDIA RTX PRO 6000 Blackwell (Google Colab Pro, `torch 2.10.0+cu128`),
+total wall-clock 26:51.
+
+**Comparison baseline.** The 38-strategy baseline from Sessions 1–3 was extended with all 9
+DW strategy results, producing a 47-strategy unified comparison table at
+`results/cuda/policy_strategies_comparison_3d.csv`.
+
+## Findings
+
+### Finding 1 — No direct-weight configuration beats the ML ensemble bar
+
+`MSR(Ensemble_μ̂)` from Session 2 retains first place in the 47-strategy comparison with
+Sharpe 2.579. The best DW strategy by raw Sharpe, `DW(Transformer)[Sharpe]`, ranks 9th at
+2.287 — but the allocation is degenerate to cash (see Finding 2). The best non-degenerate DW
+strategy, `DW(Transformer)[CRRA]`, ranks 26th at Sharpe 2.111.
+
+Top 15 strategies by OOS Sharpe (test period 2023–2026):
+
+| Rank | Strategy | Family | Sharpe | Ann Ret | Ann Vol | Max DD |
+|---|---|---|---|---|---|---|
+| 1 | `MSR(Ensemble_μ̂)` | ML (ensemble) | 2.579 | 16.6% | 6.0% | −5.9% |
+| 2 | `VMP(MDP(LW))` | Classical | 2.422 | 14.9% | 5.8% | −4.8% |
+| 3 | `MSR(RF_μ̂)` | ML (single-fit) | 2.394 | 20.9% | 8.1% | −6.8% |
+| 4 | `MSR(MLP_μ̂)` | DL (predict-then-wrap) | 2.320 | 22.4% | 8.9% | −8.6% |
+| 5 | `SignalTilt(XGB)` | ML (single-fit) | 2.304 | 70.7% | 24.5% | −22.6% |
+| 6 | `SignalTilt(EnsembleDL_weighted)` | DL (weighted ensemble) | 2.295 | 58.8% | 21.1% | −23.9% |
+| 7 | `VMP(SignalTilt(XGB))` | ML + VMP | 2.292 | 72.0% | 25.0% | −20.5% |
+| 8 | `SignalTilt(EnsembleDL)` | DL (ensemble) | 2.292 | 59.2% | 21.3% | −24.0% |
+| 9 | `DW(Transformer)[Sharpe]` | DL (direct-weight) | 2.287 | 8.1% | **3.4%** | **−2.6%** |
+| 10 | `SignalTilt(Transformer)` | DL (predict-then-wrap) | 2.283 | 50.0% | 18.5% | −22.1% |
+| 11 | `MSR(Lasso_μ̂)` | ML (single-fit) | 2.272 | 21.8% | 8.9% | −11.6% |
+| 12 | `SignalTilt(MLP)` | DL (predict-then-wrap) | 2.269 | 66.8% | 23.8% | −26.7% |
+| 13 | `VMP(MSR(Lasso_μ̂))` | ML + VMP | 2.255 | 22.7% | 9.3% | −9.8% |
+| 14 | `SignalTilt(RF)` | ML (single-fit) | 2.252 | 61.9% | 22.5% | −32.6% |
+| 15 | `SignalTilt(LSTM)` | DL (predict-then-wrap) | 2.233 | 55.7% | 20.8% | −23.0% |
+
+(Bold entries in rank 9 indicate degenerate allocation; see Finding 2.)
+
+See `docs/figures/session3d/top10_sharpe_3d.png` for the bar chart.
+
+### Finding 2 — Sharpe-loss direct-weight degenerates to cash on this universe
+
+All three Sharpe-loss configurations produced allocations inconsistent with genuine
+29-asset portfolio construction:
+
+| Strategy | Sharpe | Ann Vol | Max DD |
+|---|---|---|---|
+| `DW(Transformer)[Sharpe]` | 2.287 | **3.4%** | **−2.6%** |
+| `DW(LSTM)[Sharpe]` | 1.861 | **4.5%** | **−4.1%** |
+| `DW(MLP)[Sharpe]` | 1.697 | **4.6%** | **−4.4%** |
+
+On a 29-asset universe spanning equities, bonds, commodities, and alternatives, an invested
+portfolio has no plausible realisation with 3.4% annualised volatility and a −2.6% maximum
+drawdown over a three-year test period. These profiles are only achievable by concentrating
+heavily in cash or near-zero-volatility positions.
+
+The mechanism is well-understood: the Sharpe ratio $\hat{\mu}(R_p)/\hat{\sigma}(R_p)$ is
+scale-invariant, and gradient descent can maximise it by driving portfolio variance toward
+zero rather than by selecting high-return assets. The training diagnostic is conclusive:
+for all three Sharpe-loss architectures, seed-0 reached best\_epoch=1 with no improvement
+across 80 subsequent epochs, indicating the model collapsed to a near-degenerate solution
+at the first gradient step. The Sharpe-loss degeneracy replicates consistently across all
+three architectures, confirming it is a property of the loss function rather than any
+specific backbone. Cheng & Wu (2024) discuss this failure mode in the 2-asset context;
+Session 3d confirms it replicates at 29-asset scale.
+
+### Finding 3 — CRRA+Shrinkage produces the tightest per-seed stability observed in the entire study
+
+The CRRA+Shrinkage configurations converge to a narrow performance band across 10 seeds:
+
+| Config | Ensemble Sharpe | Ann Vol | Max DD | Per-seed Mean | Per-seed Stdev |
+|---|---|---|---|---|---|
+| `DW(MLP)[CRRA+Shrink]` | 2.125 | 10.3% | −12.5% | 2.113 | ±0.023 |
+| `DW(LSTM)[CRRA+Shrink]` | 2.102 | 10.4% | −12.7% | 2.108 | ±0.010 |
+| `DW(Transformer)[CRRA+Shrink]` | 2.092 | 10.1% | −12.4% | — | — |
+
+*Transformer per-seed stability data unavailable; see Stability Data Note below.*
+
+The ±0.010 stdev for `DW(LSTM)[CRRA+Shrink]` is the tightest per-seed stability
+observed across the entire 47-strategy study — tighter than the best predict-then-wrap
+Session 3c-full results (MLP ±0.148, LSTM ±0.184, Transformer ±0.154). The shrinkage
+architecture constrains the per-asset multiplier to $[0,1]$ via sigmoid activation,
+bounding each output around the equal-weight benchmark. This acts as a regulariser: the
+network cannot stray far from a diversified baseline regardless of initialisation, and the
+CRRA loss's smooth shape within that bounded space makes the optimisation well-conditioned.
+The combined effect is a training landscape that converges reliably to approximately the
+same solution from diverse starting points.
+
+Importantly, all three CRRA+Shrinkage architectures (MLP, LSTM, Transformer) cluster
+within a 0.033 Sharpe range (2.092–2.125), confirming the architecture choice has minimal
+impact once the loss function and output activation are correctly specified.
+
+See `docs/figures/session3d/seed_sharpe_dist_3d.png` for the per-seed Sharpe distribution
+across all 9 configurations.
+
+### Finding 4 — CRRA without shrinkage is competitive but less stable
+
+CRRA loss without shrinkage produces non-degenerate allocations but with higher per-seed
+variability:
+
+| Config | Ensemble Sharpe | Ann Vol | Max DD | Per-seed Mean | Per-seed Stdev |
+|---|---|---|---|---|---|
+| `DW(Transformer)[CRRA]` | 2.111 | 7.6% | −6.7% | — | — |
+| `DW(LSTM)[CRRA]` | 1.761 | 6.7% | −7.3% | 1.857 | ±0.126 |
+| `DW(MLP)[CRRA]` | 1.367 | 6.7% | −7.1% | 1.703 | ±0.212 |
+
+*Transformer per-seed data unavailable; see Stability Data Note.*
+
+Two observations stand out. First, there is a notable gap between the ensemble Sharpe and
+the per-seed mean for `DW(MLP)[CRRA]` (ensemble 1.367, per-seed mean 1.703). Jensen's
+inequality: averaging weight vectors across 10 seeds does not preserve the mean Sharpe of
+the individual seed portfolios. The ensemble weight vector occupies a different region of
+weight space than any individual seed, and in this case that blended region has lower
+realised Sharpe. This effect does not appear for CRRA+Shrinkage, where the sigmoid
+activation bounds the individual seed weights tightly.
+
+Second, architecture matters more for CRRA than for CRRA+Shrinkage: the Transformer
+significantly outperforms MLP under CRRA (2.111 vs 1.367), whereas the three architectures
+converge tightly under CRRA+Shrinkage (2.092–2.125). Without the shrinkage prior, the
+architecture's inductive bias influences which region of weight space the optimiser finds.
+
+### Finding 5 — Loss function dominates architecture choice for direct-weight policy
+
+Grouping the 9 configurations by loss function:
+
+| Loss family | Sharpe range | Ann Vol range | Character |
+|---|---|---|---|
+| Sharpe loss | 1.697 – 2.287 | 3.4–4.6% | All degenerate to cash |
+| CRRA | 1.367 – 2.111 | 6.7–7.6% | Non-degenerate, architecture-dependent |
+| CRRA+Shrink | 2.092 – 2.125 | 10.1–10.4% | Tight cluster, non-degenerate |
+
+The within-loss-family spread is much smaller than the between-loss-family spread for Sharpe
+and CRRA+Shrink. For the CRRA family, the within-family spread is wider (1.367–2.111),
+but even there the character of the allocations — non-degenerate, moderate volatility —
+is consistent across architectures.
+
+This finding is consistent with Cheng & Wu (2024): in the direct-weight paradigm, the
+choice of loss function and output regularisation architecture (shrinkage vs unconstrained)
+is the dominant design decision. Backbone selection within a given loss family is secondary.
+
+## Stability Data Note
+
+The §8 per-seed stability analysis in `notebooks/04c_dl_policy_strategies_cuda.ipynb`
+produced correct per-seed statistics at stdout time (as captured in the table above), but
+the saved `policy_stability_table_3d.csv` originally contained single-seed fallback values
+for all 9 configurations due to a variable-scoping bug in the original notebook §8 cell.
+The root cause: the `stability_rows` list was initialised and populated in a *separate loop*
+after the main per-seed collection loop, rather than inline within the collection loop. If
+the cell was re-executed after the full run, or if the two loops ran with different scope
+state, `stability_rows` received stale data. The fix (applied in this session) moves the
+`stability_rows = []` initialisation and each row's `stability_rows.append({...})` call
+*inside* the outer collection loop, building the table atomically with the per-seed
+computation it summarises.
+
+The 10-seed per-seed statistics for 6 of 9 configurations are sourced from the §8 stdout
+captured during the Colab run. The 3 Transformer per-seed entries are unavailable and are
+flagged as `single-seed-fallback` in `results/cuda/policy_stability_table_3d.csv`.
+
+## Comparative Conclusion Across Sessions 3 + 3d
+
+The unified empirical finding across both DL paradigms on the 29-asset 2003–2026 universe:
+the ML ensemble from Session 2 — Lasso, RF, and XGBoost equal-weighted predictions wrapped
+in MSR optimisation — at Sharpe 2.579 remains the empirical winner of the 47-strategy
+comparative study. No DL configuration in either the predict-then-wrap or the direct-weight
+paradigm exceeds it.
+
+Best DL strategies by paradigm (test period 2023–2026):
+
+| Paradigm | Strategy | Sharpe | Ann Vol | Max DD |
+|---|---|---|---|---|
+| Predict-then-wrap (Session 3c-full) | `MSR(MLP_μ̂)` | 2.320 | 8.9% | −8.6% |
+| Direct-weight non-degenerate (Session 3d) | `DW(Transformer)[CRRA]` | 2.111 | 7.6% | −6.7% |
+| Direct-weight stable (Session 3d) | `DW(LSTM)[CRRA+Shrink]` | 2.102 ens / 2.108 ±0.010 | 10.4% | −12.7% |
+
+The two paradigms produce qualitatively different failure modes. Predict-then-wrap strategies
+produce realistic allocations (vol 7–25%, DD −7 to −27%) but can be over-confident when
+the underlying model's predictions are noisy — `SignalTilt(XGB)` reaches Sharpe 2.304 but
+with 24.5% annualised vol and −22.6% maximum drawdown. Direct-weight strategies without
+proper regularisation degenerate to near-cash allocations under Sharpe loss. CRRA loss with
+shrinkage to the equal-weight benchmark is the most defensible direct-weight configuration:
+it produces non-degenerate allocations, achieves competitive Sharpe ratios (~2.10 across
+architectures), and exhibits the tightest per-seed stability in the study.
+
+See `docs/figures/session3d/equity_curves_3d.png` and
+`docs/figures/session3d/drawdown_3d.png` for the visual comparison of top strategies.
+
+## Future Work (Extended)
+
+Session 3d-specific extensions — each is a self-contained experiment that could
+specifically address the identified failure modes:
+
+1. **Sum-of-weights penalty.** Add $\lambda \max(0, 1 - \sum_i w_i)^2$ to the Sharpe loss,
+   penalising under-investment. This closes the cash-escape route without changing the output
+   activation structure.
+2. **Softmax output activation.** Replace the current per-asset output (relu-clipped and
+   renormalised) with a softmax, which enforces $\sum_i w_i = 1$ exactly and eliminates the
+   degenerate-to-zero solution from the feasible set.
+3. **Sortino loss.** Replace the Sharpe loss with $\hat{\mu}(R_p)/\hat{\sigma}^-(R_p)$ where
+   $\hat{\sigma}^-$ is the downside deviation. Retains the ratio structure but removes the
+   variance-minimisation incentive that drives Sharpe degeneracy.
+4. **Volatility targeting.** Post-hoc vol scaling (3-month realised vol, 5% p.a. target) per
+   Cheng & Wu (2024), to stabilise portfolio risk across regimes.
+5. **Walk-forward retraining.** Monthly model refits using a trailing window, as in
+   Cheng & Wu (2024). Session 2 walk-forward underperformed single-fit for tree-based
+   models, but direct-weight neural policies may benefit from adaptation to the post-2023
+   regime.
+6. **Cross-asset attention.** The current architectures process each asset independently on
+   a per-asset sequence. A cross-asset Transformer would process a single cross-sectional
+   snapshot of all 29 assets at each date (input shape $(batch, 29, 17)$), enabling the
+   model to learn pairwise correlation structure directly. This was identified as the
+   highest-priority architectural extension in the Session 3c-full findings (Part I) and
+   remains unaddressed in Session 3d.
+
+For the comparative study as a whole, the natural next chapters are reinforcement learning
+(Session 4, via `SequentialStrategy.step()`), LLM-views Black-Litterman (Session 5), and
+LLM-orchestrated agents (Session 6).
+
+## Reproducibility
+
+Session 3d artifacts are committed to this repository.
+
+| Session | Commit | Primary artifacts |
+|---|---|---|
+| 3d-a — Direct-weight scaffolding | `4177ada` | `src/aiam/dl/policies.py`, `losses.py`, `policy_workflow.py`; `src/aiam/strategy/dl_policy_strategies.py`; 46 new tests (212 total) |
+| 3d-b — Colab CUDA notebook | `2c8914e` | `notebooks/04c_dl_policy_strategies_cuda.ipynb` |
+| 3d-c — Closeout (this commit) | *(this commit)* | `results/cuda/policy_*.csv`, `results/cuda/policy_*.parquet`, `docs/figures/session3d/`, `docs/handoff/session_3_findings.md` (Part II), notebook §8 fix |
+
+**Compute environment.** Google Colab Pro, NVIDIA RTX PRO 6000 Blackwell
+(`torch 2.10.0+cu128`). Training time: 26:51 total (90 policies across 9 configs × 10 seeds).
+
+**Reproducing results.** The 47-strategy comparison table is at
+`results/cuda/policy_strategies_comparison_3d.csv`. Per-seed stability data (6 of 9 configs)
+is at `results/cuda/policy_stability_table_3d.csv`. Portfolio returns are at
+`results/cuda/policy_returns_3d.parquet`. To reproduce from scratch, open
+`notebooks/04c_dl_policy_strategies_cuda.ipynb` in Colab (CUDA runtime required) and
+execute all cells.

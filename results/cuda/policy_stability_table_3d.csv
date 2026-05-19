@@ -1,0 +1,10 @@
+Strategy,Seeds,Min OOS Sharpe,Mean OOS Sharpe,Max OOS Sharpe,Stdev OOS Sharpe,data_quality
+DW(MLP)[Sharpe],10,,1.720,,0.072,10-seed
+DW(MLP)[CRRA],10,,1.703,,0.212,10-seed
+DW(MLP)[CRRA+Shrink],10,,2.113,,0.023,10-seed
+DW(LSTM)[Sharpe],10,,1.993,,0.330,10-seed
+DW(LSTM)[CRRA],10,,1.857,,0.126,10-seed
+DW(LSTM)[CRRA+Shrink],10,,2.108,,0.010,10-seed
+DW(Transformer)[Sharpe],1,2.2874288124189768,2.2874288124189768,2.2874288124189768,0.0,single-seed-fallback
+DW(Transformer)[CRRA],1,2.1109823577151494,2.1109823577151494,2.1109823577151494,0.0,single-seed-fallback
+DW(Transformer)[CRRA+Shrink],1,2.092403472909435,2.092403472909435,2.092403472909435,0.0,single-seed-fallback
