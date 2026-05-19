@@ -27,6 +27,7 @@ class PortfolioEnv:
         lookback: int = 20,
         start: str | pd.Timestamp | None = None,
         end: str | pd.Timestamp | None = None,
+        lambda_risk: float = LAMBDA_RISK,
     ) -> None:
         if start is not None or end is not None:
             mask = pd.Series(True, index=returns.index)
@@ -53,6 +54,7 @@ class PortfolioEnv:
         self.n_features: int = self._features.shape[2]
 
         self._vol_proxy: np.ndarray = _rolling_vol(self._returns, _VOL_LOOKBACK)
+        self._lambda_risk: float = lambda_risk
 
         # First valid index: need both feature history and vol history.
         self._start_idx: int = max(lookback, _VOL_LOOKBACK)
@@ -102,7 +104,7 @@ class PortfolioEnv:
         gross_return = float(w_t @ r_next)
         turnover = float(np.abs(w_t - prev_w).sum())
         transaction_cost = COST_BPS / 10_000.0 * turnover
-        risk_penalty = LAMBDA_RISK * float(w_t @ self._vol_proxy[self._t])
+        risk_penalty = self._lambda_risk * float(w_t @ self._vol_proxy[self._t])
         net_return = gross_return - transaction_cost - risk_penalty
 
         self._weights = w_t
