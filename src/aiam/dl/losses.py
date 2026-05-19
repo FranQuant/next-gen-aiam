@@ -43,6 +43,7 @@ def crra_shrinkage_loss(
     benchmark_w: tensor of shape (n_assets,) — prior allocation (e.g., 1/N EW).
     Network output (Sigmoid activation) acts as a per-asset shrinkage multiplier.
     """
+    benchmark_w = benchmark_w.to(weights.device)
     effective_weights = weights * benchmark_w
     portfolio_returns = (effective_weights * returns).sum(dim=-1)
     portfolio_returns = torch.clamp(portfolio_returns, min=clip_min)

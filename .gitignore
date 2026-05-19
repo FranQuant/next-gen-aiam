@@ -97,6 +97,9 @@ notebooks/_archived_*.ipynb
 .ipynb_checkpoints/
 **/.ipynb_checkpoints/
 
+# Smoke-test execution artifacts (local verification only, not committed)
+**/_smoke_*.ipynb
+
 # Ad-hoc one-off scripts — local-only
 scripts/_add_*.py
 

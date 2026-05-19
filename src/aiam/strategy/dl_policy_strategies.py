@@ -106,6 +106,8 @@ class _DLPolicyBase(PointInTimeStrategy):
 
         bw = benchmark_w if benchmark_w is not None else np.ones(len(assets)) / len(assets)
         self._loss_fn = _make_loss_fn(loss_kind, gamma, bw)
+        # crra_shrinkage uses sigmoid output (multiplier in [0,1]); others use relu
+        self._activation = "sigmoid" if loss_kind == "crra_shrinkage" else "relu"
 
         if self._lookback is not None:
             self._std_panel = apply_standardizer(feature_panel, center, scale, feature_cols)
@@ -266,7 +268,7 @@ class DirectWeightMLPStrategy(_DLPolicyBase):
             seeds=self.seeds,
             n_features=len(self._feature_cols),
             n_assets=self._n_assets,
-            activation="relu",
+            activation=self._activation,
             **self._hp,
         )
 
@@ -310,7 +312,7 @@ class DirectWeightLSTMStrategy(_DLPolicyBase):
             seeds=self.seeds,
             n_features=n_features,
             n_assets=self._n_assets,
-            activation="relu",
+            activation=self._activation,
             **self._hp,
         )
 
@@ -357,7 +359,7 @@ class DirectWeightTransformerStrategy(_DLPolicyBase):
             seeds=self.seeds,
             n_features=n_features,
             n_assets=self._n_assets,
-            activation="relu",
+            activation=self._activation,
             **self._hp,
         )
 
