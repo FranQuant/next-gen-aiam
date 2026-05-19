@@ -105,10 +105,8 @@ notebooks/_archived_*.ipynb
 # Ad-hoc one-off scripts — local-only
 scripts/_add_*.py
 
-# Notebook 05 working outputs (smoke runs + Colab results)
-results/notebook_05/*.csv
-results/notebook_05/*.parquet
-results/notebook_05/figures/
+# Claude Code session memory (local-only)
+memory/
 
 # Local temporary probe scripts
 test_intraday*.py

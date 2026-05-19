@@ -237,10 +237,11 @@ over tree-based models on this universe.
 
 ### Direct-weight DL (Notebook 05)
 
-End-to-end direct-weight portfolio construction (Brandt, Santa-Clara & Valkanov 2009; Cheng & Wu
-2024) — where the network outputs portfolio weights directly rather than predicted returns — is
-explored as a standalone replication in Notebook 05, using a faithful 2-asset setup on SPY+IEF
-with intraday-derived realized-power features.
+Direct-weight DL with intraday features was explored separately in Notebook 05
+([notebook 05 findings](notebook_05_findings.md)). That exploration replicated the
+Brandt-Santa-Clara-Valkanov (2009) parametric portfolio policy framework on
+SPY + IEF using daily and intraday-derived features with walk-forward refit, and
+found no Sharpe lift over simple benchmarks on this universe and period.
 
 ### Other Extensions (not prioritized)
 
