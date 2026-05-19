@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import torch
 
 from aiam.data.panel import Panel
 from aiam.dl.workflow import set_global_seed
 from aiam.rl import SEED
 from aiam.rl.policy import SimplexPolicy
+from aiam.rl.trainer import TrainConfig, TrainHistory, train
 
 
 class RLAgent:
@@ -17,7 +19,7 @@ class RLAgent:
     builds (N, F) feature state from trailing returns, runs policy.act, returns
     a pd.Series of weights indexed by asset name.
 
-    optimizer is a placeholder for the Session 4b training loop.
+    .fit(env, config) runs REINFORCE+baseline training and stores history.
     """
 
     def __init__(
@@ -29,7 +31,37 @@ class RLAgent:
         self.policy = policy
         self.lookback = lookback
         self.seed = seed
-        self.optimizer: object | None = None  # set in Session 4b training
+        self.history: TrainHistory | None = None
+        self._value_head = None
+
+    def fit(
+        self,
+        env,  # PortfolioEnv — avoid circular import by not type-annotating
+        config: TrainConfig | None = None,
+        use_value_baseline: bool = True,
+        temperature: float = 1.0,
+    ) -> TrainHistory:
+        """Train policy via REINFORCE with optional value baseline.
+
+        Mutates self.policy in-place. Returns training history.
+        """
+        if config is None:
+            config = TrainConfig(seed=self.seed)
+        history, value_head = train(
+            self.policy, env, config,
+            use_value_baseline=use_value_baseline,
+            temperature=temperature,
+        )
+        self.history = history
+        self._value_head = value_head
+        return history
+
+    def save(self, path: str) -> None:
+        torch.save(self.policy.state_dict(), path)
+
+    def load(self, path: str) -> None:
+        self.policy.load_state_dict(torch.load(path, map_location="cpu"))
+        self.policy.eval()
 
     def predict_weights(self, panel: Panel, date: pd.Timestamp) -> pd.Series:
         """Build state from panel at `date`, run policy, return per-asset weights."""
