@@ -5,9 +5,11 @@ import bisect
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 
 from aiam.dl.walkforward import generate_refit_dates  # noqa: reuse DL harness date logic
 from aiam.rl.agent import RLAgent
@@ -19,6 +21,7 @@ __all__ = [
     "RLRefitResult",
     "WalkForwardRLEnsemble",
     "fit_walkforward_rl",
+    "fit_walkforward_ppo",
     "generate_refit_dates",
 ]
 
@@ -160,6 +163,103 @@ def fit_walkforward_rl(
                 max_steps_per_episode=config.max_steps_per_episode,
             )
             history, value_head = train(policy, env, seed_config)
+            agent = RLAgent(policy=policy, lookback=n_features, seed=seed)
+            agent.history = history
+            agent._value_head = value_head
+            agents.append(agent)
+            histories.append(history)
+
+        refit_results.append(RLRefitResult(
+            refit_date=refit_date,
+            agents=agents,
+            histories=histories,
+        ))
+
+        if verbose:
+            mean_final_reward = float(np.mean([h.episode_rewards[-1] for h in histories]))
+            mean_turnover = float(np.mean([np.mean(h.mean_turnovers[-10:]) for h in histories]))
+            print(
+                f"  Refit {i+1:2d}/{len(refit_dates)}: "
+                f"{train_start.date()} → {train_end.date()} "
+                f"({len(train_returns)} days) | "
+                f"seeds={len(seeds)} | "
+                f"final_reward={mean_final_reward:.5f} | "
+                f"mean_to={mean_turnover:.4f} | "
+                f"{time.time()-t0:.1f}s"
+            )
+
+    return WalkForwardRLEnsemble(refit_results=refit_results)
+
+
+def fit_walkforward_ppo(
+    returns: pd.DataFrame,
+    refit_dates: list[pd.Timestamp],
+    config,  # PPOConfig — imported locally to avoid circular dependency
+    seeds: Sequence[int],
+    hidden_dim: int = 32,
+    training_window_months: int = 24,
+    lambda_risk: float = 0.02,
+    checkpoint_dir: Path | str | None = None,
+    verbose: bool = False,
+) -> WalkForwardRLEnsemble:
+    """Train one PPO agent per (refit_date, seed) on a trailing returns window.
+
+    Mirrors fit_walkforward_rl but uses PPO instead of REINFORCE.
+    Saves policy + value_head state_dicts to checkpoint_dir after each (refit, seed).
+    """
+    from aiam.rl.ppo import PPOConfig, train_ppo  # local import avoids circular
+
+    n_features: int = 20
+    refit_results: list[RLRefitResult] = []
+
+    if checkpoint_dir is not None:
+        Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
+
+    for i, refit_date in enumerate(refit_dates):
+        train_end = refit_date - pd.Timedelta(days=1)
+        train_start = refit_date - pd.DateOffset(months=training_window_months)
+
+        train_returns = returns.loc[
+            (returns.index >= train_start) & (returns.index <= train_end)
+        ]
+
+        if len(train_returns) < 50:
+            if verbose:
+                print(f"  Refit {i+1}/{len(refit_dates)}: skipped ({len(train_returns)} rows)")
+            continue
+
+        agents: list[RLAgent] = []
+        histories: list[TrainHistory] = []
+        t0 = time.time()
+
+        for seed in seeds:
+            policy = SimplexPolicy(n_features=n_features, hidden_dim=hidden_dim)
+            env = PortfolioEnv(train_returns, lambda_risk=lambda_risk)
+            seed_config = PPOConfig(
+                episodes=config.episodes,
+                gamma=config.gamma,
+                gae_lambda=config.gae_lambda,
+                clip_eps=config.clip_eps,
+                k_epochs=config.k_epochs,
+                minibatch_size=config.minibatch_size,
+                value_coef=config.value_coef,
+                lr=config.lr,
+                entropy_coef=config.entropy_coef,
+                grad_clip=config.grad_clip,
+                seed=seed,
+                max_steps_per_episode=config.max_steps_per_episode,
+            )
+            history, value_head = train_ppo(policy, env, seed_config)
+
+            if checkpoint_dir is not None:
+                ckpt = {
+                    "policy_state_dict": policy.state_dict(),
+                    "value_head_state_dict": value_head.state_dict(),
+                    "refit_date": str(refit_date.date()),
+                    "seed": seed,
+                }
+                torch.save(ckpt, Path(checkpoint_dir) / f"refit_{i:02d}_seed_{seed}.pt")
+
             agent = RLAgent(policy=policy, lookback=n_features, seed=seed)
             agent.history = history
             agent._value_head = value_head
