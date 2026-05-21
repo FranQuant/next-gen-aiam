@@ -1,0 +1,12 @@
+{
+  "generator": "equilibrium",
+  "mock": false,
+  "n_refits": 3,
+  "n_oos_days": 833,
+  "mean_views_per_refit": 0.0,
+  "mean_turnover_per_refit": 1.333308463635774e-14,
+  "sharpe_ratio": 2.037318400240527,
+  "annualized_return": 0.22197863191803968,
+  "annualized_volatility": 0.10093135809435681,
+  "max_drawdown": -0.1216037225623233
+}

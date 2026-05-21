@@ -1,0 +1,12 @@
+{
+  "generator": "llm-anthropic",
+  "mock": true,
+  "n_refits": 3,
+  "n_oos_days": 833,
+  "mean_views_per_refit": 5.0,
+  "mean_turnover_per_refit": 0.09814539587261994,
+  "sharpe_ratio": 2.10755138232169,
+  "annualized_return": 0.2772303833658514,
+  "annualized_volatility": 0.11954852693130608,
+  "max_drawdown": -0.09754146106494364
+}
