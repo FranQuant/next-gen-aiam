@@ -1,0 +1,7 @@
+cluster,n_assets,assets,asset_classes
+1,2,"GLD.US, SLV.US",commodity_etf
+2,4,"AGG.US, IEF.US, SHY.US, TLT.US",fixed_income_etf
+3,4,"DBC.US, USO.US, XLE.US, XOM.US","commodity_etf, us_sector_etf, us_single_stock"
+4,17,"IWM.US, SPY.US, HYG.US, EEM.US, EFA.US, FXI.US, XLF.US, XLK.US, XLP.US, XLU.US, XLV.US, AAPL.US, GOOGL.US, JNJ.US, JPM.US, MSFT.US, NVDA.US","broad_equity_etf, fixed_income_etf, intl_equity_etf, us_sector_etf, us_single_stock"
+5,1,WMT.US,us_single_stock
+6,1,EURUSD.FOREX,fx_spot

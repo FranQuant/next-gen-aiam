@@ -1,0 +1,7 @@
+methodology_element,availability_in_repo,07b_v1_treatment
+True institutional positioning layer,unavailable,not implemented; no positioning proxy is fabricated
+Futures non-commercial positioning / fund beta / survey / option positioning,unavailable,explicitly excluded from v1
+Point-in-time macro support scores,unavailable,replaced only by existing dominant_regime categorical context
+Broad institutional cross-asset index universe,unavailable,uses repo-native canonical 29-asset panel
+OU residual model and integrated residuals,not implemented,simple trailing residual z-score
+Lasso PC relevance selection,not implemented,fixed K=5 PCA reconstruction
