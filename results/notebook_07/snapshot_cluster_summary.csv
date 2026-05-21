@@ -1,0 +1,4 @@
+snapshot_cluster,asset_count,assets,asset_classes,avg_mom_21d,avg_vol_21d,avg_drawdown_63d
+0,26,"AAPL.US, MSFT.US, NVDA.US, JPM.US, JNJ.US, XOM.US, WMT.US, XLK.US, XLF.US, XLE.US, XLV.US, XLP.US, XLU.US, SPY.US, IWM.US, EFA.US, EEM.US, FXI.US, SHY.US, IEF.US, TLT.US, AGG.US, HYG.US, GLD.US, DBC.US, EURUSD.FOREX","broad_equity_etf, commodity_etf, fixed_income_etf, fx_spot, intl_equity_etf, us_sector_etf, us_single_stock",0.041685678676689125,0.17528972219805097,-0.03726910869296389
+1,1,SLV.US,commodity_etf,-0.02171998825946586,0.40770777553509036,-0.21567243205082953
+2,2,"GOOGL.US, USO.US","commodity_etf, us_single_stock",0.24703453568142342,0.5804947646929258,-0.011750647281418003
