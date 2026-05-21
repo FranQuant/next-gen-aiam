@@ -2,7 +2,7 @@
 
 ## Status: Pending Colab Execution
 
-Notebook `04f_rl_n29_training.ipynb` is written and smoke-tested locally.
+Notebook `06a_rl_reinforce.ipynb` (formerly `04f_rl_n29_training.ipynb`) is written and smoke-tested locally.
 Full results require Colab GPU (T4/L4 recommended). Fill in bracketed placeholders
 `[TBD]` after the Colab run completes.
 
@@ -341,7 +341,7 @@ All figures in `results/rl/n29/figures/`:
 | `results/rl/n29/seed_sharpe_distribution.csv` | Per-seed OOS Sharpe for each config |
 | `data/cache/portfolio_returns/full_comparison_with_rl.csv` | 39-strategy comparison table |
 | `results/rl/n29/figures/*.png` | 4 diagnostic figures |
-| `notebooks/04f_rl_n29_training.ipynb` | Execution notebook (Colab-ready) |
+| `notebooks/06a_rl_reinforce.ipynb` | Execution notebook (Colab-ready) |
 | `src/aiam/rl/walkforward.py` | Walk-forward RL adapter |
 | `tests/rl/test_walkforward.py` | 10 interface tests (added to 293-test baseline) |
 
