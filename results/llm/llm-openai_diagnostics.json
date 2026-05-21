@@ -1,0 +1,12 @@
+{
+  "generator": "llm-openai",
+  "mock": false,
+  "n_refits": 41,
+  "n_oos_days": 833,
+  "mean_views_per_refit": 15.75609756097561,
+  "mean_turnover_per_refit": 0.5081677013975187,
+  "sharpe_ratio": 1.978567695379122,
+  "annualized_return": 0.2711340523965913,
+  "annualized_volatility": 0.1252720967694867,
+  "max_drawdown": -0.1099693409101931
+}

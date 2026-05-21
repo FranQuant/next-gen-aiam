@@ -29,6 +29,11 @@ xgboost>=2.0
 # DL
 torch>=2.0
 
+# LLM integrations
+anthropic>=0.40
+openai>=2.0
+pydantic>=2.0
+
 # dev tools
 pytest>=8.0
 nbstripout>=0.7

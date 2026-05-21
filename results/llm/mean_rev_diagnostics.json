@@ -1,0 +1,12 @@
+{
+  "generator": "mean_rev",
+  "mock": false,
+  "n_refits": 41,
+  "n_oos_days": 833,
+  "mean_views_per_refit": 29.0,
+  "mean_turnover_per_refit": 0.47576357567845096,
+  "sharpe_ratio": 1.5594700803584332,
+  "annualized_return": 0.278032206604375,
+  "annualized_volatility": 0.1661602170874027,
+  "max_drawdown": -0.12274314399126832
+}
