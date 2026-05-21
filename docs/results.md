@@ -1056,6 +1056,139 @@ MSR — rather than as specific-strategy superiority claims. See Table 2 above f
 
 \newpage
 
+# Reinforcement Learning
+
+## Motivation
+
+The preceding paradigms — Classical optimization, supervised machine learning,
+and deep learning — all share a common structure: they estimate a quantity
+(expected returns, a covariance matrix, or weights directly) at a point in time
+and hand it to a portfolio constructor. None of them treats allocation as a
+*sequential* decision problem in which today's position shapes tomorrow's
+opportunity set through transaction costs and path dependence. Reinforcement
+learning (RL) is the natural paradigm for that framing: an agent observes the
+market state, chooses a portfolio, receives a reward, and adapts. The question
+this section asks is direct: given the same 29-asset universe, the same feature
+set, and the same walk-forward evaluation harness, can an RL agent produce a
+strategy that exceeds the empirical bar set by the ML ensemble,
+`MSR(Ensemble_μ̂)`, at Sharpe 2.579?
+
+## Problem Formulation
+
+We cast allocation as an offline (batch) Markov decision process, trained by
+replaying the historical panel rather than interacting with a live market — the
+only feasible regime in finance, where exploration cannot be conducted with real
+capital. The state at each date combines trailing return features with the
+agent's current portfolio weights; the action is a continuous weight vector on
+the simplex (long-only, sum-to-one), produced by a softmax over a shared-weight
+per-asset encoder so the architecture scales across universe size. The reward is
+
+$$r_t = \mathbf{w}_t^\top \mathbf{r}_{t+1} - c\,\|\mathbf{w}_t - \mathbf{w}_{t-1}\|_1 - \lambda\,(\mathbf{w}_t \cdot \boldsymbol{\sigma}_t),$$
+
+i.e. realized portfolio return net of transaction costs ($c = 10$ bps) and an
+optional risk penalty ($\lambda$). Training follows the same chronological
+train/validation/test discipline as the earlier paradigms, with normalizers fit
+on the training window and frozen, and policies refit monthly via walk-forward
+(41 refits over the test window). Reported results average across random seeds,
+as in the earlier sections.
+
+## Algorithms
+
+Two on-policy policy-gradient methods are evaluated, spanning the standard
+practitioner toolkit. The first is **REINFORCE with a learned value baseline**
+($\gamma = 0.95$), the canonical Monte-Carlo policy gradient. The second is
+**Proximal Policy Optimization (PPO)** — clipped surrogate objective
+($\varepsilon = 0.2$), generalized advantage estimation ($\lambda_\text{GAE} =
+0.95$), four optimization epochs per batch — the de facto standard for
+continuous control. PPO shares REINFORCE's environment, policy architecture,
+and reward, so the comparison isolates the effect of the optimizer rather than
+confounding it with implementation differences. REINFORCE is run under both
+$\lambda = 0.02$ and $\lambda = 0.00$ (820 policy fits across 10 seeds); PPO
+under $\lambda = 0.02$ (205 fits across 5 seeds).
+
+## Results
+
+![OOS cumulative wealth for the three RL configurations versus the ML ensemble bar and three representative classical strategies, 2023–2026. All three RL policies track the equal-weight line closely, consistent with the static-collapse diagnosis.](figures/equity_curves_rl.png)
+
+![OOS cumulative wealth for PPO ($\lambda = 0.02$, ensemble of 5 seeds) versus top classical and ML strategies, 2023–2026. PPO converges to the same near-equal-weight trajectory as REINFORCE.](figures/equity_curves_ppo.png)
+
+| Strategy | OOS Sharpe | Ann. Return | Ann. Vol | Max DD | Rank (of 39) |
+|---|---|---|---|---|---|
+| `MSR(Ensemble_μ̂)` (ML bar) | **2.579** | — | — | — | 1 |
+| RL — PPO ($\lambda = 0.02$) | 2.0267 | 22.06% | 10.09% | −12.16% | 26 |
+| RL — REINFORCE ($\lambda = 0.00$) | 2.0256 | 22.05% | 10.09% | −12.16% | 26 |
+| RL — REINFORCE ($\lambda = 0.02$) | 2.0255 | 22.05% | 10.09% | −12.16% | 27 |
+
+All three RL configurations land within 0.0012 Sharpe of one another, at rank
+26–27 of 39 strategies, falling short of the ML ensemble by approximately 0.55
+Sharpe. The result is invariant to the choice of algorithm (REINFORCE vs. PPO),
+to the risk penalty ($\lambda = 0.02$ vs. $\lambda = 0.00$), and — within each
+configuration — to the random seed (cross-seed standard deviation $\approx
+0.0008$).
+
+## The Static Collapse and the Equal-Weight Optimum
+
+![Monthly-average portfolio weights for REINFORCE ($\lambda = 0.02$) over the OOS period, 2023–2026. Weights are nearly uniform across all 29 assets throughout the test period, confirming convergence to a static allocation.](figures/weight_heatmap_rl.png)
+
+The convergence is not merely numerical agreement; it reflects a common
+endpoint. Out-of-sample turnover is negligible — 0.00068 for REINFORCE and
+0.000007 for PPO — and the cross-time standard deviation of the weights is
+effectively zero (Figure above). The agents do not rebalance. Inspecting the
+learned weights shows them clustered tightly around $1/29 \approx 0.034$:
+**the agents rediscover an equal-weight portfolio and hold it.** This also
+accounts for the Sharpe of $\approx 2.03$, which is approximately where a
+$1/N$ allocation lands on this universe over the test period.
+
+Crucially, the agents did explore. REINFORCE's training-time turnover was 1.87,
+confirming that the stochastic policy actively sampled dynamic, feature-conditional
+allocations during learning. The deterministic policy nonetheless converged to a
+near-constant weight vector. The most parsimonious reading is that, after transaction
+costs, the feature-conditional edge available on this universe is too small to
+justify dynamic rebalancing — so the optimal policy under this reward is approximately
+static. That PPO, a stronger optimizer with clipping and advantage estimation,
+reaches the *same* optimum as REINFORCE indicates that the collapse is a property
+of the problem (a weak conditional signal relative to cost), not of the algorithm.
+
+## Relation to Prior Paradigms
+
+This conclusion corroborates the direct-weight deep-learning track, where the
+strongest deep model tied a Risk Parity benchmark (Sharpe 1.240 vs. 1.247) and
+the reported advantage of attention-based direct-weight optimization (Cheng and Wu, 2024)
+did not reproduce on this universe. Two methodologically independent
+paradigms — deep learning and reinforcement learning — arriving at the same
+verdict is mutual corroboration rather than coincidence: the ML ensemble's
+one-shot optimization is the genuine standout, and additional model complexity
+does not reliably improve risk-adjusted performance here.
+
+The finding is also consistent with the more rigorous portion of the RL-finance
+literature, in which overfitting to historical regimes is the dominant failure
+mode and the documented successes of RL concentrate in optimal execution, market
+making, and hedging — problems with clearer rewards and more stationary dynamics —
+rather than strategic asset allocation.
+
+## Limitations and Conclusion
+
+The result is conditional on the 17-feature state representation, the
+return–cost–risk reward family, and two on-policy algorithms. It is not a claim
+that reinforcement learning can never add value to allocation. Levers that the
+literature uses to elicit dynamic behavior — a differential Sharpe reward, richer
+state (sentiment, regime, or cross-sectional signals), synthetic data augmentation,
+or off-policy actor-critics — could in principle alter the outcome, but each
+carries low expected out-of-sample payoff on this universe and a high risk of
+manufacturing an overfit result. They are identified as future work rather than
+treated as omissions.
+
+The reinforcement-learning paradigm thus enters the comparative study as a
+rigorous negative result: two algorithms, an identical collapse to a static
+equal-weight allocation, and no configuration exceeding the ML ensemble at
+Sharpe 2.579. The contribution is the clean, corroborated demonstration that
+sequential decision-making does not improve on one-shot optimization for this
+problem — a result that strengthens the paper's central finding precisely
+because it was obtained under the same disciplined methodology as every other
+paradigm.
+
+\newpage
+
 # Conclusion and Future Work
 
 This study evaluated 62 portfolio allocation strategies — the largest single-universe
@@ -1085,10 +1218,10 @@ via futures overlays carries its own friction (~1–3 bps/day). All Sharpe ratio
 computed at $r_f = 0$; at positive risk-free rates the relative ordering of
 low-return strategies (GMV(sample), FF3-LowVol) would deteriorate further. The
 universe carries no crypto coverage; strategies that benefit from
-diversification into digital assets are not captured. The next planned
-extension — ML signal strategies (Lasso, Random Forest, XGBoost) on the extended
-2003–2026 sample — will explore whether non-linear factor models improve on the
-classical signal baselines established here.
+diversification into digital assets are not captured. ML signal strategies
+(Lasso, Random Forest, XGBoost), deep learning sequence models, and reinforcement
+learning agents have been evaluated on the same panel; results are reported in the
+preceding sections.
 
 **Long-short extensions (Table 1, Long-Short block).** Three long-short variants
 are added to quantify the long-only constraint gap identified in Findings 8 and 11:
@@ -1109,21 +1242,17 @@ viable strategy — the bottom tercile being shorted contains structurally diffe
 assets (bonds, commodities) rather than equity momentum losers.
 
 **Future work.** The harness architecture accommodates several natural extensions.
-First, machine-learning signal strategies — Lasso expected-return estimation, Random
-Forest regime classification, and XGBoost factor scoring — can replace the rolling
-sample-mean signals currently used in MSR and BL-Mom, extending the 62-strategy
-comparison to include data-driven alternatives on the same 2003–2026 panel. Second,
-applying the L/S strategies to a pure-equity universe would permit a cleaner
-replication of published long-short momentum results [@moskowitz2012time;
-@jegadeesh1993titman], isolating the constraint gap from the mixed-asset composition
-effect. Third, multi-universe robustness checks — applying the 62-strategy comparison
-to a global equity universe, a fixed-income-only universe, and a commodities universe
-— would test whether the ranking structure generalizes. Fourth, deep learning sequence
-models (LSTM, Transformer) and reinforcement learning agents via a `SequentialStrategy`
-interface represent the frontier for dynamic allocation within the same evaluation
-framework. Fifth, cryptocurrency re-entry via dedicated instruments (Bitcoin ETFs,
-CME futures) on a 2020-forward sub-panel would allow crypto coverage without
-survivorship bias.
+First, LLM-generated views injected into the Black-Litterman framework via a
+`view_generator` callable — substituting market intelligence from large language
+models for the hand-crafted views currently used — would test whether unstructured
+text signals improve on the statistical priors. Second, applying the L/S strategies
+to a pure-equity universe would permit a cleaner replication of published long-short
+momentum results [@moskowitz2012time; @jegadeesh1993titman], isolating the constraint
+gap from the mixed-asset composition effect. Third, multi-universe robustness checks —
+applying the full comparison to a global equity universe, a fixed-income-only universe,
+and a commodities universe — would test whether the ranking structure generalizes.
+Fourth, cryptocurrency re-entry via dedicated instruments (Bitcoin ETFs, CME futures)
+on a 2020-forward sub-panel would allow crypto coverage without survivorship bias.
 
 \newpage
 
