@@ -116,3 +116,4 @@ test_intraday*.py
 # Local-only reference notebooks (proof-of-concept HTMLs)
 notebooks/_local_*.html
 notebooks/_local_*.ipynb
+notebooks/*.html
