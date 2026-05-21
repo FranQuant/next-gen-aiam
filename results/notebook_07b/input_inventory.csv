@@ -1,0 +1,6 @@
+input,path,exists,shape,start,end,frequency,role
+canonical_daily_prices,data/cache/prices_29.parquet,True,5869x29,2003-01-02,2026-04-30,daily,source for weekly returns and momentum
+canonical_daily_returns,data/cache/returns_29_2003_2026.parquet,True,5869x29,2003-01-02,2026-04-30,daily,sanity check and fallback return panel
+asset_metadata,src/aiam/features/asset_class.py,True,29x1,,,static,asset-class grouping
+notebook_07_artifacts,results/notebook_07,True,,,,static,optional provenance/context
+macro_regime_labels,data/cache/regime_signals_2003_2026.parquet,True,317x9,2000-01-31,2026-05-31,monthly,dominant_regime context overlay
