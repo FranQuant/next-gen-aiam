@@ -1,12 +1,12 @@
 {
   "generator": "momentum",
   "mock": false,
-  "n_refits": 3,
+  "n_refits": 41,
   "n_oos_days": 833,
   "mean_views_per_refit": 29.0,
-  "mean_turnover_per_refit": 0.17244805391547424,
-  "sharpe_ratio": 0.7113739049922067,
-  "annualized_return": 0.1486486801974367,
-  "annualized_volatility": 0.23312202627249146,
-  "max_drawdown": -0.18918136360508123
+  "mean_turnover_per_refit": 0.2116422752370423,
+  "sharpe_ratio": 1.8685140248338914,
+  "annualized_return": 0.32653362822545207,
+  "annualized_volatility": 0.15797410685039728,
+  "max_drawdown": -0.15575817797161776
 }
