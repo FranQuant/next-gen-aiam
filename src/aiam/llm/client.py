@@ -15,7 +15,7 @@ class AnthropicClient:
     def __init__(
         self,
         model: str = "claude-opus-4-7",
-        temperature: float = 0.0,
+        temperature: float | None = None,
         max_tokens: int = 2000,
     ) -> None:
         self.model = model
@@ -29,9 +29,10 @@ class AnthropicClient:
         kwargs: dict = dict(
             model=self.model,
             max_tokens=self.max_tokens,
-            temperature=self.temperature,
             messages=[{"role": "user", "content": prompt}],
         )
+        if self.temperature is not None:
+            kwargs["temperature"] = self.temperature
         if system:
             kwargs["system"] = system
         response = client.messages.create(**kwargs)
