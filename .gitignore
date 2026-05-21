@@ -74,6 +74,8 @@ docs/results.toc
 data/cache/
 # Intraday cache (regenerated from EODHD; published CSV is the reproducible artifact)
 data/cache/intraday_*.parquet
+# LLM prompt/response cache (local only, potentially large)
+data/cache/llm/
 
 # Raw data exports (portability CSVs, potentially large)
 data/raw/
