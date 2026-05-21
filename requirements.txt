@@ -31,7 +31,7 @@ torch>=2.0
 
 # LLM integrations
 anthropic>=0.40
-openai>=1.60
+openai>=2.0
 pydantic>=2.0
 
 # dev tools
