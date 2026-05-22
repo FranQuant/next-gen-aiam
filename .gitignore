@@ -134,3 +134,10 @@ results/rl/n3/
 results/**/*.html
 # write-only DL portfolio weight parquets (notebook 05 outputs; nothing reloads them)
 results/notebook_05/weights_*.parquet
+
+# archived RL dev scaffolding (N=1/2/3 experiments) — kept local, not public
+notebooks/_rl_dev/
+results/rl/cumret_n*.png
+results/rl/ensemble_weights.png
+results/rl/n2_random_sanity.png
+results/rl/training_curves.png
