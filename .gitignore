@@ -123,3 +123,9 @@ docs/design/
 docs/research/
 docs/handoff/
 docs/results.md
+
+# RL model weights — kept local, out of public repo (large binaries; results live in diagnostics/figures)
+results/rl/n29_ppo/checkpoints/*.pt
+results/rl/n1/
+results/rl/n2/
+results/rl/n3/
