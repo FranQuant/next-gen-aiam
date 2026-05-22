@@ -117,3 +117,9 @@ test_intraday*.py
 notebooks/_local_*.html
 notebooks/_local_*.ipynb
 notebooks/*.html
+
+# internal working docs — keep local, not public
+docs/design/
+docs/research/
+docs/handoff/
+docs/results.md
