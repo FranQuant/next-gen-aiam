@@ -129,3 +129,8 @@ results/rl/n29_ppo/checkpoints/*.pt
 results/rl/n1/
 results/rl/n2/
 results/rl/n3/
+
+# rendered-notebook HTML exports (regenerable; inflated size + skewed GitHub language stats)
+results/**/*.html
+# write-only DL portfolio weight parquets (notebook 05 outputs; nothing reloads them)
+results/notebook_05/weights_*.parquet
