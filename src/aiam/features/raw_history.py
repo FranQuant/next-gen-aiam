@@ -1,4 +1,4 @@
-"""Raw lagged-return and realized-power feature extraction (JPM Cheng & Wu 2024 spec)."""
+"""Raw lagged-return and realized-power feature extraction (BSV 2009 spec)."""
 from __future__ import annotations
 
 from typing import Optional
@@ -22,7 +22,7 @@ def extract_raw_history(
     """Extract raw lagged history as a feature panel.
 
     For each (date, asset) row, produces `lookback` return lags and optionally
-    `lookback` realized-power lags, following Cheng & Wu (J.P. Morgan, 2024).
+    `lookback` realized-power lags, following BSV (2009).
 
     Column naming: 'r_lag_000' = return on day t (current day), 'r_lag_001' = day t-1, ...
     If RP included: 'rp_lag_000', 'rp_lag_001', ... appended after all 'r_lag_*'.

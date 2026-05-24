@@ -17,8 +17,8 @@ class MVOConstrained(PointInTimeStrategy):
     """Global Minimum Variance with per-asset weight upper bound.
 
     MVO (mean-variance optimization) in minimum-variance form with a
-    hard upper bound and a soft minimum-holding-size lower bound, following
-    JPM (2022) §3 practice.  The ub hard constraint prevents degenerate
+    hard upper bound and a soft minimum-holding-size lower bound (per-asset
+    bounds [5%, 40%]).  The ub hard constraint prevents degenerate
     corner solutions (e.g., SHY concentration).  Positions below lb are
     zeroed post-optimization and weights renormalized.
     """

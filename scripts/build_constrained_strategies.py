@@ -2,7 +2,7 @@
 
 Adds MSR_C(ledoit_wolf), MSR_C(sample), MVO_C(ledoit_wolf), MVO_C(sample)
 to the 24-strategy cache.  Saves weights and updates portfolio_returns caches.
-Following JPM (2022) §3 practice: per-asset bounds [5%, 40%].
+Standard per-asset bounds [5%, 40%].
 """
 from __future__ import annotations
 

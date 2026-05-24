@@ -116,7 +116,7 @@ class LassoSignalStrategy(_MLSignalBase):
 
 
 class RFSignalStrategy(_MLSignalBase):
-    """Random Forest for cross-sectional return prediction (Hilpisch §14 + JPM ML Quant).
+    """Random Forest for cross-sectional return prediction (Hilpisch §14).
 
     Defaults are conservative for noisy financial data: 100 trees, max_depth=8, min_samples_leaf=50.
     """

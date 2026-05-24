@@ -19,8 +19,8 @@ class MaximumSharpeConstrained(PointInTimeStrategy):
     Solved via scipy SLSQP (direct Sharpe maximization) rather than the
     Dantzig-Wolfe CVXPY parametrization, which doesn't support mixed
     lb/ub constraints cleanly on large universes.  Positions below lb are
-    zeroed and weights renormalized (JPM 2022 §3 minimum-holding-size
-    interpretation for lb; ub is a hard constraint).
+    zeroed and weights renormalized (minimum-holding-size interpretation
+    for lb; ub is a hard constraint).
     """
 
     def __init__(

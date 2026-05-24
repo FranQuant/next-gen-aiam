@@ -20,7 +20,7 @@ def crra_loss(
     gamma: float = 5.0,
     clip_min: float = -0.99,
 ) -> torch.Tensor:
-    """Negative CRRA utility (gamma=5 is the JPM 2024 default).
+    """Negative CRRA utility (gamma=5 is a standard moderately-high risk-aversion default).
 
     Clips portfolio_returns at min=-0.99 to prevent (1+R)^(1-gamma) blowup
     on negative tail moves.
