@@ -14,7 +14,7 @@ python -m apps.pca_dislocation_dashboard
 
 The dashboard requires `dash`, `plotly`, and `pandas`.
 
-Notebook 07b generates the deterministic artifacts read by the app:
+Notebook 07b generates the required artifacts read by the app:
 
 - `results/notebook_07b/pca_dislocation_scorecard.csv`
 - `results/notebook_07b/pca_dislocation_scores.csv`
@@ -23,5 +23,6 @@ Notebook 07b generates the deterministic artifacts read by the app:
 - `results/notebook_07b/rolling_pca_reconstruction_diagnostics.csv`
 - `results/notebook_07b/methodology_gap_table.csv`
 
-The app is an interactive viewer only. It does not recompute PCA, momentum,
-regime labels, diagnostic labels, or methodology outputs.
+The app is an artifact-only interactive viewer. It does not recompute PCA,
+momentum, regime labels, diagnostic labels, residuals, or methodology outputs.
+It presents diagnostics only and does not provide trading recommendations.

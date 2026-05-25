@@ -22,6 +22,10 @@ DISCLAIMER = (
     "not recompute PCA, momentum, regimes, or diagnostic labels. Outputs are research "
     "diagnostics, not buy/sell recommendations or portfolio-construction signals."
 )
+ARTIFACT_ONLY_NOTE = (
+    "Reads saved artifacts only; does not recompute PCA, momentum, regimes, residuals, "
+    "or diagnostic labels."
+)
 GAP_NOTE = (
     "These gaps are explicit by design. The dashboard does not fabricate positioning "
     "data or macro-support scores."
@@ -66,43 +70,90 @@ SCORECARD_COLUMNS = [
 ]
 
 PAGE_STYLE = {
-    "backgroundColor": "#f4f6f8",
-    "color": "#1f2933",
+    "backgroundColor": "#eef2f6",
+    "color": "#1f2937",
     "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     "minHeight": "100vh",
-    "padding": "24px",
+    "padding": "28px",
 }
 SHELL_STYLE = {"maxWidth": "1440px", "margin": "0 auto"}
 CARD_STYLE = {
     "backgroundColor": "#ffffff",
-    "border": "1px solid #d8dee6",
+    "border": "1px solid #d9e0e8",
     "borderRadius": "8px",
-    "boxShadow": "0 1px 2px rgba(15, 23, 42, 0.04)",
-    "padding": "18px",
-    "marginBottom": "18px",
+    "boxShadow": "0 10px 28px rgba(15, 23, 42, 0.06)",
+    "padding": "20px",
+    "marginBottom": "20px",
+}
+HEADER_STYLE = {
+    **CARD_STYLE,
+    "backgroundColor": "#0f1f33",
+    "border": "1px solid #20344f",
+    "boxShadow": "0 18px 36px rgba(15, 31, 51, 0.16)",
+    "padding": "24px 26px",
 }
 SECTION_TITLE_STYLE = {
     "fontSize": "16px",
     "fontWeight": 650,
-    "margin": "0 0 12px",
+    "margin": "0 0 14px",
     "color": "#111827",
 }
 CONTROL_GRID_STYLE = {
     "display": "grid",
-    "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
-    "gap": "14px",
+    "gridTemplateColumns": "repeat(4, minmax(180px, 1fr))",
+    "gap": "16px",
+    "alignItems": "end",
 }
 LABEL_STYLE = {
     "display": "block",
-    "fontSize": "12px",
-    "fontWeight": 650,
-    "color": "#52616f",
+    "fontSize": "11px",
+    "fontWeight": 700,
+    "color": "#607083",
     "marginBottom": "6px",
     "textTransform": "uppercase",
     "letterSpacing": "0",
 }
 GRAPH_CONFIG = {"displaylogo": False, "responsive": True}
 NEUTRAL_TEMPLATE = "plotly_white"
+PALETTE = {
+    "navy": "#10233f",
+    "slate": "#475569",
+    "muted_slate": "#64748b",
+    "blue": "#2f6fbb",
+    "blue_soft": "#dceafd",
+    "amber": "#b7791f",
+    "amber_soft": "#fff4dc",
+    "rose": "#b4535f",
+    "rose_soft": "#fbe7ea",
+    "gold": "#9a7b24",
+    "teal": "#1f766e",
+    "grid": "#e6ebf1",
+}
+CHART_COLOR_SEQUENCE = [
+    PALETTE["blue"],
+    PALETTE["rose"],
+    PALETTE["teal"],
+    PALETTE["gold"],
+    PALETTE["muted_slate"],
+    "#5b6f95",
+    "#8a6f3d",
+]
+CHART_LAYOUT = {
+    "template": NEUTRAL_TEMPLATE,
+    "paper_bgcolor": "white",
+    "plot_bgcolor": "white",
+    "font": {"family": PAGE_STYLE["fontFamily"], "size": 12, "color": "#1f2937"},
+    "legend": {
+        "orientation": "h",
+        "yanchor": "bottom",
+        "y": 1.02,
+        "xanchor": "right",
+        "x": 1,
+        "font": {"size": 11},
+        "title": {"font": {"size": 11}},
+    },
+    "title": {"font": {"size": 16, "color": "#111827"}, "x": 0.01, "xanchor": "left"},
+}
 
 
 def find_repo_root(start: Path | None = None) -> Path:
@@ -183,12 +234,44 @@ def _all_values(values: pd.Series | list[str]) -> list[str]:
     return [option["value"] for option in _dropdown_options(values)]
 
 
+def _apply_chart_layout(
+    fig: go.Figure,
+    *,
+    height: int,
+    margin: dict[str, int] | None = None,
+    legend: dict[str, object] | None = None,
+) -> go.Figure:
+    layout = {
+        **CHART_LAYOUT,
+        "height": height,
+        "margin": margin or {"l": 52, "r": 28, "t": 62, "b": 52},
+    }
+    if legend:
+        layout["legend"] = {**CHART_LAYOUT["legend"], **legend}
+    fig.update_layout(**layout)
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor=PALETTE["grid"],
+        zerolinecolor="#cbd5e1",
+        linecolor="#cbd5e1",
+        tickfont={"size": 11},
+        title_font={"size": 12},
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor=PALETTE["grid"],
+        zerolinecolor="#cbd5e1",
+        linecolor="#cbd5e1",
+        tickfont={"size": 11},
+        title_font={"size": 12},
+    )
+    return fig
+
+
 def _empty_figure(title: str, message: str) -> go.Figure:
     fig = go.Figure()
     fig.update_layout(
         title=title,
-        template=NEUTRAL_TEMPLATE,
-        height=360,
         annotations=[
             {
                 "text": message,
@@ -203,7 +286,122 @@ def _empty_figure(title: str, message: str) -> go.Figure:
         xaxis={"visible": False},
         yaxis={"visible": False},
     )
-    return fig
+    return _apply_chart_layout(fig, height=360)
+
+
+def _format_date(value: object) -> str:
+    if pd.isna(value):
+        return "n/a"
+    timestamp = pd.to_datetime(value, errors="coerce")
+    if pd.isna(timestamp):
+        return str(value)
+    return timestamp.strftime("%Y-%m-%d")
+
+
+def _format_dislocation_asset(row: pd.Series | None) -> tuple[str, str]:
+    if row is None or row.empty:
+        return "n/a", "diagnostic only"
+    asset = str(row.get("asset", "n/a"))
+    value = pd.to_numeric(pd.Series([row.get("pca_dislocation_z")]), errors="coerce").iloc[0]
+    detail = "diagnostic only" if pd.isna(value) else f"z-score {value:.2f}"
+    return asset, detail
+
+
+def _build_kpi_items(scorecard: pd.DataFrame) -> list[dict[str, str]]:
+    if scorecard.empty:
+        return [
+            {"label": "Latest date", "value": "n/a", "detail": "artifact viewer"},
+            {"label": "Assets", "value": "0", "detail": "scorecard rows"},
+            {"label": "Dominant regime", "value": "n/a", "detail": "diagnostic only"},
+            {"label": "Positive dislocation", "value": "n/a", "detail": "diagnostic only"},
+            {"label": "Negative dislocation", "value": "n/a", "detail": "diagnostic only"},
+            {"label": "Median absolute dislocation", "value": "n/a", "detail": "z-score"},
+        ]
+
+    latest_date = (
+        _format_date(scorecard["date"].max()) if "date" in scorecard.columns else "latest"
+    )
+    asset_count = scorecard["asset"].nunique() if "asset" in scorecard.columns else len(scorecard)
+    regime = "n/a"
+    if "dominant_regime" in scorecard.columns and not scorecard["dominant_regime"].dropna().empty:
+        regime = str(scorecard["dominant_regime"].dropna().astype(str).mode().iloc[0])
+
+    z_scores = (
+        pd.to_numeric(scorecard["pca_dislocation_z"], errors="coerce")
+        if "pca_dislocation_z" in scorecard.columns
+        else pd.Series(dtype="float64")
+    )
+    positive_row = scorecard.loc[z_scores.idxmax()] if not z_scores.dropna().empty else None
+    negative_row = scorecard.loc[z_scores.idxmin()] if not z_scores.dropna().empty else None
+    positive_asset, positive_detail = _format_dislocation_asset(positive_row)
+    negative_asset, negative_detail = _format_dislocation_asset(negative_row)
+    median_abs = z_scores.abs().median()
+    median_abs_text = "n/a" if pd.isna(median_abs) else f"{median_abs:.2f}"
+
+    return [
+        {"label": "Latest date", "value": latest_date, "detail": "scorecard snapshot"},
+        {"label": "Assets", "value": f"{asset_count}", "detail": "loaded from artifacts"},
+        {"label": "Dominant regime", "value": regime, "detail": "diagnostic only"},
+        {"label": "Positive dislocation", "value": positive_asset, "detail": positive_detail},
+        {"label": "Negative dislocation", "value": negative_asset, "detail": negative_detail},
+        {
+            "label": "Median absolute dislocation",
+            "value": median_abs_text,
+            "detail": "z-score",
+        },
+    ]
+
+
+def _kpi_cards(scorecard: pd.DataFrame) -> html.Div:
+    return html.Div(
+        style={
+            "display": "grid",
+            "gridTemplateColumns": "repeat(6, minmax(145px, 1fr))",
+            "gap": "12px",
+            "marginBottom": "20px",
+        },
+        children=[
+            html.Div(
+                style={
+                    "backgroundColor": "#ffffff",
+                    "border": "1px solid #d9e0e8",
+                    "borderRadius": "8px",
+                    "padding": "14px 15px",
+                    "boxShadow": "0 6px 18px rgba(15, 23, 42, 0.05)",
+                    "minHeight": "92px",
+                },
+                children=[
+                    html.Div(
+                        item["label"],
+                        style={
+                            "fontSize": "11px",
+                            "fontWeight": 700,
+                            "color": "#607083",
+                            "textTransform": "uppercase",
+                            "letterSpacing": "0",
+                            "marginBottom": "8px",
+                        },
+                    ),
+                    html.Div(
+                        item["value"],
+                        style={
+                            "fontSize": "19px",
+                            "fontWeight": 700,
+                            "lineHeight": "1.2",
+                            "color": "#10233f",
+                            "wordBreak": "break-word",
+                        },
+                    ),
+                    html.Div(
+                        item["detail"],
+                        style={"fontSize": "12px", "color": "#64748b", "marginTop": "6px"},
+                    ),
+                ],
+            )
+            for item in _build_kpi_items(scorecard)
+        ],
+    )
+
 
 
 def filter_scorecard(
@@ -240,32 +438,43 @@ def make_dislocation_bar(scorecard: pd.DataFrame, top_n: int) -> go.Figure:
     if frame.empty:
         return _empty_figure(title, "No scorecard rows match the current filters.")
 
-    color_col = "diagnostic_label" if "diagnostic_label" in frame.columns else "_direction"
     frame = frame.copy()
     frame["_direction"] = frame["pca_dislocation_z"].apply(
-        lambda value: "Positive dislocation" if value >= 0 else "Negative dislocation"
+        lambda value: "Positive dislocation"
+        if value >= 2
+        else "Negative dislocation"
+        if value <= -2
+        else "Diagnostic only"
     )
+    color_map = {
+        "Positive dislocation": PALETTE["blue"],
+        "Negative dislocation": PALETTE["rose"],
+        "Diagnostic only": PALETTE["muted_slate"],
+    }
 
     fig = px.bar(
-        frame.sort_values("pca_dislocation_z"),
+        frame.sort_values("pca_dislocation_z", ascending=True),
         x="asset",
         y="pca_dislocation_z",
-        color=color_col,
+        color="_direction",
         hover_data=[col for col in SCORECARD_COLUMNS if col in frame.columns],
         title=title,
         template=NEUTRAL_TEMPLATE,
-        color_discrete_sequence=px.colors.qualitative.Safe,
+        color_discrete_map=color_map,
     )
-    fig.add_hline(y=2, line_dash="dash", line_color="#6b7280", opacity=0.65)
-    fig.add_hline(y=-2, line_dash="dash", line_color="#6b7280", opacity=0.65)
+    fig.add_hline(y=2, line_dash="dash", line_color=PALETTE["slate"], opacity=0.62)
+    fig.add_hline(y=-2, line_dash="dash", line_color=PALETTE["slate"], opacity=0.62)
+    fig.update_traces(
+        marker_line_width=0,
+        hovertemplate="<b>%{x}</b><br>PCA dislocation z-score: %{y:.2f}<extra></extra>",
+    )
     fig.update_layout(
-        height=420,
-        legend_title_text=color_col.replace("_", " ").title(),
-        margin={"l": 46, "r": 24, "t": 58, "b": 90},
+        legend_title_text="",
+        bargap=0.24,
     )
     fig.update_xaxes(title_text="", tickangle=-35)
     fig.update_yaxes(title_text="PCA dislocation z-score", zeroline=True)
-    return fig
+    return _apply_chart_layout(fig, height=440, margin={"l": 54, "r": 24, "t": 62, "b": 104})
 
 
 def make_dislocation_momentum_scatter(scorecard: pd.DataFrame) -> go.Figure:
@@ -297,19 +506,20 @@ def make_dislocation_momentum_scatter(scorecard: pd.DataFrame) -> go.Figure:
         hover_data=hover_cols,
         title=title,
         template=NEUTRAL_TEMPLATE,
-        color_discrete_sequence=px.colors.qualitative.Safe,
+        color_discrete_sequence=CHART_COLOR_SEQUENCE,
     )
-    fig.add_vline(x=0, line_dash="dash", line_color="#6b7280", opacity=0.65)
-    fig.add_hline(y=0, line_dash="dash", line_color="#6b7280", opacity=0.65)
-    fig.update_traces(marker={"size": 10, "line": {"width": 0.8, "color": "#ffffff"}})
+    fig.add_vline(x=0, line_dash="dash", line_color=PALETTE["slate"], opacity=0.62)
+    fig.add_hline(y=0, line_dash="dash", line_color=PALETTE["slate"], opacity=0.62)
+    fig.update_traces(
+        marker={"size": 10, "line": {"width": 0.8, "color": "#ffffff"}, "opacity": 0.92},
+        hovertemplate="<b>%{customdata[0]}</b><br>Dislocation z-score: %{x:.2f}<br>Momentum score: %{y:.2f}<extra></extra>",
+    )
     fig.update_layout(
-        height=420,
         legend_title_text=color_col.replace("_", " ").title(),
-        margin={"l": 46, "r": 24, "t": 58, "b": 46},
     )
     fig.update_xaxes(title_text="PCA dislocation z-score")
     fig.update_yaxes(title_text="Momentum score")
-    return fig
+    return _apply_chart_layout(fig, height=440, margin={"l": 54, "r": 24, "t": 62, "b": 54})
 
 
 def make_dislocation_timeseries(
@@ -336,20 +546,26 @@ def make_dislocation_timeseries(
         color="asset",
         title=title,
         template=NEUTRAL_TEMPLATE,
-        color_discrete_sequence=px.colors.qualitative.Safe,
+        color_discrete_sequence=CHART_COLOR_SEQUENCE,
     )
     for y_value, width in [(2, 1), (0, 1.2), (-2, 1)]:
         fig.add_hline(
             y=y_value,
             line_dash="dash" if y_value else "solid",
-            line_color="#6b7280",
+            line_color=PALETTE["slate"],
             line_width=width,
-            opacity=0.65,
+            opacity=0.6,
         )
-    fig.update_layout(height=430, margin={"l": 46, "r": 24, "t": 58, "b": 46})
+    fig.update_traces(line={"width": 1.7}, opacity=0.92)
+    fig.update_layout(legend_title_text="Asset")
     fig.update_xaxes(title_text="")
     fig.update_yaxes(title_text="PCA dislocation z-score")
-    return fig
+    return _apply_chart_layout(
+        fig,
+        height=500,
+        margin={"l": 54, "r": 28, "t": 62, "b": 58},
+        legend={"y": -0.24, "x": 0, "xanchor": "left", "yanchor": "top"},
+    )
 
 
 def make_rolling_pca_diagnostics(diagnostics: pd.DataFrame) -> go.Figure:
@@ -377,7 +593,7 @@ def make_rolling_pca_diagnostics(diagnostics: pd.DataFrame) -> go.Figure:
                 y=frame[cumulative_col],
                 mode="lines",
                 name="PC1-PC5 cumulative explained variance",
-                line={"color": "#2563eb", "width": 2},
+                line={"color": PALETTE["blue"], "width": 2},
                 yaxis="y",
             )
         )
@@ -388,17 +604,18 @@ def make_rolling_pca_diagnostics(diagnostics: pd.DataFrame) -> go.Figure:
                 y=frame[col],
                 mode="lines",
                 name=col.replace("_", " ").title(),
-                line={"color": ["#64748b", "#0f766e", "#7c3aed"][idx % 3], "width": 1.8},
+                line={
+                    "color": [PALETTE["muted_slate"], PALETTE["teal"], PALETTE["gold"]][
+                        idx % 3
+                    ],
+                    "width": 1.8,
+                },
                 yaxis="y2" if has_cumulative else "y",
             )
         )
 
     layout = {
         "title": title,
-        "template": NEUTRAL_TEMPLATE,
-        "height": 430,
-        "margin": {"l": 46, "r": 54, "t": 58, "b": 46},
-        "legend": {"orientation": "h", "y": -0.2},
         "xaxis": {"title": ""},
     }
     if has_cumulative and error_cols:
@@ -420,7 +637,12 @@ def make_rolling_pca_diagnostics(diagnostics: pd.DataFrame) -> go.Figure:
             else "Reconstruction error"
         }
     fig.update_layout(**layout)
-    return fig
+    return _apply_chart_layout(
+        fig,
+        height=470,
+        margin={"l": 58, "r": 72, "t": 62, "b": 68},
+        legend={"y": -0.22, "x": 0, "xanchor": "left", "yanchor": "top"},
+    )
 
 
 def _data_table_columns(frame: pd.DataFrame) -> list[dict[str, object]]:
@@ -443,46 +665,70 @@ def _scorecard_table(frame: pd.DataFrame) -> dash_table.DataTable:
         data=table_frame.to_dict("records"),
         sort_action="native",
         filter_action="native",
-        page_action="native",
-        page_size=12,
+        page_action="none",
+        fixed_rows={"headers": True},
+        fixed_columns={"headers": True, "data": 1},
         style_as_list_view=True,
-        style_table={"overflowX": "auto"},
+        style_table={
+            "height": "500px",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "minWidth": "100%",
+        },
         style_cell={
             "fontFamily": PAGE_STYLE["fontFamily"],
-            "fontSize": "13px",
-            "padding": "8px",
+            "fontSize": "12.5px",
+            "padding": "10px 12px",
             "textAlign": "left",
-            "minWidth": "110px",
-            "maxWidth": "260px",
+            "minWidth": "125px",
+            "maxWidth": "280px",
             "whiteSpace": "normal",
+            "height": "auto",
+            "lineHeight": "1.35",
         },
+        style_cell_conditional=[
+            {"if": {"column_id": "asset"}, "minWidth": "125px", "fontWeight": 700},
+            {"if": {"column_id": "asset_class"}, "minWidth": "120px"},
+            {"if": {"column_id": "pca_dislocation_z"}, "minWidth": "132px", "textAlign": "right"},
+            {"if": {"column_id": "momentum_score"}, "minWidth": "132px", "textAlign": "right"},
+            {"if": {"column_id": "abs_dislocation_rank"}, "minWidth": "136px", "textAlign": "right"},
+            {"if": {"column_id": "dislocation_bucket"}, "minWidth": "150px"},
+            {"if": {"column_id": "momentum_bucket"}, "minWidth": "150px"},
+            {"if": {"column_id": "dominant_regime"}, "minWidth": "160px"},
+            {"if": {"column_id": "macro_context"}, "minWidth": "210px"},
+            {"if": {"column_id": "diagnostic_label"}, "minWidth": "280px"},
+        ],
         style_header={
-            "backgroundColor": "#eef2f6",
+            "backgroundColor": "#10233f",
             "fontWeight": 700,
-            "color": "#1f2933",
-            "border": "1px solid #d8dee6",
+            "color": "#ffffff",
+            "border": "1px solid #20344f",
+            "fontSize": "11px",
+            "textTransform": "uppercase",
+            "letterSpacing": "0",
         },
-        style_data={"border": "1px solid #e5e7eb"},
+        style_data={"border": "1px solid #e5e7eb", "backgroundColor": "#ffffff"},
         style_data_conditional=[
             {
-                "if": {"filter_query": "{pca_dislocation_z} > 0", "column_id": "pca_dislocation_z"},
-                "backgroundColor": "#e8f1fb",
-                "color": "#1e3a5f",
+                "if": {"row_index": "odd"},
+                "backgroundColor": "#f8fafc",
             },
             {
-                "if": {"filter_query": "{pca_dislocation_z} < 0", "column_id": "pca_dislocation_z"},
-                "backgroundColor": "#f3edf7",
-                "color": "#4c1d69",
+                "if": {"filter_query": "{abs_dislocation_rank} <= 5"},
+                "backgroundColor": "#fffaf0",
+                "borderLeft": f"3px solid {PALETTE['gold']}",
             },
             {
-                "if": {"filter_query": "{pca_dislocation_z} >= 2"},
+                "if": {"filter_query": "{pca_dislocation_z} >= 2", "column_id": "pca_dislocation_z"},
+                "backgroundColor": PALETTE["blue_soft"],
+                "color": "#173f70",
+                "fontWeight": 700,
+            },
+            {
+                "if": {"filter_query": "{pca_dislocation_z} <= -2", "column_id": "pca_dislocation_z"},
+                "backgroundColor": PALETTE["rose_soft"],
+                "color": "#7f2f3c",
                 "fontWeight": 650,
-                "borderLeft": "3px solid #475569",
-            },
-            {
-                "if": {"filter_query": "{pca_dislocation_z} <= -2"},
-                "fontWeight": 650,
-                "borderLeft": "3px solid #475569",
             },
         ],
     )
@@ -499,17 +745,20 @@ def _small_table(frame: pd.DataFrame) -> dash_table.DataTable:
         style_table={"overflowX": "auto"},
         style_cell={
             "fontFamily": PAGE_STYLE["fontFamily"],
-            "fontSize": "13px",
-            "padding": "8px",
+            "fontSize": "12.5px",
+            "padding": "9px 10px",
             "textAlign": "left",
             "whiteSpace": "normal",
             "height": "auto",
         },
         style_header={
-            "backgroundColor": "#eef2f6",
+            "backgroundColor": "#f1f5f9",
             "fontWeight": 700,
             "color": "#1f2933",
             "border": "1px solid #d8dee6",
+            "fontSize": "11px",
+            "textTransform": "uppercase",
+            "letterSpacing": "0",
         },
         style_data={"border": "1px solid #e5e7eb"},
     )
@@ -584,15 +833,15 @@ def build_layout(artifacts: dict[str, pd.DataFrame | list[str]]) -> html.Div:
                 style=SHELL_STYLE,
                 children=[
                     html.Div(
-                        style=CARD_STYLE,
+                        style=HEADER_STYLE,
                         children=[
                             html.H1(
                                 APP_TITLE,
                                 style={
                                     "margin": "0 0 6px",
-                                    "fontSize": "30px",
+                                    "fontSize": "32px",
                                     "lineHeight": "1.2",
-                                    "color": "#111827",
+                                    "color": "#ffffff",
                                 },
                             ),
                             html.P(
@@ -600,20 +849,35 @@ def build_layout(artifacts: dict[str, pd.DataFrame | list[str]]) -> html.Div:
                                 style={
                                     "margin": "0 0 14px",
                                     "fontSize": "15px",
-                                    "color": "#52616f",
+                                    "color": "#d7e2ee",
+                                },
+                            ),
+                            html.P(
+                                ARTIFACT_ONLY_NOTE,
+                                style={
+                                    "display": "inline-block",
+                                    "margin": "0 0 14px",
+                                    "padding": "7px 10px",
+                                    "borderRadius": "6px",
+                                    "backgroundColor": "rgba(255, 255, 255, 0.08)",
+                                    "border": "1px solid rgba(255, 255, 255, 0.13)",
+                                    "fontSize": "13px",
+                                    "lineHeight": "1.4",
+                                    "color": "#e8eef6",
                                 },
                             ),
                             html.P(
                                 DISCLAIMER,
                                 style={
                                     "margin": 0,
-                                    "fontSize": "13px",
-                                    "lineHeight": "1.55",
-                                    "color": "#344054",
+                                    "fontSize": "12.5px",
+                                    "lineHeight": "1.5",
+                                    "color": "#b9c6d4",
                                 },
                             ),
                         ],
                     ),
+                    _kpi_cards(scorecard),
                     html.Div(
                         style=CARD_STYLE,
                         children=[
@@ -697,6 +961,14 @@ def build_layout(artifacts: dict[str, pd.DataFrame | list[str]]) -> html.Div:
                         style=CARD_STYLE,
                         children=[
                             html.H2("Latest Scorecard", style=SECTION_TITLE_STYLE),
+                            html.Div(
+                                "Diagnostic scorecard view; values are loaded from saved artifacts.",
+                                style={
+                                    "fontSize": "12.5px",
+                                    "color": "#64748b",
+                                    "margin": "-6px 0 12px",
+                                },
+                            ),
                             html.Div(id="scorecard-table-container"),
                         ],
                     ),
