@@ -1,0 +1,5 @@
+strategy,arch,sharpe,ann_ret,ann_vol,max_dd,start,end
+RiskParity-21d,Benchmark,0.989,0.0626,0.0634,-0.1302,2015-02-27,2026-04-30
+DeepMom(CrossAsset),DeepMomentum,0.852,0.0958,0.1153,-0.2241,2015-02-27,2026-04-30
+DeepMom(Pooled),DeepMomentum,0.849,0.0997,0.1206,-0.1916,2015-02-27,2026-04-30
+TSMOM-12m,Benchmark,0.65,0.0273,0.0429,-0.1236,2015-02-27,2026-04-30
