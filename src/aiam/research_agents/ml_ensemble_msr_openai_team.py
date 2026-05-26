@@ -26,6 +26,19 @@ OPTIONAL_SDK_ERROR = (
     "Install with: python -m pip install -e '.[agents]'"
 )
 
+RESEARCH_MANAGER_AGENT_NAME = "research_manager_agent"
+DATA_QA_AGENT_NAME = "data_qa_agent"
+QUANT_STRATEGY_AGENT_NAME = "quant_strategy_agent"
+PORTFOLIO_RISK_AGENT_NAME = "portfolio_risk_agent"
+RESEARCH_HANDOFF_AGENT_NAME = "research_handoff_agent"
+SDK_SAFE_AGENT_NAMES = (
+    RESEARCH_MANAGER_AGENT_NAME,
+    DATA_QA_AGENT_NAME,
+    QUANT_STRATEGY_AGENT_NAME,
+    PORTFOLIO_RISK_AGENT_NAME,
+    RESEARCH_HANDOFF_AGENT_NAME,
+)
+
 COMMON_AGENT_CONSTRAINTS = """
 Constraints:
 - research-only.
@@ -194,35 +207,35 @@ def build_ml_ensemble_msr_openai_team(model_id: str) -> Any:
 
     data_qa = _agent(
         Agent,
-        name="Data QA Agent",
+        name=DATA_QA_AGENT_NAME,
         model=model_id,
         instructions=DATA_QA_INSTRUCTIONS,
         tools=tools,
     )
     quant_strategy = _agent(
         Agent,
-        name="Quant Strategy Agent",
+        name=QUANT_STRATEGY_AGENT_NAME,
         model=model_id,
         instructions=QUANT_STRATEGY_INSTRUCTIONS,
         tools=tools,
     )
     portfolio_risk = _agent(
         Agent,
-        name="Portfolio Risk Agent",
+        name=PORTFOLIO_RISK_AGENT_NAME,
         model=model_id,
         instructions=PORTFOLIO_RISK_INSTRUCTIONS,
         tools=tools,
     )
     research_handoff = _agent(
         Agent,
-        name="Research Handoff Agent",
+        name=RESEARCH_HANDOFF_AGENT_NAME,
         model=model_id,
         instructions=RESEARCH_HANDOFF_INSTRUCTIONS,
         tools=tools,
     )
     return _agent(
         Agent,
-        name="Research Manager Agent",
+        name=RESEARCH_MANAGER_AGENT_NAME,
         model=model_id,
         instructions=RESEARCH_MANAGER_INSTRUCTIONS,
         tools=tools,
@@ -293,4 +306,3 @@ def _final_output_text(result: Any) -> str:
         if value is not None:
             return str(value)
     return str(result)
-

@@ -91,4 +91,3 @@ def _print_team_progress() -> None:
 
 if __name__ == "__main__":
     main()
-

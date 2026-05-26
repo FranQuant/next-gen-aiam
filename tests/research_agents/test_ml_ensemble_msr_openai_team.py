@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib
 import inspect
 import json
+import re
 import runpy
 import sys
 from pathlib import Path
@@ -205,6 +206,46 @@ def test_model_id_is_required_for_live_run(tmp_path):
         module.run_ml_ensemble_msr_openai_team(artifact_dir, "")
 
 
+def test_sdk_team_construction_uses_safe_internal_agent_names(monkeypatch):
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    constructed_agents = []
+
+    class FakeAgent:
+        def __init__(self, **kwargs):
+            self.name = kwargs["name"]
+            self.handoffs = kwargs.get("handoffs", [])
+            constructed_agents.append(self)
+
+    monkeypatch.setattr(
+        module,
+        "_load_agents_sdk",
+        lambda: {
+            "Agent": FakeAgent,
+            "Runner": object(),
+            "function_tool": lambda func: func,
+        },
+    )
+
+    manager = module.build_ml_ensemble_msr_openai_team("gpt-test")
+
+    names = [agent.name for agent in constructed_agents]
+    assert names == [
+        module.DATA_QA_AGENT_NAME,
+        module.QUANT_STRATEGY_AGENT_NAME,
+        module.PORTFOLIO_RISK_AGENT_NAME,
+        module.RESEARCH_HANDOFF_AGENT_NAME,
+        module.RESEARCH_MANAGER_AGENT_NAME,
+    ]
+    assert manager.name == module.RESEARCH_MANAGER_AGENT_NAME
+    assert [agent.name for agent in manager.handoffs] == [
+        module.DATA_QA_AGENT_NAME,
+        module.QUANT_STRATEGY_AGENT_NAME,
+        module.PORTFOLIO_RISK_AGENT_NAME,
+        module.RESEARCH_HANDOFF_AGENT_NAME,
+    ]
+    assert all(re.fullmatch(r"[A-Za-z0-9_]+", name) for name in names)
+
+
 def test_agent_instruction_strings_contain_required_constraints():
     module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
     instruction_names = [
@@ -271,4 +312,3 @@ def test_source_check_for_disallowed_terms():
     for path in paths:
         text = path.read_text(encoding="utf-8").lower()
         assert not [term for term in terms if term in text]
-
