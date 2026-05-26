@@ -18,6 +18,10 @@ dev = [
     "pytest>=8",
     "nbstripout>=0.7",
 ]
+agents = [
+    "openai-agents",
+    "openai",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
