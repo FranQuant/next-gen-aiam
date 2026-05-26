@@ -6,6 +6,7 @@ artifact helpers remain the source of truth for every metric and table.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,17 @@ FIGURE_LINKS = (
     "figures/turnover.png",
     "figures/concentration.png",
     "figures/top_weights.png",
+)
+HUMAN_REVIEW_PATTERNS = (
+    r"\bhuman review required\b",
+    r"\bhuman review is required\b",
+    r"\brequires human review\b",
+)
+GOVERNANCE_FOOTER = (
+    "---\n\n"
+    "Human review required. This memo is research-only, provides no investment "
+    "advice, no target allocations, and no trading recommendations. Historical "
+    "weights are not target allocations."
 )
 
 COMMON_AGENT_CONSTRAINTS = """
@@ -104,7 +116,7 @@ RESEARCH_HANDOFF_INSTRUCTIONS = (
     "include an '## Appendix / Source Artifacts' section listing run_manifest.json, "
     "metrics.json, report.md, predictions.parquet, weights.parquet, "
     "strategy_returns.parquet, and figures/*.png. Do not dump raw JSON and do not "
-    "use recommendation language.\n"
+    "use recommendation language. Include the exact phrase 'Human review required.'\n"
     + COMMON_AGENT_CONSTRAINTS
 )
 
@@ -116,10 +128,10 @@ render the deterministic markdown handoff for evidence only. Specialist agents
 should critique the bounded evidence only. The final output must be the
 canonical GitHub-compatible Markdown deliverable, research-only, no investment
 advice, no target allocations, no trading recommendations, and human review
-required. The Research Handoff Agent must not paste the deterministic handoff
-verbatim, must not include a section titled '# Deterministic Rendered Handoff
-Memo', and must produce exactly one top-level '# ML Ensemble MSR Research
-Handoff' title. Use this structure:
+required. Include the exact phrase 'Human review required.' The Research Handoff
+Agent must not paste the deterministic handoff verbatim, must not include a
+section titled '# Deterministic Rendered Handoff Memo', and must produce exactly
+one top-level '# ML Ensemble MSR Research Handoff' title. Use this structure:
 
 # ML Ensemble MSR Research Handoff
 
@@ -322,7 +334,7 @@ def run_ml_ensemble_msr_openai_team(
         import asyncio
 
         result = asyncio.run(Runner.run(manager, runner_prompt))
-    final_output = _final_output_text(result)
+    final_output = finalize_team_handoff_output(_final_output_text(result))
     validation = validate_team_handoff_output(
         final_output,
         require_figures=write_figures or _figures_exist(output_dir),
@@ -330,6 +342,22 @@ def run_ml_ensemble_msr_openai_team(
     if not validation["ok"]:
         raise RuntimeError(json.dumps({"team_handoff_validation": validation}, sort_keys=True))
     return final_output
+
+
+def finalize_team_handoff_output(markdown: str) -> str:
+    """Append a concise governance footer only when required language is missing."""
+    lower_markdown = markdown.lower()
+    required_present = (
+        "research-only" in lower_markdown
+        and "no investment advice" in lower_markdown
+        and "no target allocations" in lower_markdown
+        and "no trading recommendations" in lower_markdown
+        and "historical weights are not target allocations" in lower_markdown
+        and _contains_human_review_language(markdown)
+    )
+    if required_present:
+        return markdown
+    return f"{markdown.rstrip()}\n\n{GOVERNANCE_FOOTER}"
 
 
 def validate_team_handoff_output(markdown: str, require_figures: bool = False) -> dict[str, Any]:
@@ -345,8 +373,8 @@ def validate_team_handoff_output(markdown: str, require_figures: bool = False) -
     lower_markdown = markdown.lower()
     if "no investment advice" not in lower_markdown:
         errors.append("missing no investment advice language")
-    if "human review required" not in lower_markdown:
-        errors.append("missing human review required language")
+    if not _contains_human_review_language(markdown):
+        errors.append("missing human review language")
     if require_figures:
         if "## Figures" not in markdown:
             errors.append("missing Figures section")
@@ -354,6 +382,10 @@ def validate_team_handoff_output(markdown: str, require_figures: bool = False) -
         if missing_links:
             errors.append(f"missing figure links: {missing_links}")
     return {"ok": not errors, "errors": errors}
+
+
+def _contains_human_review_language(markdown: str) -> bool:
+    return any(re.search(pattern, markdown, flags=re.IGNORECASE) for pattern in HUMAN_REVIEW_PATTERNS)
 
 
 def _figures_exist(output_dir: str | Path) -> bool:

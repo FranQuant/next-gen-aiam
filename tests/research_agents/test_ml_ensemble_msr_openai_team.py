@@ -280,6 +280,7 @@ def test_handoff_agent_prompt_forbids_verbatim_deterministic_handoff():
     assert "canonical github-compatible markdown deliverable" in text
     assert "## figures" in text
     assert "## appendix / source artifacts" in text
+    assert "human review required." in module.RESEARCH_HANDOFF_INSTRUCTIONS
 
 
 def test_default_team_prompt_forbids_appended_deterministic_handoff():
@@ -296,6 +297,7 @@ def test_default_team_prompt_forbids_appended_deterministic_handoff():
     assert "weights.parquet" in text
     assert "strategy_returns.parquet" in text
     assert "predictions.parquet" in text
+    assert "Human review required." in module.DEFAULT_TEAM_PROMPT
 
 
 def test_default_team_prompt_includes_figures_section_and_links():
@@ -355,6 +357,71 @@ def test_team_handoff_validator_accepts_clean_handoff_with_figures_and_artifacts
         concise,
         require_figures=True,
     ) == {"ok": True, "errors": []}
+
+
+def test_team_handoff_validator_accepts_human_review_variants():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    variants = [
+        "Human review required.",
+        "Human review is required.",
+        "Requires human review.",
+        "Human review is required before relying on this research memo.",
+    ]
+
+    for phrase in variants:
+        handoff = _clean_team_handoff_with_governance(phrase)
+        assert module.validate_team_handoff_output(handoff) == {"ok": True, "errors": []}
+
+
+def test_team_handoff_validator_rejects_missing_human_review_language():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    handoff = _clean_team_handoff_with_governance("Manual review should happen.")
+
+    validation = module.validate_team_handoff_output(handoff)
+
+    assert validation["ok"] is False
+    assert "missing human review language" in validation["errors"]
+
+
+def test_team_handoff_finalizer_appends_governance_footer_when_needed():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    handoff = (
+        "# ML Ensemble MSR Research Handoff\n\n"
+        "## Executive Summary\n\n"
+        "A concise research memo.\n\n"
+        "## Appendix / Source Artifacts\n"
+    )
+
+    finalized = module.finalize_team_handoff_output(handoff)
+
+    assert finalized.endswith(module.GOVERNANCE_FOOTER)
+    assert "Human review required." in finalized
+    assert module.validate_team_handoff_output(finalized) == {"ok": True, "errors": []}
+
+
+def test_team_handoff_finalizer_does_not_duplicate_complete_governance_footer():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    handoff = _clean_team_handoff_with_governance("Human review is required.")
+
+    finalized = module.finalize_team_handoff_output(handoff)
+
+    assert finalized == handoff
+    assert finalized.count("Human review") == 1
+
+
+def _clean_team_handoff_with_governance(human_review_phrase: str) -> str:
+    return (
+        "# ML Ensemble MSR Research Handoff\n\n"
+        "## Executive Summary\n\n"
+        f"{human_review_phrase} This memo is research-only, provides no investment "
+        "advice, no target allocations, and no trading recommendations. Historical "
+        "weights are not target allocations.\n\n"
+        "## Appendix / Source Artifacts\n\n"
+        "The deterministic source artifacts are:\n"
+        "- run_manifest.json\n"
+        "- metrics.json\n"
+        "- report.md\n"
+    )
 
 
 def test_tool_functions_expose_no_arbitrary_file_reader_interface():
