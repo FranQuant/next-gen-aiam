@@ -1,0 +1,816 @@
+manifest_version: "1.0"
+phase: "6B"
+scope: "governed_agentic_research_workflow"
+generated_for: "phase6_research_committee_packet"
+research_only: true
+human_review_required: true
+forbidden_default: true
+
+policy:
+  description: "Explicit file-level allowlist for Phase 6 research packet inputs."
+  no_directory_wide_trust: true
+  no_live_web_or_api_refresh: true
+  no_broker_or_order_routing_access: true
+  no_portfolio_recommendation_authority: true
+  arbitrary_filesystem_paths_allowed: false
+  allowed_parsers:
+    - csv
+    - parquet
+    - markdown
+    - pdf
+    - json
+    - image_metadata_only
+  allowed_uses:
+    - backtest_metrics_summary
+    - regime_signal_summary
+    - pca_dashboard_summary
+    - historical_experiment_context
+    - governance_context
+    - validation_context
+    - design_context
+    - evidence_inventory
+  canonicality_values:
+    - canonical
+    - diagnostic
+    - historical
+    - auxiliary
+
+excluded_surfaces:
+  - path: ".env"
+    reason: "Credentials and local secrets are forbidden inputs."
+  - path: ".claude/"
+    reason: "Private development and tool state is outside the research evidence surface."
+  - path: ".venv/"
+    reason: "Local environment dependencies are not research artifacts."
+  - path: "data/cache/llm/*.json"
+    reason: "Raw LLM cache files are forbidden inputs."
+  - path: "notebooks/.ipynb_checkpoints/"
+    reason: "Notebook checkpoint files are not reviewed artifacts."
+  - path: "notebooks/_rl_dev/"
+    reason: "Private development notebooks are outside the approved read surface."
+  - path: "results/rl/**/agent_seed_*.pt"
+    reason: "Model weights and checkpoint files are forbidden inputs."
+  - path: "__pycache__"
+    reason: "Python bytecode caches are not research artifacts."
+  - path: ".pytest_cache"
+    reason: "Test runner cache is not a research artifact."
+  - path: "arbitrary filesystem paths not listed in approved_artifacts"
+    reason: "Phase 6 uses explicit allowlisting only."
+
+approved_artifacts:
+  - artifact_id: data_published_readme
+    path: data/published/README.md
+    artifact_type: published_data_documentation
+    parser: markdown
+    role: Documents the published deterministic data surface.
+    allowed_use: evidence_inventory
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Documentation only; does not refresh or validate source data."
+  - artifact_id: data_published_full_comparison_with_rl
+    path: data/published/full_comparison_with_rl.csv
+    artifact_type: published_comparison_table
+    parser: csv
+    role: Provides published cross-strategy comparison context including RL results.
+    allowed_use: backtest_metrics_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Use as reported evidence only; do not infer deployable allocations."
+  - artifact_id: data_published_intraday_5min_spy_ief
+    path: data/published/intraday_5min_SPY_IEF_2021_2026.csv
+    artifact_type: published_market_data
+    parser: csv
+    role: Provides deterministic intraday SPY and IEF data for evidence inventory.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Historical data only; no live market-data refresh is allowed."
+  - artifact_id: data_published_master_table_62strategies
+    path: data/published/master_table_62strategies.csv
+    artifact_type: published_strategy_summary
+    parser: csv
+    role: Provides canonical published summary metrics across strategies.
+    allowed_use: backtest_metrics_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Metric definitions and execution assumptions require human review."
+  - artifact_id: data_published_ohlcv_29assets
+    path: data/published/ohlcv_29assets_2003_2026.csv
+    artifact_type: published_market_data
+    parser: csv
+    role: Provides deterministic historical OHLCV evidence inventory.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Historical repository artifact only; do not use for live refresh."
+  - artifact_id: data_published_regime_signals
+    path: data/published/regime_signals.parquet
+    artifact_type: published_regime_signals
+    parser: parquet
+    role: Provides canonical regime signal data for research summaries.
+    allowed_use: regime_signal_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Regime labels are research features, not trading instructions."
+  - artifact_id: data_published_strategy_returns_base
+    path: data/published/strategy_returns_base.parquet
+    artifact_type: published_strategy_returns
+    parser: parquet
+    role: Provides canonical base strategy returns for metric summaries.
+    allowed_use: backtest_metrics_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Returns are historical backtest artifacts and require methodology review."
+  - artifact_id: data_published_strategy_returns_vmp
+    path: data/published/strategy_returns_vmp.parquet
+    artifact_type: published_strategy_returns
+    parser: parquet
+    role: Provides canonical VMP strategy returns for metric summaries.
+    allowed_use: backtest_metrics_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Returns are historical backtest artifacts and require methodology review."
+
+  - artifact_id: notebook07_asset_class_correlation_summary
+    path: results/notebook_07/asset_class_correlation_summary.csv
+    artifact_type: pca_summary_table
+    parser: csv
+    role: Summarizes asset-class correlation structure.
+    allowed_use: pca_dashboard_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Correlation evidence is descriptive and may be regime sensitive."
+  - artifact_id: notebook07_asset_inventory
+    path: results/notebook_07/asset_inventory.csv
+    artifact_type: pca_input_inventory
+    parser: csv
+    role: Lists assets used by the PCA research surface.
+    allowed_use: evidence_inventory
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Inventory only; does not validate data provenance by itself."
+  - artifact_id: notebook07_cluster_labels
+    path: results/notebook_07/cluster_labels.csv
+    artifact_type: pca_cluster_table
+    parser: csv
+    role: Provides cluster assignments for PCA interpretation.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Cluster assignments are diagnostic labels, not allocation groups."
+  - artifact_id: notebook07_cluster_summary
+    path: results/notebook_07/cluster_summary.csv
+    artifact_type: pca_cluster_summary
+    parser: csv
+    role: Summarizes cluster characteristics for PCA evidence.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Use for interpretation context only."
+  - artifact_id: notebook07_correlation_matrix
+    path: results/notebook_07/correlation_matrix.csv
+    artifact_type: pca_correlation_matrix
+    parser: csv
+    role: Provides correlation matrix input for PCA dashboard summaries.
+    allowed_use: pca_dashboard_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Correlation estimates can be unstable across windows."
+  - artifact_id: notebook07_eigenportfolio_returns
+    path: results/notebook_07/eigenportfolio_returns.parquet
+    artifact_type: pca_eigenportfolio_returns
+    parser: parquet
+    role: Provides historical eigenportfolio return diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Diagnostic PCA artifact only; not a portfolio recommendation."
+  - artifact_id: notebook07_eigenportfolio_summary
+    path: results/notebook_07/eigenportfolio_summary.csv
+    artifact_type: pca_eigenportfolio_summary
+    parser: csv
+    role: Summarizes eigenportfolio diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Diagnostic PCA artifact only; requires human interpretation."
+  - artifact_id: notebook07_eigenportfolio_weights
+    path: results/notebook_07/eigenportfolio_weights.csv
+    artifact_type: pca_eigenportfolio_weights
+    parser: csv
+    role: Provides PCA eigenportfolio loading diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Weights are PCA loadings and must not be treated as target allocations."
+  - artifact_id: notebook07_pca_by_regime_summary
+    path: results/notebook_07/pca_by_regime_summary.csv
+    artifact_type: pca_regime_summary
+    parser: csv
+    role: Summarizes PCA behavior across regimes.
+    allowed_use: regime_signal_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Regime relationships are descriptive and require review."
+  - artifact_id: notebook07_pca_component_interpretation
+    path: results/notebook_07/pca_component_interpretation.csv
+    artifact_type: pca_interpretation_table
+    parser: csv
+    role: Provides component interpretation labels for PCA evidence.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Interpretation labels are analyst-facing summaries, not recommendations."
+  - artifact_id: notebook07_pca_explained_variance
+    path: results/notebook_07/pca_explained_variance.csv
+    artifact_type: pca_variance_table
+    parser: csv
+    role: Reports explained variance diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Variance explained does not establish economic usefulness."
+  - artifact_id: notebook07_pca_loadings
+    path: results/notebook_07/pca_loadings.csv
+    artifact_type: pca_loadings_table
+    parser: csv
+    role: Provides PCA loadings for dashboard summaries.
+    allowed_use: pca_dashboard_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Loadings are descriptive factors, not target portfolio weights."
+  - artifact_id: notebook07_return_summary
+    path: results/notebook_07/return_summary.csv
+    artifact_type: pca_return_summary
+    parser: csv
+    role: Summarizes return behavior for PCA input assets.
+    allowed_use: pca_dashboard_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical summary only; no forward-looking claim is implied."
+  - artifact_id: notebook07_rolling_pca_diagnostics
+    path: results/notebook_07/rolling_pca_diagnostics.csv
+    artifact_type: pca_rolling_diagnostics
+    parser: csv
+    role: Provides rolling PCA stability diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Rolling diagnostics can vary with window selection."
+  - artifact_id: notebook07_snapshot_cluster_labels
+    path: results/notebook_07/snapshot_cluster_labels.csv
+    artifact_type: pca_snapshot_cluster_table
+    parser: csv
+    role: Provides snapshot cluster labels for evidence context.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Snapshot labels are point-in-time diagnostics."
+  - artifact_id: notebook07_snapshot_cluster_summary
+    path: results/notebook_07/snapshot_cluster_summary.csv
+    artifact_type: pca_snapshot_cluster_summary
+    parser: csv
+    role: Summarizes snapshot cluster diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Snapshot summary is not a stable classification guarantee."
+  - artifact_id: notebook07_snapshot_feature_summary
+    path: results/notebook_07/snapshot_feature_summary.csv
+    artifact_type: pca_snapshot_feature_summary
+    parser: csv
+    role: Summarizes snapshot features for PCA dashboard context.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Snapshot features require review before interpretation."
+  - artifact_id: notebook07_fig_cluster_dendrogram
+    path: results/notebook_07/figures/cluster_dendrogram.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for cluster dendrogram evidence.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; only metadata/provenance may be inventoried."
+  - artifact_id: notebook07_fig_clustered_correlation_heatmap
+    path: results/notebook_07/figures/clustered_correlation_heatmap.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for clustered correlation heatmap evidence.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use source tables for claims."
+  - artifact_id: notebook07_fig_correlation_heatmap
+    path: results/notebook_07/figures/correlation_heatmap.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for correlation heatmap evidence.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use source tables for claims."
+  - artifact_id: notebook07_fig_eigenportfolio_cumulative_returns
+    path: results/notebook_07/figures/eigenportfolio_cumulative_returns.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for eigenportfolio return chart.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; not portfolio advice."
+  - artifact_id: notebook07_fig_eigenportfolio_weights
+    path: results/notebook_07/figures/eigenportfolio_weights.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for eigenportfolio loading chart.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; displayed weights are not target allocations."
+  - artifact_id: notebook07_fig_pca_by_regime
+    path: results/notebook_07/figures/pca_by_regime.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for PCA-by-regime chart.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use source summaries for claims."
+  - artifact_id: notebook07_fig_pca_explained_variance
+    path: results/notebook_07/figures/pca_explained_variance.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for explained variance chart.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use source tables for claims."
+  - artifact_id: notebook07_fig_pca_loading_heatmap
+    path: results/notebook_07/figures/pca_loading_heatmap.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for PCA loading heatmap.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; loadings are not allocation recommendations."
+  - artifact_id: notebook07_fig_reference_style_snapshot_clustering
+    path: results/notebook_07/figures/reference_style_snapshot_clustering.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for reference-style snapshot clustering.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; snapshot evidence is point-in-time."
+  - artifact_id: notebook07_fig_rolling_pc1_stability
+    path: results/notebook_07/figures/rolling_pc1_stability.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for rolling PC1 stability.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use diagnostics table for claims."
+  - artifact_id: notebook07_fig_rolling_pca_explained_variance
+    path: results/notebook_07/figures/rolling_pca_explained_variance.png
+    artifact_type: pca_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for rolling explained variance.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use diagnostics table for claims."
+
+  - artifact_id: notebook07b_input_inventory
+    path: results/notebook_07b/input_inventory.csv
+    artifact_type: pca_dislocation_input_inventory
+    parser: csv
+    role: Lists inputs used by the dislocation and macro momentum dashboard.
+    allowed_use: evidence_inventory
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Inventory only; source quality still requires review."
+  - artifact_id: notebook07b_macro_regime_overlay
+    path: results/notebook_07b/macro_regime_overlay.csv
+    artifact_type: macro_regime_overlay
+    parser: csv
+    role: Provides macro regime overlay evidence for dashboard summaries.
+    allowed_use: regime_signal_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Macro regime overlay is descriptive, not a trading trigger."
+  - artifact_id: notebook07b_methodology_gap_table
+    path: results/notebook_07b/methodology_gap_table.csv
+    artifact_type: methodology_gap_table
+    parser: csv
+    role: Lists methodology gaps for research committee review.
+    allowed_use: validation_context
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Gaps should remain visible in packet output."
+  - artifact_id: notebook07b_momentum_scores
+    path: results/notebook_07b/momentum_scores.csv
+    artifact_type: macro_momentum_scores
+    parser: csv
+    role: Provides macro momentum score diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Scores are research diagnostics and not allocation instructions."
+  - artifact_id: notebook07b_pca_dislocation_scorecard
+    path: results/notebook_07b/pca_dislocation_scorecard.csv
+    artifact_type: pca_dislocation_scorecard
+    parser: csv
+    role: Provides scorecard summary for PCA dislocation research.
+    allowed_use: pca_dashboard_summary
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Scorecard is for committee interpretation only."
+  - artifact_id: notebook07b_pca_dislocation_scores
+    path: results/notebook_07b/pca_dislocation_scores.csv
+    artifact_type: pca_dislocation_scores
+    parser: csv
+    role: Provides detailed PCA dislocation score diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Scores require human interpretation and are not signals to trade."
+  - artifact_id: notebook07b_pca_reconstruction_residuals
+    path: results/notebook_07b/pca_reconstruction_residuals.parquet
+    artifact_type: pca_reconstruction_residuals
+    parser: parquet
+    role: Provides reconstruction residuals for dislocation diagnostics.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Residuals are model diagnostics and can be sensitive to PCA windowing."
+  - artifact_id: notebook07b_rolling_pca_reconstruction_diagnostics
+    path: results/notebook_07b/rolling_pca_reconstruction_diagnostics.csv
+    artifact_type: pca_rolling_reconstruction_diagnostics
+    parser: csv
+    role: Provides rolling reconstruction diagnostics for dashboard review.
+    allowed_use: pca_dashboard_summary
+    canonicality: diagnostic
+    research_only: true
+    human_review_required: true
+    caveats: "Rolling diagnostics depend on historical window choices."
+  - artifact_id: notebook07b_fig_dislocation_vs_momentum_scatter
+    path: results/notebook_07b/figures/dislocation_vs_momentum_scatter.png
+    artifact_type: pca_dislocation_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for dislocation versus momentum scatter.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use source tables for claims."
+  - artifact_id: notebook07b_fig_latest_dislocation_bar
+    path: results/notebook_07b/figures/latest_dislocation_bar.png
+    artifact_type: pca_dislocation_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for latest dislocation bar chart.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; latest historical point is not a recommendation."
+  - artifact_id: notebook07b_fig_macro_regime_scorecard_heatmap
+    path: results/notebook_07b/figures/macro_regime_scorecard_heatmap.png
+    artifact_type: pca_dislocation_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for macro regime scorecard heatmap.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use source tables for claims."
+  - artifact_id: notebook07b_fig_rolling_pca_reconstruction_diagnostics
+    path: results/notebook_07b/figures/rolling_pca_reconstruction_diagnostics.png
+    artifact_type: pca_dislocation_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for rolling reconstruction diagnostics.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; use diagnostics table for claims."
+  - artifact_id: notebook07b_fig_selected_asset_dislocation_timeseries
+    path: results/notebook_07b/figures/selected_asset_dislocation_timeseries.png
+    artifact_type: pca_dislocation_figure
+    parser: image_metadata_only
+    role: Provides figure provenance for selected asset dislocation time series.
+    allowed_use: evidence_inventory
+    canonicality: auxiliary
+    research_only: true
+    human_review_required: true
+    caveats: "Image content is not parsed; selected assets are examples, not recommendations."
+
+  - artifact_id: notebook05_comparison
+    path: results/notebook_05/comparison.csv
+    artifact_type: deep_learning_summary
+    parser: csv
+    role: Provides selected Notebook 05 comparison summary context.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Selected summary only; detailed returns and weight files are intentionally excluded."
+  - artifact_id: notebook05_config_progress
+    path: results/notebook_05/config_progress.csv
+    artifact_type: deep_learning_config_summary
+    parser: csv
+    role: Provides selected Notebook 05 configuration progress summary.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical experiment context only; not a tuning instruction."
+  - artifact_id: notebook05_stability
+    path: results/notebook_05/stability.csv
+    artifact_type: deep_learning_stability_summary
+    parser: csv
+    role: Provides selected Notebook 05 stability summary.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical stability evidence only; requires review before reuse."
+
+  - artifact_id: cuda_dl_strategies_comparison_3cfull
+    path: results/cuda/dl_strategies_comparison_3cfull.csv
+    artifact_type: cuda_deep_learning_summary
+    parser: csv
+    role: Provides selected CUDA strategy comparison summary context.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Selected summary only; CUDA returns and figures are intentionally excluded."
+  - artifact_id: cuda_stability_table_3cfull
+    path: results/cuda/stability_table_3cfull.csv
+    artifact_type: cuda_deep_learning_stability_summary
+    parser: csv
+    role: Provides selected CUDA stability summary context.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical experiment context only; not a deployment endorsement."
+
+  - artifact_id: llm_equilibrium_diagnostics
+    path: results/llm/equilibrium_diagnostics.json
+    artifact_type: llm_historical_diagnostics
+    parser: json
+    role: Provides historical LLM equilibrium experiment diagnostics.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical diagnostics only; not a current model call or recommendation."
+  - artifact_id: llm_equilibrium_returns
+    path: results/llm/equilibrium_returns.parquet
+    artifact_type: llm_historical_returns
+    parser: parquet
+    role: Provides historical LLM equilibrium experiment returns.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical returns only; no live LLM or market-data refresh is allowed."
+  - artifact_id: llm_equilibrium_weights
+    path: results/llm/equilibrium_weights.parquet
+    artifact_type: llm_historical_weights
+    parser: parquet
+    role: Provides historical LLM equilibrium experiment weights.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical weights must not be presented as target allocations."
+  - artifact_id: llm_anthropic_diagnostics
+    path: results/llm/llm-anthropic_diagnostics.json
+    artifact_type: llm_historical_diagnostics
+    parser: json
+    role: Provides historical Anthropic LLM experiment diagnostics.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical diagnostics only; no model invocation is allowed."
+  - artifact_id: llm_anthropic_returns
+    path: results/llm/llm-anthropic_returns.parquet
+    artifact_type: llm_historical_returns
+    parser: parquet
+    role: Provides historical Anthropic LLM experiment returns.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical returns only; not investment advice."
+  - artifact_id: llm_anthropic_weights
+    path: results/llm/llm-anthropic_weights.parquet
+    artifact_type: llm_historical_weights
+    parser: parquet
+    role: Provides historical Anthropic LLM experiment weights.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical weights must not be presented as target allocations."
+  - artifact_id: llm_openai_diagnostics
+    path: results/llm/llm-openai_diagnostics.json
+    artifact_type: llm_historical_diagnostics
+    parser: json
+    role: Provides historical OpenAI LLM experiment diagnostics.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical diagnostics only; no model invocation is allowed."
+  - artifact_id: llm_openai_returns
+    path: results/llm/llm-openai_returns.parquet
+    artifact_type: llm_historical_returns
+    parser: parquet
+    role: Provides historical OpenAI LLM experiment returns.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical returns only; not investment advice."
+  - artifact_id: llm_openai_weights
+    path: results/llm/llm-openai_weights.parquet
+    artifact_type: llm_historical_weights
+    parser: parquet
+    role: Provides historical OpenAI LLM experiment weights.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical weights must not be presented as target allocations."
+  - artifact_id: llm_mean_rev_diagnostics
+    path: results/llm/mean_rev_diagnostics.json
+    artifact_type: llm_historical_diagnostics
+    parser: json
+    role: Provides historical mean-reversion LLM experiment diagnostics.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical diagnostics only; no model invocation is allowed."
+  - artifact_id: llm_mean_rev_returns
+    path: results/llm/mean_rev_returns.parquet
+    artifact_type: llm_historical_returns
+    parser: parquet
+    role: Provides historical mean-reversion LLM experiment returns.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical returns only; not investment advice."
+  - artifact_id: llm_mean_rev_weights
+    path: results/llm/mean_rev_weights.parquet
+    artifact_type: llm_historical_weights
+    parser: parquet
+    role: Provides historical mean-reversion LLM experiment weights.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical weights must not be presented as target allocations."
+  - artifact_id: llm_momentum_diagnostics
+    path: results/llm/momentum_diagnostics.json
+    artifact_type: llm_historical_diagnostics
+    parser: json
+    role: Provides historical momentum LLM experiment diagnostics.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical diagnostics only; no model invocation is allowed."
+  - artifact_id: llm_momentum_returns
+    path: results/llm/momentum_returns.parquet
+    artifact_type: llm_historical_returns
+    parser: parquet
+    role: Provides historical momentum LLM experiment returns.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical returns only; not investment advice."
+  - artifact_id: llm_momentum_weights
+    path: results/llm/momentum_weights.parquet
+    artifact_type: llm_historical_weights
+    parser: parquet
+    role: Provides historical momentum LLM experiment weights.
+    allowed_use: historical_experiment_context
+    canonicality: historical
+    research_only: true
+    human_review_required: true
+    caveats: "Historical weights must not be presented as target allocations."
+
+  - artifact_id: docs_results_markdown
+    path: docs/results.md
+    artifact_type: published_results_report
+    parser: markdown
+    role: Provides canonical written results context.
+    allowed_use: governance_context
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Narrative claims must be traced to approved artifacts where material."
+  - artifact_id: docs_results_pdf
+    path: docs/results.pdf
+    artifact_type: published_results_report_pdf
+    parser: pdf
+    role: Provides canonical PDF results context for human-facing report review.
+    allowed_use: governance_context
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "PDF extraction must preserve page references for citations."
+  - artifact_id: docs_research_pca_dislocation_macro_momentum_report_review
+    path: docs/research/pca_dislocation_macro_momentum_report_review.md
+    artifact_type: research_review_note
+    parser: markdown
+    role: Provides review context for PCA dislocation and macro momentum work.
+    allowed_use: validation_context
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Review note guides interpretation and does not authorize recommendations."
+  - artifact_id: docs_validation_session_1_5b_feature_library
+    path: docs/validation/session_1.5b_feature_library.md
+    artifact_type: validation_note
+    parser: markdown
+    role: Provides validation context for feature library work.
+    allowed_use: validation_context
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Validation context should be cited when discussing feature methodology."
+  - artifact_id: docs_validation_session_2_ml_strategies
+    path: docs/validation/session_2_ml_strategies.md
+    artifact_type: validation_note
+    parser: markdown
+    role: Provides validation context for ML strategy work.
+    allowed_use: validation_context
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Validation context should be cited when discussing ML strategy evidence."
+  - artifact_id: docs_design_phase6_agentic_research_workflow_design
+    path: docs/design/phase6_agentic_research_workflow_design.md
+    artifact_type: phase6_design_memo
+    parser: markdown
+    role: Provides governing Phase 6 design constraints and boundaries.
+    allowed_use: design_context
+    canonicality: canonical
+    research_only: true
+    human_review_required: true
+    caveats: "Design memo constrains later implementation; it is not executable policy by itself."
