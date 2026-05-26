@@ -269,6 +269,94 @@ def test_agent_instruction_strings_contain_required_constraints():
         assert "human review required" in text
 
 
+def test_handoff_agent_prompt_forbids_verbatim_deterministic_handoff():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    text = module.RESEARCH_HANDOFF_INSTRUCTIONS.lower()
+
+    assert "deterministic handoff as evidence" in text
+    assert "do not paste the deterministic handoff verbatim" in text
+    assert "# deterministic rendered handoff memo" in text
+    assert "one top-level '# ml ensemble msr research handoff' title only" in text
+    assert "canonical github-compatible markdown deliverable" in text
+    assert "## figures" in text
+    assert "## appendix / source artifacts" in text
+
+
+def test_default_team_prompt_forbids_appended_deterministic_handoff():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    text = " ".join(module.DEFAULT_TEAM_PROMPT.lower().split())
+
+    assert "canonical github-compatible markdown deliverable" in text
+    assert "must not paste the deterministic handoff verbatim" in text
+    assert "# deterministic rendered handoff memo" in text
+    assert "exactly one top-level" in text
+    assert "appendix / source artifacts" in text
+    assert "run_manifest.json" in text
+    assert "metrics.json" in text
+    assert "weights.parquet" in text
+    assert "strategy_returns.parquet" in text
+    assert "predictions.parquet" in text
+
+
+def test_default_team_prompt_includes_figures_section_and_links():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    prompt = module.DEFAULT_TEAM_PROMPT
+
+    assert "## Figures" in prompt
+    assert "![Cumulative Returns](figures/cumulative_returns.png)" in prompt
+    assert "![Drawdown](figures/drawdown.png)" in prompt
+    assert "![Turnover](figures/turnover.png)" in prompt
+    assert "![Concentration](figures/concentration.png)" in prompt
+    assert "![Top Weights](figures/top_weights.png)" in prompt
+
+
+def test_team_handoff_validator_flags_duplicated_deterministic_handoff_content():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    duplicated = (
+        "# ML Ensemble MSR Research Handoff\n\n"
+        "## Executive Summary\n\n"
+        "This memo is research-only, no investment advice, and human review required.\n\n"
+        "# Deterministic Rendered Handoff Memo\n\n"
+        "# ML Ensemble MSR Research Handoff\n\n"
+        "## Appendix / Source Artifacts\n"
+    )
+
+    validation = module.validate_team_handoff_output(duplicated)
+
+    assert validation["ok"] is False
+    assert any("deterministic rendered handoff" in error for error in validation["errors"])
+    assert any("exactly one top-level" in error for error in validation["errors"])
+
+
+def test_team_handoff_validator_accepts_clean_handoff_with_figures_and_artifacts():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    concise = (
+        "# ML Ensemble MSR Research Handoff\n\n"
+        "## Executive Summary\n\n"
+        "This memo is research-only, no investment advice, and human review required.\n\n"
+        "## Figures\n\n"
+        "![Cumulative Returns](figures/cumulative_returns.png)\n"
+        "![Drawdown](figures/drawdown.png)\n"
+        "![Turnover](figures/turnover.png)\n"
+        "![Concentration](figures/concentration.png)\n"
+        "![Top Weights](figures/top_weights.png)\n\n"
+        "## Appendix / Source Artifacts\n\n"
+        "The deterministic source artifacts are:\n"
+        "- run_manifest.json\n"
+        "- metrics.json\n"
+        "- report.md\n"
+        "- predictions.parquet\n"
+        "- weights.parquet\n"
+        "- strategy_returns.parquet\n"
+        "- figures/*.png\n"
+    )
+
+    assert module.validate_team_handoff_output(
+        concise,
+        require_figures=True,
+    ) == {"ok": True, "errors": []}
+
+
 def test_tool_functions_expose_no_arbitrary_file_reader_interface():
     module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
     tool_names = [

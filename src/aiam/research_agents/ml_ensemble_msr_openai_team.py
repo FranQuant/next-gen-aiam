@@ -38,6 +38,15 @@ SDK_SAFE_AGENT_NAMES = (
     PORTFOLIO_RISK_AGENT_NAME,
     RESEARCH_HANDOFF_AGENT_NAME,
 )
+TEAM_HANDOFF_TITLE = "# ML Ensemble MSR Research Handoff"
+DETERMINISTIC_HANDOFF_APPENDIX_TITLE = "# Deterministic Rendered Handoff Memo"
+FIGURE_LINKS = (
+    "figures/cumulative_returns.png",
+    "figures/drawdown.png",
+    "figures/turnover.png",
+    "figures/concentration.png",
+    "figures/top_weights.png",
+)
 
 COMMON_AGENT_CONSTRAINTS = """
 Constraints:
@@ -86,8 +95,16 @@ PORTFOLIO_RISK_INSTRUCTIONS = (
 
 RESEARCH_HANDOFF_INSTRUCTIONS = (
     "You are the Research Handoff Agent. Produce a clean Markdown research memo "
-    "with useful tables, required caveats, and a human-review checklist. Do not "
-    "dump raw JSON and do not use recommendation language.\n"
+    "as the canonical GitHub-compatible Markdown deliverable. Use the deterministic "
+    "handoff as evidence, but do not paste the deterministic handoff verbatim. Do "
+    "not include a '# Deterministic Rendered Handoff Memo' section. Produce one "
+    "top-level '# ML Ensemble MSR Research Handoff' title only. Include a "
+    "'## Figures' section with relative Markdown image links when figures are "
+    "available. Reference deterministic artifacts instead of appending them, and "
+    "include an '## Appendix / Source Artifacts' section listing run_manifest.json, "
+    "metrics.json, report.md, predictions.parquet, weights.parquet, "
+    "strategy_returns.parquet, and figures/*.png. Do not dump raw JSON and do not "
+    "use recommendation language.\n"
     + COMMON_AGENT_CONSTRAINTS
 )
 
@@ -95,10 +112,45 @@ DEFAULT_TEAM_PROMPT = """
 Run the five-agent ML Ensemble MSR research handoff workflow.
 
 Use the deterministic tools to validate artifacts, load bounded summaries, and
-render the deterministic markdown handoff. Specialist agents should critique the
-bounded evidence only. The final output must be clean Markdown, research-only,
-no investment advice, no target allocations, no trading recommendations, and
-human review required.
+render the deterministic markdown handoff for evidence only. Specialist agents
+should critique the bounded evidence only. The final output must be the
+canonical GitHub-compatible Markdown deliverable, research-only, no investment
+advice, no target allocations, no trading recommendations, and human review
+required. The Research Handoff Agent must not paste the deterministic handoff
+verbatim, must not include a section titled '# Deterministic Rendered Handoff
+Memo', and must produce exactly one top-level '# ML Ensemble MSR Research
+Handoff' title. Use this structure:
+
+# ML Ensemble MSR Research Handoff
+
+## Executive Summary
+## Five-Agent Review Summary
+## Performance Metrics
+## Turnover and Concentration
+## Figures
+## Methodology Caveats
+## Open Questions for Human Review
+## Human Review Checklist
+## Appendix / Source Artifacts
+
+When figures are available, include this exact Figures section:
+
+## Figures
+
+![Cumulative Returns](figures/cumulative_returns.png)
+![Drawdown](figures/drawdown.png)
+![Turnover](figures/turnover.png)
+![Concentration](figures/concentration.png)
+![Top Weights](figures/top_weights.png)
+
+In Appendix / Source Artifacts, state that the deterministic source artifacts are:
+- run_manifest.json
+- metrics.json
+- report.md
+- predictions.parquet
+- weights.parquet
+- strategy_returns.parquet
+- figures/*.png
 """
 
 
@@ -270,7 +322,43 @@ def run_ml_ensemble_msr_openai_team(
         import asyncio
 
         result = asyncio.run(Runner.run(manager, runner_prompt))
-    return _final_output_text(result)
+    final_output = _final_output_text(result)
+    validation = validate_team_handoff_output(
+        final_output,
+        require_figures=write_figures or _figures_exist(output_dir),
+    )
+    if not validation["ok"]:
+        raise RuntimeError(json.dumps({"team_handoff_validation": validation}, sort_keys=True))
+    return final_output
+
+
+def validate_team_handoff_output(markdown: str, require_figures: bool = False) -> dict[str, Any]:
+    """Validate the live team memo did not append the deterministic handoff."""
+    errors = []
+    if DETERMINISTIC_HANDOFF_APPENDIX_TITLE in markdown:
+        errors.append("contains deterministic rendered handoff appendix title")
+    title_count = sum(line.strip() == TEAM_HANDOFF_TITLE for line in markdown.splitlines())
+    if title_count != 1:
+        errors.append(f"expected exactly one top-level team handoff title, found {title_count}")
+    if "## Appendix / Source Artifacts" not in markdown:
+        errors.append("missing Appendix / Source Artifacts section")
+    lower_markdown = markdown.lower()
+    if "no investment advice" not in lower_markdown:
+        errors.append("missing no investment advice language")
+    if "human review required" not in lower_markdown:
+        errors.append("missing human review required language")
+    if require_figures:
+        if "## Figures" not in markdown:
+            errors.append("missing Figures section")
+        missing_links = [link for link in FIGURE_LINKS if link not in markdown]
+        if missing_links:
+            errors.append(f"missing figure links: {missing_links}")
+    return {"ok": not errors, "errors": errors}
+
+
+def _figures_exist(output_dir: str | Path) -> bool:
+    figure_dir = Path(output_dir) / "figures"
+    return all((figure_dir / Path(link).name).is_file() for link in FIGURE_LINKS)
 
 
 def _load_agents_sdk() -> dict[str, Any]:
