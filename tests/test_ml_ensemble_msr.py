@@ -9,10 +9,12 @@ import numpy as np
 import pandas as pd
 
 from aiam.strategy.ml_ensemble_msr import (
+    ARTIFACT_FILES,
     FEATURE_COLUMNS,
     MLEnsembleMSRConfig,
     backtest_lagged_weights,
     build_report,
+    build_run_manifest,
     build_ensemble_predictions,
     build_ml_feature_panel_from_ohlcv,
     build_target_21d,
@@ -21,6 +23,7 @@ from aiam.strategy.ml_ensemble_msr import (
     compute_performance_metrics,
     compute_turnover_diagnostics,
     summary_payload,
+    write_research_artifacts,
 )
 
 
@@ -215,6 +218,13 @@ def test_concentration_diagnostics_empty_weights():
 
 
 def _minimal_result() -> dict[str, object]:
+    dates = pd.bdate_range("2024-01-01", periods=3)
+    predictions = _prediction_series([[0.01, 0.02, 0.03]], dates[:1]).rename("ensemble_pred")
+    weights = pd.DataFrame(
+        {"AAPL.US": [0.5], "MSFT.US": [0.3], "SPY.US": [0.2]},
+        index=dates[:1],
+    )
+    strategy_returns = pd.Series([0.01, -0.002], index=dates[1:], name="MSR(Ensemble_mu_hat)")
     return {
         "universe_size": 3,
         "date_range": ("2024-01-01", "2024-01-03"),
@@ -249,6 +259,9 @@ def _minimal_result() -> dict[str, object]:
             "Sharpe uses arithmetic annualized return over annualized volatility",
             "concentration diagnostics are descriptive; no constraint is imposed in this baseline",
         ],
+        "predictions": predictions,
+        "weights": weights,
+        "strategy_returns": strategy_returns,
     }
 
 
@@ -269,6 +282,89 @@ def test_build_report_includes_institutional_metric_sections():
     assert "## Concentration Diagnostics" in report
     assert "CAGR" in report
     assert "arithmetic annualized return" in report
+
+
+def test_build_run_manifest_contains_required_top_level_keys():
+    manifest = build_run_manifest(_minimal_result())
+
+    assert set(manifest) == {
+        "strategy",
+        "created_at_utc",
+        "universe_size",
+        "date_range",
+        "train_end",
+        "test_start",
+        "feature_count",
+        "feature_columns",
+        "model_components",
+        "cov_lookback",
+        "horizon",
+        "validation_share",
+        "artifact_files",
+        "metrics",
+        "turnover_diagnostics",
+        "concentration_diagnostics",
+        "caveats",
+        "reproducibility_notes",
+    }
+
+
+def test_build_run_manifest_contains_strategy_and_artifact_files():
+    manifest = build_run_manifest(_minimal_result())
+
+    assert manifest["strategy"] == "MSR(Ensemble_mu_hat)"
+    assert manifest["artifact_files"] == ARTIFACT_FILES
+    assert set(manifest["artifact_files"]) == {
+        "predictions.parquet",
+        "weights.parquet",
+        "strategy_returns.parquet",
+        "metrics.json",
+        "report.md",
+        "run_manifest.json",
+    }
+
+
+def test_build_run_manifest_contains_metrics_and_diagnostics():
+    result = _minimal_result()
+
+    manifest = build_run_manifest(result)
+
+    assert manifest["metrics"] == result["metrics"]
+    assert manifest["turnover_diagnostics"] == result["turnover_diagnostics"]
+    assert manifest["concentration_diagnostics"] == result["concentration_diagnostics"]
+
+
+def test_write_research_artifacts_writes_expected_files(tmp_path):
+    write_research_artifacts(_minimal_result(), tmp_path)
+
+    written = {path.name for path in tmp_path.iterdir()}
+    assert written == set(ARTIFACT_FILES)
+
+
+def test_written_manifest_and_metrics_json_are_structured(tmp_path):
+    write_research_artifacts(_minimal_result(), tmp_path)
+
+    manifest = json.loads((tmp_path / "run_manifest.json").read_text())
+    metrics = json.loads((tmp_path / "metrics.json").read_text())
+
+    assert manifest["strategy"] == "MSR(Ensemble_mu_hat)"
+    assert manifest["artifact_files"] == ARTIFACT_FILES
+    assert manifest["reproducibility_notes"] == [
+        "local cache only",
+        "no live EODHD call",
+        "no notebook execution",
+        "single-fit ML setup",
+        "no transaction costs in baseline",
+        "weights lagged by one trading day",
+    ]
+    assert set(metrics) == {
+        "metrics",
+        "turnover_diagnostics",
+        "concentration_diagnostics",
+    }
+    assert metrics["metrics"]["sharpe"] == 0.5
+    assert metrics["turnover_diagnostics"]["average_turnover"] == 0.1
+    assert metrics["concentration_diagnostics"]["average_herfindahl"] == 0.4
 
 
 def test_cli_print_summary_json(monkeypatch, capsys):
@@ -320,6 +416,7 @@ def test_security_source_check_new_files():
     paths = [
         Path("src/aiam/strategy/ml_ensemble_msr.py"),
         Path("scripts/run_ml_ensemble_msr_research.py"),
+        Path("tests/test_ml_ensemble_msr.py"),
     ]
     for path in paths:
         text = path.read_text().lower()

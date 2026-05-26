@@ -35,6 +35,26 @@ FEATURE_COLUMNS = [
     "fx_spot",
 ]
 
+ARTIFACT_FILES = [
+    "predictions.parquet",
+    "weights.parquet",
+    "strategy_returns.parquet",
+    "metrics.json",
+    "report.md",
+    "run_manifest.json",
+]
+
+MODEL_COMPONENTS = ["Lasso", "Random Forest", "XGBoost"]
+
+REPRODUCIBILITY_NOTES = [
+    "local cache only",
+    "no live EODHD call",
+    "no notebook execution",
+    "single-fit ML setup",
+    "no transaction costs in baseline",
+    "weights lagged by one trading day",
+]
+
 
 @dataclass(frozen=True)
 class MLEnsembleMSRConfig:
@@ -443,6 +463,34 @@ def write_research_artifacts(result: dict[str, Any], output_dir: str | Path) -> 
     }
     (out / "metrics.json").write_text(json.dumps(metrics_payload, indent=2, sort_keys=True))
     (out / "report.md").write_text(build_report(result))
+    (out / "run_manifest.json").write_text(
+        json.dumps(build_run_manifest(result), indent=2, sort_keys=True)
+    )
+
+
+def build_run_manifest(result: dict[str, Any]) -> dict[str, Any]:
+    """Build a deterministic, JSON-serializable manifest for written artifacts."""
+    cfg: MLEnsembleMSRConfig = result["config"]
+    return {
+        "strategy": "MSR(Ensemble_mu_hat)",
+        "created_at_utc": result.get("created_at_utc", "1970-01-01T00:00:00Z"),
+        "universe_size": int(result["universe_size"]),
+        "date_range": list(result["date_range"]),
+        "train_end": cfg.train_end,
+        "test_start": cfg.test_start,
+        "feature_count": len(FEATURE_COLUMNS),
+        "feature_columns": list(FEATURE_COLUMNS),
+        "model_components": list(MODEL_COMPONENTS),
+        "cov_lookback": int(cfg.cov_lookback),
+        "horizon": int(cfg.horizon),
+        "validation_share": float(cfg.validation_share),
+        "artifact_files": list(ARTIFACT_FILES),
+        "metrics": result["metrics"],
+        "turnover_diagnostics": result["turnover_diagnostics"],
+        "concentration_diagnostics": result["concentration_diagnostics"],
+        "caveats": list(result["caveats"]),
+        "reproducibility_notes": list(REPRODUCIBILITY_NOTES),
+    }
 
 
 def build_report(result: dict[str, Any]) -> str:
@@ -481,7 +529,7 @@ def build_report(result: dict[str, Any]) -> str:
         f"- Train end: {cfg.train_end}\n"
         f"- Test start: {cfg.test_start}\n"
         f"- Feature count: {len(FEATURE_COLUMNS)}\n"
-        "- Model components: Lasso, Random Forest, XGBoost\n"
+        f"- Model components: {', '.join(MODEL_COMPONENTS)}\n"
         f"- Covariance lookback: {cfg.cov_lookback}\n\n"
         "## Performance Metrics\n\n"
         "Annual return is arithmetic annualized return. CAGR is geometric annualized return.\n\n"
