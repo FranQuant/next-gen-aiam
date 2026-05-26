@@ -252,11 +252,17 @@ def backtest_lagged_weights(weights: pd.DataFrame, returns: pd.DataFrame) -> pd.
 
 
 def compute_performance_metrics(returns: pd.Series) -> dict[str, float]:
-    """Mean-return annualized metrics using 252 sessions per year."""
+    """Performance metrics using 252 sessions per year.
+
+    ``annual_return`` is retained as a backward-compatible alias for
+    ``annual_return_arithmetic``. It is not CAGR.
+    """
     clean = returns.replace([np.inf, -np.inf], np.nan).dropna()
     if clean.empty:
         return {
             "annual_return": np.nan,
+            "annual_return_arithmetic": np.nan,
+            "cagr": np.nan,
             "annual_volatility": np.nan,
             "sharpe": np.nan,
             "max_drawdown": np.nan,
@@ -264,17 +270,75 @@ def compute_performance_metrics(returns: pd.Series) -> dict[str, float]:
             "observations": 0.0,
         }
 
-    annual_return = float(clean.mean() * 252.0)
+    annual_return_arithmetic = float(clean.mean() * 252.0)
     annual_volatility = float(clean.std() * np.sqrt(252.0))
-    sharpe = annual_return / annual_volatility if annual_volatility > 0 else np.nan
+    sharpe = annual_return_arithmetic / annual_volatility if annual_volatility > 0 else np.nan
     cumulative = (1.0 + clean).cumprod()
+    final_wealth = float(cumulative.iloc[-1])
+    total_return = final_wealth - 1.0
+    cagr = final_wealth ** (252.0 / len(clean)) - 1.0 if final_wealth > 0 else np.nan
     drawdown = cumulative / cumulative.cummax() - 1.0
     return {
-        "annual_return": annual_return,
+        "annual_return": annual_return_arithmetic,
+        "annual_return_arithmetic": annual_return_arithmetic,
+        "cagr": float(cagr),
         "annual_volatility": annual_volatility,
         "sharpe": float(sharpe),
         "max_drawdown": float(drawdown.min()),
-        "total_return": float(cumulative.iloc[-1] - 1.0),
+        "total_return": float(total_return),
+        "observations": float(len(clean)),
+    }
+
+
+def compute_turnover_diagnostics(weights: pd.DataFrame) -> dict[str, float]:
+    """Summarize one-way turnover from consecutive weight vectors."""
+    nan_result = {
+        "average_turnover": np.nan,
+        "median_turnover": np.nan,
+        "max_turnover": np.nan,
+        "observations": 0.0,
+    }
+    if len(weights) < 2:
+        return nan_result
+
+    aligned = weights.sort_index().replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    turnover = 0.5 * aligned.diff().abs().sum(axis=1).iloc[1:]
+    if turnover.empty:
+        return nan_result
+    return {
+        "average_turnover": float(turnover.mean()),
+        "median_turnover": float(turnover.median()),
+        "max_turnover": float(turnover.max()),
+        "observations": float(len(turnover)),
+    }
+
+
+def compute_concentration_diagnostics(weights: pd.DataFrame) -> dict[str, float]:
+    """Summarize descriptive concentration statistics for portfolio weights."""
+    nan_result = {
+        "average_herfindahl": np.nan,
+        "average_effective_positions": np.nan,
+        "average_max_weight": np.nan,
+        "max_single_asset_weight": np.nan,
+        "average_top_5_weight_share": np.nan,
+        "max_top_5_weight_share": np.nan,
+        "observations": 0.0,
+    }
+    if weights.empty:
+        return nan_result
+
+    clean = weights.sort_index().replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    herfindahl = (clean**2).sum(axis=1)
+    effective_positions = 1.0 / herfindahl.where(herfindahl > 0.0)
+    max_weight = clean.max(axis=1)
+    top_5_weight_share = clean.apply(lambda row: row.nlargest(5).sum(), axis=1)
+    return {
+        "average_herfindahl": float(herfindahl.mean()),
+        "average_effective_positions": float(effective_positions.mean()),
+        "average_max_weight": float(max_weight.mean()),
+        "max_single_asset_weight": float(max_weight.max()),
+        "average_top_5_weight_share": float(top_5_weight_share.mean()),
+        "max_top_5_weight_share": float(top_5_weight_share.max()),
         "observations": float(len(clean)),
     }
 
@@ -326,6 +390,8 @@ def run_ml_ensemble_msr_research(
     strategy_returns = backtest_lagged_weights(weights, returns)
     strategy_returns = strategy_returns.loc[strategy_returns.index >= pd.Timestamp(cfg.test_start)]
     metrics = compute_performance_metrics(strategy_returns)
+    turnover_diagnostics = compute_turnover_diagnostics(weights)
+    concentration_diagnostics = compute_concentration_diagnostics(weights)
 
     caveats = [
         "historical backtest only",
@@ -335,6 +401,9 @@ def run_ml_ensemble_msr_research(
         "possible optimizer concentration",
         "local cache / EODHD cache dependence",
         "must verify against Notebook 03 published metrics",
+        "CAGR and arithmetic annualized return are both reported",
+        "Sharpe uses arithmetic annualized return over annualized volatility",
+        "concentration diagnostics are descriptive; no constraint is imposed in this baseline",
     ]
     result = {
         "features": features,
@@ -344,6 +413,8 @@ def run_ml_ensemble_msr_research(
         "weights": weights,
         "strategy_returns": strategy_returns,
         "metrics": metrics,
+        "turnover_diagnostics": turnover_diagnostics,
+        "concentration_diagnostics": concentration_diagnostics,
         "caveats": caveats,
         "config": cfg,
         "universe_size": int(returns.shape[1]),
@@ -365,14 +436,42 @@ def write_research_artifacts(result: dict[str, Any], output_dir: str | Path) -> 
     result["predictions"].to_frame("ensemble_pred").to_parquet(out / "predictions.parquet")
     result["weights"].to_parquet(out / "weights.parquet")
     result["strategy_returns"].to_frame("return").to_parquet(out / "strategy_returns.parquet")
-    (out / "metrics.json").write_text(json.dumps(result["metrics"], indent=2, sort_keys=True))
+    metrics_payload = {
+        "metrics": result["metrics"],
+        "turnover_diagnostics": result["turnover_diagnostics"],
+        "concentration_diagnostics": result["concentration_diagnostics"],
+    }
+    (out / "metrics.json").write_text(json.dumps(metrics_payload, indent=2, sort_keys=True))
     (out / "report.md").write_text(build_report(result))
 
 
 def build_report(result: dict[str, Any]) -> str:
     cfg: MLEnsembleMSRConfig = result["config"]
     metrics = result["metrics"]
-    rows = "\n".join(f"| {k} | {v:.6g} |" for k, v in metrics.items())
+    turnover = result["turnover_diagnostics"]
+    concentration = result["concentration_diagnostics"]
+    performance_keys = [
+        "annual_return_arithmetic",
+        "cagr",
+        "annual_volatility",
+        "sharpe",
+        "max_drawdown",
+        "total_return",
+        "observations",
+    ]
+    turnover_keys = ["average_turnover", "median_turnover", "max_turnover", "observations"]
+    concentration_keys = [
+        "average_herfindahl",
+        "average_effective_positions",
+        "average_max_weight",
+        "max_single_asset_weight",
+        "average_top_5_weight_share",
+        "max_top_5_weight_share",
+        "observations",
+    ]
+    performance_rows = "\n".join(f"| {k} | {metrics[k]:.6g} |" for k in performance_keys)
+    turnover_rows = "\n".join(f"| {k} | {turnover[k]:.6g} |" for k in turnover_keys)
+    concentration_rows = "\n".join(f"| {k} | {concentration[k]:.6g} |" for k in concentration_keys)
     caveats = "\n".join(f"- {item}" for item in result["caveats"])
     return (
         "# ML Ensemble MSR Research Run\n\n"
@@ -384,10 +483,19 @@ def build_report(result: dict[str, Any]) -> str:
         f"- Feature count: {len(FEATURE_COLUMNS)}\n"
         "- Model components: Lasso, Random Forest, XGBoost\n"
         f"- Covariance lookback: {cfg.cov_lookback}\n\n"
-        "## Metrics\n\n"
+        "## Performance Metrics\n\n"
+        "Annual return is arithmetic annualized return. CAGR is geometric annualized return.\n\n"
         "| Metric | Value |\n"
         "| --- | ---: |\n"
-        f"{rows}\n\n"
+        f"{performance_rows}\n\n"
+        "## Turnover Diagnostics\n\n"
+        "| Metric | Value |\n"
+        "| --- | ---: |\n"
+        f"{turnover_rows}\n\n"
+        "## Concentration Diagnostics\n\n"
+        "| Metric | Value |\n"
+        "| --- | ---: |\n"
+        f"{concentration_rows}\n\n"
         "## Caveats\n\n"
         f"{caveats}\n"
     )
@@ -403,5 +511,7 @@ def summary_payload(result: dict[str, Any]) -> dict[str, Any]:
         "feature_count": len(FEATURE_COLUMNS),
         "cov_lookback": result["config"].cov_lookback,
         "metrics": result["metrics"],
+        "turnover_diagnostics": result["turnover_diagnostics"],
+        "concentration_diagnostics": result["concentration_diagnostics"],
         "observations": int(result["metrics"]["observations"]),
     }

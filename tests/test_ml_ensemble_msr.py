@@ -12,11 +12,15 @@ from aiam.strategy.ml_ensemble_msr import (
     FEATURE_COLUMNS,
     MLEnsembleMSRConfig,
     backtest_lagged_weights,
+    build_report,
     build_ensemble_predictions,
     build_ml_feature_panel_from_ohlcv,
     build_target_21d,
+    compute_concentration_diagnostics,
     compute_msr_weights_from_mu,
     compute_performance_metrics,
+    compute_turnover_diagnostics,
+    summary_payload,
 )
 
 
@@ -120,6 +124,8 @@ def test_metrics_contain_required_keys_and_finite_values():
 
     assert set(metrics) == {
         "annual_return",
+        "annual_return_arithmetic",
+        "cagr",
         "annual_volatility",
         "sharpe",
         "max_drawdown",
@@ -127,25 +133,157 @@ def test_metrics_contain_required_keys_and_finite_values():
         "observations",
     }
     assert all(np.isfinite(v) for v in metrics.values())
+    assert metrics["annual_return"] == metrics["annual_return_arithmetic"]
+
+
+def test_metrics_sharpe_uses_arithmetic_annualized_return_not_cagr():
+    returns = pd.Series([0.10, -0.05, 0.02, 0.01], index=pd.bdate_range("2024-01-01", periods=4))
+
+    metrics = compute_performance_metrics(returns)
+
+    expected_arithmetic = float(returns.mean() * 252.0)
+    expected_volatility = float(returns.std() * np.sqrt(252.0))
+    np.testing.assert_allclose(metrics["annual_return_arithmetic"], expected_arithmetic)
+    np.testing.assert_allclose(metrics["sharpe"], expected_arithmetic / expected_volatility)
+    assert not np.isclose(metrics["sharpe"], metrics["cagr"] / expected_volatility)
+
+
+def test_metrics_cagr_matches_known_compounded_return():
+    returns = pd.Series([0.01, 0.02], index=pd.bdate_range("2024-01-01", periods=2))
+
+    metrics = compute_performance_metrics(returns)
+
+    total_return = (1.01 * 1.02) - 1.0
+    expected_cagr = (1.0 + total_return) ** (252.0 / 2.0) - 1.0
+    np.testing.assert_allclose(metrics["total_return"], total_return)
+    np.testing.assert_allclose(metrics["cagr"], expected_cagr)
+
+
+def test_turnover_diagnostics_from_simple_weights():
+    dates = pd.bdate_range("2024-01-01", periods=3)
+    weights = pd.DataFrame(
+        {
+            "AAPL.US": [0.5, 0.25, 1.0],
+            "MSFT.US": [0.5, 0.75, 0.0],
+        },
+        index=[dates[1], dates[2], dates[0]],
+    )
+
+    diagnostics = compute_turnover_diagnostics(weights)
+
+    np.testing.assert_allclose(diagnostics["average_turnover"], 0.375)
+    np.testing.assert_allclose(diagnostics["median_turnover"], 0.375)
+    np.testing.assert_allclose(diagnostics["max_turnover"], 0.5)
+    assert diagnostics["observations"] == 2.0
+
+
+def test_turnover_diagnostics_require_two_rows():
+    weights = pd.DataFrame({"AAPL.US": [1.0]}, index=[pd.Timestamp("2024-01-01")])
+
+    diagnostics = compute_turnover_diagnostics(weights)
+
+    assert np.isnan(diagnostics["average_turnover"])
+    assert diagnostics["observations"] == 0.0
+
+
+def test_concentration_diagnostics_equal_weight_and_concentrated_weights():
+    weights = pd.DataFrame(
+        {
+            "AAPL.US": [0.5, 1.0],
+            "MSFT.US": [0.5, 0.0],
+            "SPY.US": [0.0, 0.0],
+        },
+        index=pd.bdate_range("2024-01-01", periods=2),
+    )
+
+    diagnostics = compute_concentration_diagnostics(weights)
+
+    np.testing.assert_allclose(diagnostics["average_herfindahl"], 0.75)
+    np.testing.assert_allclose(diagnostics["average_effective_positions"], 1.5)
+    np.testing.assert_allclose(diagnostics["average_max_weight"], 0.75)
+    np.testing.assert_allclose(diagnostics["max_single_asset_weight"], 1.0)
+    np.testing.assert_allclose(diagnostics["average_top_5_weight_share"], 1.0)
+    np.testing.assert_allclose(diagnostics["max_top_5_weight_share"], 1.0)
+    assert diagnostics["observations"] == 2.0
+
+
+def test_concentration_diagnostics_empty_weights():
+    diagnostics = compute_concentration_diagnostics(pd.DataFrame())
+
+    assert np.isnan(diagnostics["average_herfindahl"])
+    assert diagnostics["observations"] == 0.0
+
+
+def _minimal_result() -> dict[str, object]:
+    return {
+        "universe_size": 3,
+        "date_range": ("2024-01-01", "2024-01-03"),
+        "config": MLEnsembleMSRConfig(cov_lookback=10),
+        "metrics": {
+            "annual_return": 0.1,
+            "annual_return_arithmetic": 0.1,
+            "cagr": 0.08,
+            "annual_volatility": 0.2,
+            "sharpe": 0.5,
+            "max_drawdown": -0.01,
+            "total_return": 0.02,
+            "observations": 3.0,
+        },
+        "turnover_diagnostics": {
+            "average_turnover": 0.1,
+            "median_turnover": 0.08,
+            "max_turnover": 0.2,
+            "observations": 2.0,
+        },
+        "concentration_diagnostics": {
+            "average_herfindahl": 0.4,
+            "average_effective_positions": 2.5,
+            "average_max_weight": 0.6,
+            "max_single_asset_weight": 0.9,
+            "average_top_5_weight_share": 1.0,
+            "max_top_5_weight_share": 1.0,
+            "observations": 3.0,
+        },
+        "caveats": [
+            "CAGR and arithmetic annualized return are both reported",
+            "Sharpe uses arithmetic annualized return over annualized volatility",
+            "concentration diagnostics are descriptive; no constraint is imposed in this baseline",
+        ],
+    }
+
+
+def test_summary_payload_includes_turnover_and_concentration_sections():
+    payload = summary_payload(_minimal_result())
+
+    assert "turnover_diagnostics" in payload
+    assert "concentration_diagnostics" in payload
+    assert payload["turnover_diagnostics"]["average_turnover"] == 0.1
+    assert payload["concentration_diagnostics"]["average_herfindahl"] == 0.4
+
+
+def test_build_report_includes_institutional_metric_sections():
+    report = build_report(_minimal_result())
+
+    assert "## Performance Metrics" in report
+    assert "## Turnover Diagnostics" in report
+    assert "## Concentration Diagnostics" in report
+    assert "CAGR" in report
+    assert "arithmetic annualized return" in report
 
 
 def test_cli_print_summary_json(monkeypatch, capsys):
     import aiam.strategy.ml_ensemble_msr as module
 
     def fake_run_ml_ensemble_msr_research(**kwargs):
-        return {
-            "universe_size": 3,
-            "date_range": ("2024-01-01", "2024-01-03"),
-            "config": kwargs["config"],
-            "metrics": {
-                "annual_return": 0.1,
-                "annual_volatility": 0.2,
-                "sharpe": 0.5,
-                "max_drawdown": -0.01,
-                "total_return": 0.02,
-                "observations": 3.0,
-            },
-        }
+        result = _minimal_result()
+        result.update(
+            {
+                "universe_size": 3,
+                "date_range": ("2024-01-01", "2024-01-03"),
+                "config": kwargs["config"],
+            }
+        )
+        return result
 
     monkeypatch.setattr(module, "run_ml_ensemble_msr_research", fake_run_ml_ensemble_msr_research)
     monkeypatch.setattr(
