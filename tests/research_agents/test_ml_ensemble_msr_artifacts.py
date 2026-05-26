@@ -10,6 +10,8 @@ import pandas as pd
 
 from aiam.research_agents.ml_ensemble_msr_artifacts import (
     EXPECTED_ARTIFACT_FILES,
+    EXPECTED_HANDOFF_FIGURES,
+    generate_handoff_figures,
     load_metrics,
     load_report_markdown,
     load_run_manifest,
@@ -156,6 +158,31 @@ def test_parquet_summaries_are_bounded_and_json_serializable(tmp_path):
     assert "return" not in returns
 
 
+def test_generate_handoff_figures_creates_expected_pngs(tmp_path):
+    artifact_dir = _write_synthetic_artifacts(tmp_path)
+
+    result = generate_handoff_figures(artifact_dir)
+
+    assert result["ok"] is True
+    assert Path(result["figure_dir"]).is_dir()
+    assert [item["file"] for item in result["figures"]] == [
+        f"figures/{name}" for name in EXPECTED_HANDOFF_FIGURES
+    ]
+    for name in EXPECTED_HANDOFF_FIGURES:
+        path = artifact_dir / "figures" / name
+        assert path.is_file()
+        assert path.stat().st_size > 0
+
+
+def test_generate_handoff_figures_metadata_is_json_serializable(tmp_path):
+    artifact_dir = _write_synthetic_artifacts(tmp_path)
+
+    result = generate_handoff_figures(artifact_dir)
+
+    json.dumps(result)
+    assert all(item["exists"] for item in result["figures"])
+
+
 def test_handoff_markdown_contains_required_sections(tmp_path):
     markdown = render_research_handoff(_write_synthetic_artifacts(tmp_path))
 
@@ -175,6 +202,20 @@ def test_handoff_markdown_contains_required_sections(tmp_path):
         assert section in markdown
     assert "research-only" in markdown
     assert "historical weights are not target allocations" in markdown
+
+
+def test_handoff_markdown_contains_figure_links_when_figures_exist(tmp_path):
+    artifact_dir = _write_synthetic_artifacts(tmp_path)
+    generate_handoff_figures(artifact_dir)
+
+    markdown = render_research_handoff(artifact_dir)
+
+    assert "## Figures" in markdown
+    assert "![Cumulative Returns](figures/cumulative_returns.png)" in markdown
+    assert "![Drawdown](figures/drawdown.png)" in markdown
+    assert "![Turnover](figures/turnover.png)" in markdown
+    assert "![Concentration](figures/concentration.png)" in markdown
+    assert "![Top Weights](figures/top_weights.png)" in markdown
 
 
 def test_handoff_markdown_contains_expected_tables(tmp_path):
@@ -210,6 +251,29 @@ def test_cli_default_mode_works_on_synthetic_artifact_directory(tmp_path, monkey
     assert payload["contract_validation"]["ok"] is True
     assert payload["handoff_validation"]["ok"] is True
     assert payload["artifact_count"] == 6
+
+
+def test_cli_write_figures_print_summary_json_reports_metadata(tmp_path, monkeypatch, capsys):
+    artifact_dir = _write_synthetic_artifacts(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_ml_ensemble_msr_handoff.py",
+            "--output-dir",
+            str(artifact_dir),
+            "--write-figures",
+            "--print-summary-json",
+        ],
+    )
+
+    runpy.run_path("scripts/build_ml_ensemble_msr_handoff.py", run_name="__main__")
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["figure_generation"]["ok"] is True
+    assert len(payload["figure_generation"]["figures"]) == 5
+    assert all(item["exists"] for item in payload["figure_generation"]["figures"])
 
 
 def test_cli_default_mode_reports_not_ok_for_missing_artifact_directory(tmp_path, monkeypatch, capsys):
@@ -250,6 +314,28 @@ def test_cli_print_markdown_works_on_synthetic_artifact_directory(tmp_path, monk
     output = capsys.readouterr().out
     assert output.startswith("# ML Ensemble MSR Research Handoff")
     assert "## Artifact Inventory" in output
+
+
+def test_cli_write_figures_print_markdown_includes_figure_links(tmp_path, monkeypatch, capsys):
+    artifact_dir = _write_synthetic_artifacts(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_ml_ensemble_msr_handoff.py",
+            "--output-dir",
+            str(artifact_dir),
+            "--write-figures",
+            "--print-markdown",
+        ],
+    )
+
+    runpy.run_path("scripts/build_ml_ensemble_msr_handoff.py", run_name="__main__")
+
+    output = capsys.readouterr().out
+    assert "## Figures" in output
+    assert "![Cumulative Returns](figures/cumulative_returns.png)" in output
+    assert "![Top Weights](figures/top_weights.png)" in output
 
 
 def test_source_check_for_disallowed_terms():

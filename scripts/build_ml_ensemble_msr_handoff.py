@@ -13,6 +13,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from aiam.research_agents.ml_ensemble_msr_artifacts import (  # noqa: E402
+    generate_handoff_figures,
     headline_metrics,
     render_research_handoff,
     summarize_artifact_inventory,
@@ -30,12 +31,24 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--print-markdown", action="store_true")
     parser.add_argument("--print-summary-json", action="store_true")
+    parser.add_argument("--write-figures", action="store_true")
     return parser.parse_args()
 
 
-def build_summary(output_dir: str | Path) -> dict:
+def build_summary(output_dir: str | Path, *, write_figures: bool = False) -> dict:
     contract = validate_ml_ensemble_msr_artifact_contract(output_dir)
     inventory = summarize_artifact_inventory(output_dir)
+    figure_generation = (
+        generate_handoff_figures(output_dir)
+        if write_figures
+        else {
+            "ok": None,
+            "figure_dir": str(Path(output_dir) / "figures"),
+            "figures": [],
+            "errors": [],
+            "warnings": ["not requested"],
+        }
+    )
     if contract["ok"]:
         markdown = render_research_handoff(output_dir)
         handoff = validate_research_handoff(markdown)
@@ -54,12 +67,15 @@ def build_summary(output_dir: str | Path) -> dict:
         "handoff_validation": handoff,
         "artifact_count": inventory["artifact_count"],
         "headline_metrics": metrics,
+        "figure_generation": figure_generation,
     }
 
 
 def main() -> None:
     args = parse_args()
     if args.print_markdown:
+        if args.write_figures:
+            generate_handoff_figures(args.output_dir)
         markdown = render_research_handoff(args.output_dir)
         validation = validate_research_handoff(markdown)
         if not validation["ok"]:
@@ -67,7 +83,7 @@ def main() -> None:
         print(markdown)
         return
 
-    summary = build_summary(args.output_dir)
+    summary = build_summary(args.output_dir, write_figures=args.write_figures)
     print(json.dumps(summary, sort_keys=True))
 
 

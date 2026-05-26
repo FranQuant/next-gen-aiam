@@ -10,6 +10,14 @@ import numpy as np
 import pandas as pd
 
 
+EXPECTED_HANDOFF_FIGURES = [
+    "cumulative_returns.png",
+    "drawdown.png",
+    "turnover.png",
+    "concentration.png",
+    "top_weights.png",
+]
+
 EXPECTED_ARTIFACT_FILES = [
     "predictions.parquet",
     "weights.parquet",
@@ -168,13 +176,7 @@ def summarize_weights_artifact(output_dir: str | Path) -> dict[str, Any]:
 
 def summarize_strategy_returns_artifact(output_dir: str | Path) -> dict[str, Any]:
     """Summarize the strategy returns parquet without returning raw returns."""
-    frame = pd.read_parquet(_expected_path(output_dir, "strategy_returns.parquet"))
-    if isinstance(frame, pd.Series):
-        series = frame
-    elif "return" in frame.columns:
-        series = frame["return"]
-    else:
-        series = frame.select_dtypes(include=[np.number]).iloc[:, 0]
+    series = _load_strategy_returns(output_dir)
 
     clean = series.replace([np.inf, -np.inf], np.nan).dropna()
     dates = _index_dates(series.index)
@@ -192,6 +194,67 @@ def summarize_strategy_returns_artifact(output_dir: str | Path) -> dict[str, Any
             "finite_ratio": _finite_ratio(values),
         }
     )
+
+
+def generate_handoff_figures(output_dir: str | Path) -> dict[str, Any]:
+    """Create deterministic static chart PNGs from local handoff artifacts."""
+    artifact_dir = Path(output_dir)
+    figure_dir = artifact_dir / "figures"
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    if not artifact_dir.is_dir():
+        errors.append("output_dir must be an artifact directory")
+        return _figure_generation_result(figure_dir, errors, warnings)
+
+    missing_inputs = [
+        name
+        for name in [
+            "strategy_returns.parquet",
+            "weights.parquet",
+            "metrics.json",
+            "run_manifest.json",
+        ]
+        if not (artifact_dir / name).is_file()
+    ]
+    if missing_inputs:
+        errors.append(f"missing figure input files: {', '.join(missing_inputs)}")
+        return _figure_generation_result(figure_dir, errors, warnings)
+
+    figure_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        returns = _clean_numeric_series(_load_strategy_returns(artifact_dir))
+        weights = _clean_numeric_frame(pd.read_parquet(_expected_path(artifact_dir, "weights.parquet")))
+    except (FileNotFoundError, ValueError, OSError, KeyError, IndexError) as exc:
+        errors.append(str(exc))
+        return _figure_generation_result(figure_dir, errors, warnings)
+
+    if returns.empty:
+        errors.append("strategy_returns.parquet contains no finite returns")
+    if weights.empty:
+        errors.append("weights.parquet contains no finite numeric weights")
+    if errors:
+        return _figure_generation_result(figure_dir, errors, warnings)
+
+    plotters = [
+        ("cumulative_returns.png", _plot_cumulative_returns),
+        ("drawdown.png", _plot_drawdown),
+        ("turnover.png", _plot_turnover),
+        ("concentration.png", _plot_concentration),
+        ("top_weights.png", _plot_top_weights),
+    ]
+    for file_name, plotter in plotters:
+        try:
+            path = figure_dir / file_name
+            if file_name in {"cumulative_returns.png", "drawdown.png"}:
+                plotter(returns, path)
+            else:
+                plotter(weights, path)
+        except (ValueError, OSError, RuntimeError) as exc:
+            errors.append(f"{file_name}: {exc}")
+
+    return _figure_generation_result(figure_dir, errors, warnings)
 
 
 def render_research_handoff(output_dir: str | Path) -> str:
@@ -244,6 +307,8 @@ def render_research_handoff(output_dir: str | Path) -> str:
         f"{_metrics_table(concentration)}\n\n"
         "Weights artifact summary:\n\n"
         f"{_compact_table(['Metric', 'Value'], _summary_rows(weights_summary))}\n\n"
+        "## Figures\n\n"
+        f"{_figures_markdown(output_dir)}\n\n"
         "## Artifact Inventory\n\n"
         f"{_artifact_table(inventory['artifacts'])}\n\n"
         "Additional bounded artifact summaries:\n\n"
@@ -302,6 +367,15 @@ def _expected_path(output_dir: str | Path, file_name: str) -> Path:
     if not artifact_dir.is_dir():
         raise ValueError("output_dir must be an artifact directory")
     return artifact_dir / file_name
+
+
+def _load_strategy_returns(output_dir: str | Path) -> pd.Series:
+    frame = pd.read_parquet(_expected_path(output_dir, "strategy_returns.parquet"))
+    if isinstance(frame, pd.Series):
+        return frame
+    if "return" in frame.columns:
+        return frame["return"]
+    return frame.select_dtypes(include=[np.number]).iloc[:, 0]
 
 
 def _load_json_expected(output_dir: str | Path, file_name: str) -> dict[str, Any]:
@@ -364,6 +438,188 @@ def _json_ready(value: Any) -> Any:
     if isinstance(value, pd.Timestamp):
         return value.isoformat()
     return value
+
+
+def _clean_numeric_series(series: pd.Series) -> pd.Series:
+    result = pd.to_numeric(series, errors="coerce").replace([np.inf, -np.inf], np.nan).dropna()
+    result = result.copy()
+    result.index = pd.to_datetime(result.index, errors="coerce")
+    result = result[~pd.isna(result.index)]
+    return result.astype(float)
+
+
+def _clean_numeric_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    numeric = frame.select_dtypes(include=[np.number]).replace([np.inf, -np.inf], np.nan)
+    numeric = numeric.dropna(axis=0, how="all").fillna(0.0)
+    numeric = numeric.copy()
+    numeric.index = pd.to_datetime(numeric.index, errors="coerce")
+    numeric = numeric[~pd.isna(numeric.index)]
+    return numeric.astype(float)
+
+
+def _figure_generation_result(
+    figure_dir: Path,
+    errors: list[str],
+    warnings: list[str],
+) -> dict[str, Any]:
+    figures = []
+    for file_name in EXPECTED_HANDOFF_FIGURES:
+        path = figure_dir / file_name
+        exists = path.is_file()
+        figures.append(
+            {
+                "file": f"figures/{file_name}",
+                "exists": exists,
+                "size_bytes": int(path.stat().st_size) if exists else None,
+            }
+        )
+    return {
+        "ok": not errors and all(figure["exists"] for figure in figures),
+        "figure_dir": str(figure_dir),
+        "figures": figures,
+        "errors": errors,
+        "warnings": warnings,
+    }
+
+
+def _figures_markdown(output_dir: str | Path) -> str:
+    figure_dir = Path(output_dir) / "figures"
+    labels = [
+        ("Cumulative Returns", "cumulative_returns.png"),
+        ("Drawdown", "drawdown.png"),
+        ("Turnover", "turnover.png"),
+        ("Concentration", "concentration.png"),
+        ("Top Weights", "top_weights.png"),
+    ]
+    if all((figure_dir / file_name).is_file() for _, file_name in labels):
+        return "\n".join(f"![{label}](figures/{file_name})" for label, file_name in labels)
+    return "Figures were not generated for this run."
+
+
+def _plot_cumulative_returns(returns: pd.Series, path: Path) -> None:
+    wealth = (1.0 + returns).cumprod()
+    _save_line_chart(
+        wealth,
+        path,
+        title="Cumulative Wealth",
+        ylabel="Wealth",
+        color="#1f77b4",
+    )
+
+
+def _plot_drawdown(returns: pd.Series, path: Path) -> None:
+    wealth = (1.0 + returns).cumprod()
+    drawdown = wealth / wealth.cummax() - 1.0
+    _save_line_chart(
+        drawdown,
+        path,
+        title="Drawdown",
+        ylabel="Drawdown",
+        color="#d62728",
+        percent_axis=True,
+    )
+
+
+def _plot_turnover(weights: pd.DataFrame, path: Path) -> None:
+    turnover = 0.5 * weights.diff().abs().sum(axis=1)
+    turnover = turnover.iloc[1:] if len(turnover) > 1 else turnover
+    _save_line_chart(
+        turnover,
+        path,
+        title="One-Way Turnover",
+        ylabel="Turnover",
+        color="#ff7f0e",
+        percent_axis=True,
+    )
+
+
+def _plot_concentration(weights: pd.DataFrame, path: Path) -> None:
+    herfindahl = weights.pow(2).sum(axis=1)
+    effective_positions = 1.0 / herfindahl.replace(0.0, np.nan)
+    max_weight = _safe_float(weights.max(axis=1).mean())
+    title = "Effective Positions"
+    if max_weight is not None:
+        title = f"{title} (avg max weight: {max_weight:.2%})"
+    _save_line_chart(
+        effective_positions.dropna(),
+        path,
+        title=title,
+        ylabel="Effective positions",
+        color="#2ca02c",
+    )
+
+
+def _plot_top_weights(weights: pd.DataFrame, path: Path) -> None:
+    average_weights = weights.mean(axis=0).clip(lower=0.0)
+    top_weights = average_weights.nlargest(10)
+    if top_weights.empty:
+        raise ValueError("weights.parquet contains no average weights")
+
+    plt = _pyplot()
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    top_weights.iloc[::-1].plot(kind="barh", ax=ax, color="#9467bd")
+    ax.set_title("Top 10 Average Weights")
+    ax.set_xlabel("Average weight")
+    ax.set_ylabel("")
+    ax.xaxis.set_major_formatter(_percent_formatter())
+    ax.grid(axis="x", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(path, dpi=120, metadata={"Software": "matplotlib"})
+    plt.close(fig)
+
+
+def _save_line_chart(
+    series: pd.Series,
+    path: Path,
+    *,
+    title: str,
+    ylabel: str,
+    color: str,
+    percent_axis: bool = False,
+) -> None:
+    if series.empty:
+        raise ValueError("no values available to plot")
+    plt = _pyplot()
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    ax.plot(series.index, series.to_numpy(dtype=float), color=color, linewidth=1.6)
+    ax.set_title(title)
+    ax.set_xlabel("Date")
+    ax.set_ylabel(ylabel)
+    ax.grid(alpha=0.25)
+    if percent_axis:
+        ax.yaxis.set_major_formatter(_percent_formatter())
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    fig.savefig(path, dpi=120, metadata={"Software": "matplotlib"})
+    plt.close(fig)
+
+
+def _pyplot() -> Any:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    plt.rcParams.update(
+        {
+            "figure.facecolor": "white",
+            "axes.facecolor": "white",
+            "axes.edgecolor": "#333333",
+            "axes.labelcolor": "#222222",
+            "axes.titlesize": 12,
+            "axes.labelsize": 10,
+            "xtick.color": "#222222",
+            "ytick.color": "#222222",
+            "font.size": 10,
+        }
+    )
+    return plt
+
+
+def _percent_formatter() -> Any:
+    from matplotlib.ticker import PercentFormatter
+
+    return PercentFormatter(xmax=1.0)
 
 
 def _section_dict(payload: dict[str, Any], key: str) -> dict[str, Any]:
