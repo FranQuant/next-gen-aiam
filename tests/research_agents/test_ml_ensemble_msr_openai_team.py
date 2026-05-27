@@ -181,6 +181,57 @@ def test_cli_write_handoff_without_run_team_writes_deterministic_handoff(
     )
 
 
+def test_cli_write_handoff_and_readme_without_run_team_writes_matching_files(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    artifact_dir = _write_synthetic_artifacts(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_ml_ensemble_msr_openai_team.py",
+            "--output-dir",
+            str(artifact_dir),
+            "--write-handoff",
+            "--write-readme",
+        ],
+    )
+
+    runpy.run_path("scripts/run_ml_ensemble_msr_openai_team.py", run_name="__main__")
+
+    payload = json.loads(capsys.readouterr().out)
+    handoff_path = artifact_dir / "research_team_handoff.md"
+    readme_path = artifact_dir / "README.md"
+    assert payload["ok"] is True
+    assert handoff_path.is_file()
+    assert readme_path.is_file()
+    assert readme_path.read_text(encoding="utf-8") == handoff_path.read_text(
+        encoding="utf-8"
+    )
+
+
+def test_cli_write_readme_without_handoff_fails_cleanly(tmp_path, monkeypatch, capsys):
+    artifact_dir = _write_synthetic_artifacts(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_ml_ensemble_msr_openai_team.py",
+            "--output-dir",
+            str(artifact_dir),
+            "--write-readme",
+        ],
+    )
+
+    with pytest.raises(SystemExit):
+        runpy.run_path("scripts/run_ml_ensemble_msr_openai_team.py", run_name="__main__")
+
+    captured = capsys.readouterr()
+    assert "--write-readme requires --write-handoff" in captured.err
+
+
 def test_live_functions_raise_clear_error_if_sdk_missing(tmp_path, monkeypatch):
     artifact_dir = _write_synthetic_artifacts(tmp_path)
     module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
@@ -278,16 +329,21 @@ def test_handoff_agent_prompt_forbids_verbatim_deterministic_handoff():
     assert "# deterministic rendered handoff memo" in text
     assert "one top-level '# ml ensemble msr research handoff' title only" in text
     assert "canonical github-compatible markdown deliverable" in text
+    assert "narrative research synthesis" in text
+    assert "primarily reporting and communication" in text
+    assert "support from strategy prototyping" in text
     assert "## figures" in text
     assert "## appendix / source artifacts" in text
     assert "human review required." in module.RESEARCH_HANDOFF_INSTRUCTIONS
 
 
-def test_default_team_prompt_forbids_appended_deterministic_handoff():
+def test_default_team_prompt_asks_for_narrative_research_synthesis():
     module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
     text = " ".join(module.DEFAULT_TEAM_PROMPT.lower().split())
 
     assert "canonical github-compatible markdown deliverable" in text
+    assert "narrative research synthesis" in text
+    assert "no checklist-only findings section" in text
     assert "must not paste the deterministic handoff verbatim" in text
     assert "# deterministic rendered handoff memo" in text
     assert "exactly one top-level" in text
@@ -297,7 +353,27 @@ def test_default_team_prompt_forbids_appended_deterministic_handoff():
     assert "weights.parquet" in text
     assert "strategy_returns.parquet" in text
     assert "predictions.parquet" in text
-    assert "Human review required." in module.DEFAULT_TEAM_PROMPT
+    assert "human review required." in module.DEFAULT_TEAM_PROMPT.lower()
+
+
+def test_default_team_prompt_clarifies_reporting_category_and_strategy_support():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    text = " ".join(module.DEFAULT_TEAM_PROMPT.lower().split())
+
+    assert "primarily reporting & communication" in text
+    assert "support from strategy prototyping" in text
+    assert "deterministic engine performs the historical ml expected-return" in text
+    assert "agent team performs bounded research review" in text
+    assert "do not autonomously load external data" in text
+    assert "change portfolio weights" in text
+    assert "make execution decisions" in text
+
+
+def test_default_team_prompt_includes_required_target_sections():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+
+    for section in module.REQUIRED_TEAM_HANDOFF_SECTIONS:
+        assert section in module.DEFAULT_TEAM_PROMPT
 
 
 def test_default_team_prompt_includes_figures_section_and_links():
@@ -332,31 +408,46 @@ def test_team_handoff_validator_flags_duplicated_deterministic_handoff_content()
 
 def test_team_handoff_validator_accepts_clean_handoff_with_figures_and_artifacts():
     module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
-    concise = (
-        "# ML Ensemble MSR Research Handoff\n\n"
-        "## Executive Summary\n\n"
-        "This memo is research-only, no investment advice, and human review required.\n\n"
-        "## Figures\n\n"
-        "![Cumulative Returns](figures/cumulative_returns.png)\n"
-        "![Drawdown](figures/drawdown.png)\n"
-        "![Turnover](figures/turnover.png)\n"
-        "![Concentration](figures/concentration.png)\n"
-        "![Top Weights](figures/top_weights.png)\n\n"
-        "## Appendix / Source Artifacts\n\n"
-        "The deterministic source artifacts are:\n"
-        "- run_manifest.json\n"
-        "- metrics.json\n"
-        "- report.md\n"
-        "- predictions.parquet\n"
-        "- weights.parquet\n"
-        "- strategy_returns.parquet\n"
-        "- figures/*.png\n"
-    )
+    concise = _clean_team_handoff_with_governance("Human review required.")
 
     assert module.validate_team_handoff_output(
         concise,
         require_figures=True,
     ) == {"ok": True, "errors": []}
+
+
+def test_team_handoff_validator_rejects_missing_research_context():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    handoff = _clean_team_handoff_with_governance("Human review required.").replace(
+        "## Research Context\n\n"
+        "This is a historical ML expected-return plus MSR allocation prototype. "
+        "Deterministic code owns strategy mechanics and artifacts; the agent team "
+        "owns bounded review and communication.\n\n",
+        "",
+    )
+
+    validation = module.validate_team_handoff_output(handoff)
+
+    assert validation["ok"] is False
+    assert any("## Research Context" in error for error in validation["errors"])
+
+
+def test_team_handoff_validator_rejects_missing_figures_when_expected():
+    module = importlib.import_module("aiam.research_agents.ml_ensemble_msr_openai_team")
+    handoff = _clean_team_handoff_with_governance("Human review required.").replace(
+        "## Figures\n\n"
+        "![Cumulative Returns](figures/cumulative_returns.png)\n"
+        "![Drawdown](figures/drawdown.png)\n"
+        "![Turnover](figures/turnover.png)\n"
+        "![Concentration](figures/concentration.png)\n"
+        "![Top Weights](figures/top_weights.png)\n\n",
+        "",
+    )
+
+    validation = module.validate_team_handoff_output(handoff, require_figures=True)
+
+    assert validation["ok"] is False
+    assert any("## Figures" in error for error in validation["errors"])
 
 
 def test_team_handoff_validator_accepts_human_review_variants():
@@ -389,7 +480,23 @@ def test_team_handoff_finalizer_appends_governance_footer_when_needed():
         "# ML Ensemble MSR Research Handoff\n\n"
         "## Executive Summary\n\n"
         "A concise research memo.\n\n"
-        "## Appendix / Source Artifacts\n"
+        "## Research Context\n\n"
+        "Historical prototype context.\n\n"
+        "## Agent Team Interpretation\n\n"
+        "Bounded agent interpretation.\n\n"
+        "## Performance Interpretation\n\n"
+        "Performance context.\n\n"
+        "## Portfolio Construction and Risk Interpretation\n\n"
+        "Risk context.\n\n"
+        "## Figures\n\n"
+        "## Methodology Caveats\n\n"
+        "Methodology context.\n\n"
+        "## Recommended Next Research Questions\n\n"
+        "Research questions.\n\n"
+        "## Human Review Checklist\n\n"
+        "- [ ] Review.\n\n"
+        "## Appendix / Source Artifacts\n\n"
+        "- run_manifest.json\n"
     )
 
     finalized = module.finalize_team_handoff_output(handoff)
@@ -415,12 +522,51 @@ def _clean_team_handoff_with_governance(human_review_phrase: str) -> str:
         "## Executive Summary\n\n"
         f"{human_review_phrase} This memo is research-only, provides no investment "
         "advice, no target allocations, and no trading recommendations. Historical "
-        "weights are not target allocations.\n\n"
+        "weights are not target allocations. The prototype is promising because the "
+        "historical metrics are positive, but it is not deployable yet.\n\n"
+        "## Research Context\n\n"
+        "This is a historical ML expected-return plus MSR allocation prototype. "
+        "Deterministic code owns strategy mechanics and artifacts; the agent team "
+        "owns bounded review and communication.\n\n"
+        "## Agent Team Interpretation\n\n"
+        "The Research Manager / Handoff Agent, Data QA Agent, Quant Strategy Agent, "
+        "Portfolio Risk Agent, and Performance Review Agent synthesize bounded "
+        "artifact evidence without changing model logic or allocations.\n\n"
+        "## Performance Interpretation\n\n"
+        "Sharpe uses arithmetic annualized return over annualized volatility. CAGR "
+        "and arithmetic annualized return are different measures, and total return, "
+        "volatility, drawdown, and observation count must be read together.\n\n"
+        "## Portfolio Construction and Risk Interpretation\n\n"
+        "Concentration, turnover, max single-asset weight, top-5 concentration, no "
+        "transaction costs, and no concentration constraints are implementation "
+        "risks requiring review.\n\n"
+        "## Figures\n\n"
+        "![Cumulative Returns](figures/cumulative_returns.png)\n"
+        "![Drawdown](figures/drawdown.png)\n"
+        "![Turnover](figures/turnover.png)\n"
+        "![Concentration](figures/concentration.png)\n"
+        "![Top Weights](figures/top_weights.png)\n\n"
+        "## Methodology Caveats\n\n"
+        "Research-only, historical backtest only, no investment advice, no target "
+        "allocations, no trading recommendations, local cache dependence, single-fit "
+        "setup, no transaction costs, optimizer concentration, and benchmark "
+        "reconciliation remain caveats.\n\n"
+        "## Recommended Next Research Questions\n\n"
+        "Review transaction costs, concentration constraints, rolling/expanding "
+        "refit, benchmark reconciliation, and sensitivity to cache vintage/universe "
+        "definition.\n\n"
+        "## Human Review Checklist\n\n"
+        "- [ ] Confirm artifact contract.\n"
+        "- [ ] Review methodology caveats.\n\n"
         "## Appendix / Source Artifacts\n\n"
         "The deterministic source artifacts are:\n"
         "- run_manifest.json\n"
         "- metrics.json\n"
         "- report.md\n"
+        "- predictions.parquet\n"
+        "- weights.parquet\n"
+        "- strategy_returns.parquet\n"
+        "- figures/*.png\n"
     )
 
 

@@ -48,6 +48,25 @@ FIGURE_LINKS = (
     "figures/concentration.png",
     "figures/top_weights.png",
 )
+REQUIRED_TEAM_HANDOFF_SECTIONS = (
+    "## Executive Summary",
+    "## Research Context",
+    "## Agent Team Interpretation",
+    "## Performance Interpretation",
+    "## Portfolio Construction and Risk Interpretation",
+    "## Figures",
+    "## Methodology Caveats",
+    "## Recommended Next Research Questions",
+    "## Human Review Checklist",
+    "## Appendix / Source Artifacts",
+)
+REQUIRED_GOVERNANCE_PHRASES = (
+    "research-only",
+    "no investment advice",
+    "no target allocations",
+    "no trading recommendations",
+    "historical weights are not target allocations",
+)
 HUMAN_REVIEW_PATTERNS = (
     r"\bhuman review required\b",
     r"\bhuman review is required\b",
@@ -110,13 +129,21 @@ RESEARCH_HANDOFF_INSTRUCTIONS = (
     "as the canonical GitHub-compatible Markdown deliverable. Use the deterministic "
     "handoff as evidence, but do not paste the deterministic handoff verbatim. Do "
     "not include a '# Deterministic Rendered Handoff Memo' section. Produce one "
-    "top-level '# ML Ensemble MSR Research Handoff' title only. Include a "
-    "'## Figures' section with relative Markdown image links when figures are "
-    "available. Reference deterministic artifacts instead of appending them, and "
-    "include an '## Appendix / Source Artifacts' section listing run_manifest.json, "
-    "metrics.json, report.md, predictions.parquet, weights.parquet, "
-    "strategy_returns.parquet, and figures/*.png. Do not dump raw JSON and do not "
-    "use recommendation language. Include the exact phrase 'Human review required.'\n"
+    "top-level '# ML Ensemble MSR Research Handoff' title only. Write narrative "
+    "research synthesis rather than only bullet findings. Explain that this work "
+    "is primarily reporting and communication, with support from strategy "
+    "prototyping: deterministic code owns strategy mechanics and artifact "
+    "generation, while the agent team owns bounded review, critique, synthesis, "
+    "and communication. Explain what the historical ML expected-return plus MSR "
+    "allocation prototype is, why headline performance is promising, and why it "
+    "is not deployable yet. Include all required sections from the default team "
+    "prompt. Include a '## Figures' section with relative Markdown image links "
+    "when figures are available. Reference deterministic artifacts instead of "
+    "appending them, and include an '## Appendix / Source Artifacts' section "
+    "listing run_manifest.json, metrics.json, report.md, predictions.parquet, "
+    "weights.parquet, strategy_returns.parquet, and figures/*.png. Do not dump "
+    "raw JSON and do not use recommendation language. Include the exact phrase "
+    "'Human review required.'\n"
     + COMMON_AGENT_CONSTRAINTS
 )
 
@@ -125,27 +152,50 @@ Run the five-agent ML Ensemble MSR research handoff workflow.
 
 Use the deterministic tools to validate artifacts, load bounded summaries, and
 render the deterministic markdown handoff for evidence only. Specialist agents
-should critique the bounded evidence only. The final output must be the
-canonical GitHub-compatible Markdown deliverable, research-only, no investment
-advice, no target allocations, no trading recommendations, and human review
-required. Include the exact phrase 'Human review required.' The Research Handoff
-Agent must not paste the deterministic handoff verbatim, must not include a
-section titled '# Deterministic Rendered Handoff Memo', and must produce exactly
-one top-level '# ML Ensemble MSR Research Handoff' title. Use this structure:
+should critique the bounded evidence only. The final output must read as a
+professional institutional research handoff: narrative research synthesis first,
+short bullets only where they help, and no checklist-only findings section.
+
+This implementation is primarily Reporting & communication, with support from
+Strategy prototyping. The deterministic engine performs the historical ML
+expected-return plus MSR allocation prototype and artifact generation. The
+OpenAI agent team performs bounded research review, critique, synthesis, and
+communication. The agents do not autonomously load external data, discover new
+features, change portfolio weights, or make execution decisions.
+
+The memo must be the canonical GitHub-compatible Markdown deliverable,
+research-only, no investment advice, no target allocations, no trading
+recommendations, and human review required. Include the exact phrase 'Human
+review required.' The Research Handoff Agent must not paste the deterministic
+handoff verbatim, must not include a section titled '# Deterministic Rendered
+Handoff Memo', and must produce exactly one top-level '# ML Ensemble MSR
+Research Handoff' title. Use this structure:
 
 # ML Ensemble MSR Research Handoff
 
 ## Executive Summary
-## Five-Agent Review Summary
-## Performance Metrics
-## Turnover and Concentration
-## Figures
-## Methodology Caveats
-## Open Questions for Human Review
-## Human Review Checklist
-## Appendix / Source Artifacts
+Narrative synthesis: what was tested, what was found, why it matters, and why
+this is not deployable yet.
 
-When figures are available, include this exact Figures section:
+## Research Context
+Explain that this is a historical ML expected-return plus MSR allocation
+prototype. Clarify that deterministic code owns the strategy mechanics and the
+agent team owns bounded review and communication.
+
+## Agent Team Interpretation
+Synthesize the five agents in prose: Research Manager / Handoff Agent, Data QA
+Agent, Quant Strategy Agent, Portfolio Risk Agent, and Performance Review Agent.
+Avoid making this section only a bullet list of findings.
+
+## Performance Interpretation
+Explain Sharpe, CAGR, total return, volatility, drawdown, and observation count
+in context. Explain that Sharpe uses arithmetic annualized return over
+annualized volatility. Explain that CAGR and arithmetic annualized return are
+different.
+
+## Portfolio Construction and Risk Interpretation
+Explain concentration, turnover, max single-asset weight, top-5 concentration,
+no transaction costs, and no concentration constraints as implementation risks.
 
 ## Figures
 
@@ -154,6 +204,19 @@ When figures are available, include this exact Figures section:
 ![Turnover](figures/turnover.png)
 ![Concentration](figures/concentration.png)
 ![Top Weights](figures/top_weights.png)
+
+## Methodology Caveats
+Research-only, historical backtest only, no investment advice, no target
+allocations, no trading recommendations, local cache dependence, single-fit
+setup, no transaction costs, optimizer concentration, and benchmark
+reconciliation.
+
+## Recommended Next Research Questions
+Transaction costs, concentration constraints, rolling/expanding refit, benchmark
+reconciliation, and sensitivity to cache vintage/universe definition.
+
+## Human Review Checklist
+## Appendix / Source Artifacts
 
 In Appendix / Source Artifacts, state that the deterministic source artifacts are:
 - run_manifest.json
@@ -368,11 +431,17 @@ def validate_team_handoff_output(markdown: str, require_figures: bool = False) -
     title_count = sum(line.strip() == TEAM_HANDOFF_TITLE for line in markdown.splitlines())
     if title_count != 1:
         errors.append(f"expected exactly one top-level team handoff title, found {title_count}")
-    if "## Appendix / Source Artifacts" not in markdown:
-        errors.append("missing Appendix / Source Artifacts section")
+    missing_sections = [
+        section for section in REQUIRED_TEAM_HANDOFF_SECTIONS if section not in markdown
+    ]
+    if missing_sections:
+        errors.append(f"missing required sections: {missing_sections}")
     lower_markdown = markdown.lower()
-    if "no investment advice" not in lower_markdown:
-        errors.append("missing no investment advice language")
+    missing_governance = [
+        phrase for phrase in REQUIRED_GOVERNANCE_PHRASES if phrase not in lower_markdown
+    ]
+    if missing_governance:
+        errors.append(f"missing governance language: {missing_governance}")
     if not _contains_human_review_language(markdown):
         errors.append("missing human review language")
     if require_figures:
