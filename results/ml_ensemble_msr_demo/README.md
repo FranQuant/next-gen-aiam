@@ -2,101 +2,61 @@
 
 ## Executive Summary
 
-This research-only handoff reviews deterministic local artifacts in `results/ml_ensemble_msr_demo` for an ML Ensemble Maximum Sharpe Ratio research run. The artifact contract validated successfully with no missing files or warnings. Reported results are historical backtest evidence only, not investment advice, not target allocations, and not trading recommendations.
+This research handoff reviews a deterministic historical ML expected-return plus maximum Sharpe ratio (“MSR”) allocation prototype using the artifact set in `results/ml_ensemble_msr_demo`. The deterministic artifact contract validated successfully, with the expected source files present and no validation errors or missing files reported.
 
-Headline bounded evidence shows:
-- Strategy label: MSR using ensemble expected-return forecasts.
-- Universe size: 29 assets.
-- Test-period realized strategy returns: 813 observations from 2023-01-04 to 2026-04-01.
-- Total return: 0.641675.
-- CAGR: 0.166087.
-- Annual volatility: 0.060289.
-- Sharpe: 2.579464.
-- Maximum drawdown: -0.059160.
+The tested prototype combines machine-learning expected-return forecasts with a long-only MSR allocation approximation. The bounded evidence shows a historical test-period total return of approximately 64.2%, CAGR of approximately 16.6%, annualized volatility of approximately 6.0%, maximum drawdown of approximately -5.9%, and Sharpe ratio of approximately 2.58 over 813 strategy-return observations. These results are economically notable in the historical sample, but they are not deployable evidence on their own.
 
-Human review required.
+The most important interpretation is that the return profile must be reviewed alongside implementation assumptions. The baseline excludes transaction costs, does not impose explicit concentration constraints, relies on local cached data, uses a single-fit machine-learning setup, and produces concentrated portfolios with average top-5 weight share near 66.9% and maximum single-asset weight near 47.9%. Human review required. This memo is research-only, provides no investment advice, no target allocations, and no trading recommendations.
 
-## Five-Agent Review Summary
+## Research Context
 
-**Data QA Agent**
-- Artifact contract status is valid.
-- Required source artifacts are present: predictions, weights, strategy returns, metrics, report, and run manifest.
-- Bounded evidence shows finite ratios of 1.0 for predictions, weights, and strategy returns.
-- Predictions contain one feature output column: `ensemble_pred`.
-- Weights row sums are approximately 1.0, with row sum range from 0.9999999999999996 to 1.0000000000000004.
-- Local-cache assumptions remain a caveat; cache lineage and vintage require human verification.
+This is a historical ML expected-return plus MSR allocation prototype. The deterministic engine owns the strategy mechanics: local artifact generation, model forecasts, portfolio construction, return calculation, metrics, and figures. The OpenAI agent team owns bounded review, critique, synthesis, and communication only.
 
-**Quant Strategy Agent**
-- Strategy uses an equal-weighted ensemble of Lasso, Random Forest, and XGBoost expected-return forecasts.
-- Portfolio construction is described as a long-only maximum Sharpe ratio approximation.
-- Portfolio weights are lagged by one trading day before return realization.
-- Reported metrics are backtest diagnostics only and should not be interpreted as forward-looking expectations.
+The reviewed artifact directory is `results/ml_ensemble_msr_demo`. The deterministic run inventory indicates a 29-asset universe, 17 features, a training end date of 2022-12-31, and a test start date of 2023-01-01. The rendered deterministic evidence describes the model components as Lasso, Random Forest, and XGBoost, combined as an equal-weighted ensemble of expected-return forecasts. Portfolio weights are lagged by one trading day before return realization.
 
-**Portfolio Risk Agent**
-- Concentration is notable: average top-5 weight share is 0.668991, and maximum top-5 weight share is 0.834449.
-- Maximum single-asset weight is 0.479322.
-- Average effective positions are 6.734010, despite an average of 18.627306 nonzero assets.
-- Transaction costs and explicit concentration limits are not included in the baseline evidence.
+No agent loaded external data, discovered new features, changed hyperparameters, modified optimizer rules, changed weights, or made execution decisions.
 
-**Performance Review Agent**
-- Reported annualized arithmetic return is 0.155514.
-- Reported CAGR is 0.166087.
-- Reported annual volatility is 0.060289.
-- Reported Sharpe is 2.579464.
-- Reported maximum drawdown is -0.059160.
-- These metrics require independent human review against notebook benchmarks and published diagnostics.
+## Agent Team Interpretation
 
-**Research Handoff Agent**
-- This memo is based on deterministic validation, bounded summaries, and rendered evidence only.
-- It does not reproduce the deterministic rendered handoff verbatim.
-- It preserves the research-only framing and excludes investment advice, target allocations, and trading recommendations.
+The Research Manager / Handoff Agent interpretation is that the artifact set is complete enough for a research handoff and that the deterministic evidence supports a coherent historical prototype narrative. However, the handoff should not be read as validation for deployment. The reported performance is conditional on the historical data, local cache, feature set, model setup, and optimizer configuration used by the deterministic engine.
 
-## Performance Metrics
+The Data QA Agent interpretation is that the artifact contract passed: `predictions.parquet`, `weights.parquet`, `strategy_returns.parquet`, `metrics.json`, `report.md`, and `run_manifest.json` were present. The bounded summaries showed finite prediction, weight, and strategy-return data, with no null predictions reported. The predictions cover 29 assets from 2023-01-03 to 2026-03-31; weights cover 813 rows and 29 assets over the same date span; strategy returns cover 813 observations from 2023-01-04 to 2026-04-01. A caveat remains that the manifest-level full data date range extends from 2003-01-02 to 2026-04-30, while the bounded test artifacts cover the post-train strategy period. This distinction should be reconciled and documented for human review.
+
+The Quant Strategy Agent would interpret the result as a promising but preliminary single-fit ML ensemble prototype. The reported Sharpe and CAGR are strong in the historical test window, but the research design still requires robustness checks, including rolling or expanding refits, sensitivity to universe definition, benchmark reconciliation, and transaction-cost-aware evaluation. Since the deterministic engine owns the strategy mechanics, this review does not change model features, targets, hyperparameters, or optimizer logic.
+
+The Portfolio Risk Agent would focus on implementation risk. The portfolio is long-only and appears fully invested based on weight row sums near 1.0, but the optimizer creates meaningful concentration. Average effective positions are approximately 6.73, average max single-asset weight is approximately 33.3%, average top-5 weight share is approximately 66.9%, and maximum top-5 share reaches approximately 83.4%. Historical weights are not target allocations.
+
+The Performance Review Agent would note that the return stream is attractive in-sample for the test period but incomplete as an institutional performance case. No transaction costs are included; turnover is non-trivial, with average turnover approximately 4.9% and maximum turnover approximately 44.9%; and benchmark reconciliation remains an open question.
+
+## Performance Interpretation
+
+The reported headline metrics are:
 
 | Metric | Value |
 | --- | ---: |
 | Total return | 0.641675 |
 | CAGR | 0.166087 |
-| Annual return, arithmetic | 0.155514 |
-| Annual volatility | 0.060289 |
+| Arithmetic annualized return | 0.155514 |
+| Annualized volatility | 0.060289 |
 | Sharpe | 2.579464 |
-| Maximum drawdown | -0.059160 |
+| Max drawdown | -0.059160 |
 | Observations | 813 |
 
-Additional strategy return evidence:
-- Date range: 2023-01-04 to 2026-04-01.
-- Mean return: 0.000617.
-- Standard deviation: 0.003798.
-- Minimum return: -0.026880.
-- Maximum return: 0.034773.
-- Finite ratio: 1.0.
+Sharpe is calculated as arithmetic annualized return divided by annualized volatility. In this artifact set, the arithmetic annualized return is approximately 15.6% and annualized volatility is approximately 6.0%, producing a Sharpe ratio of approximately 2.58.
 
-## Turnover and Concentration
+CAGR and arithmetic annualized return are different measures. CAGR reflects compounded growth over the full period, while arithmetic annualized return annualizes the average periodic return. Here, CAGR is approximately 16.6%, while arithmetic annualized return is approximately 15.6%. The difference should not be treated as an error; it reflects distinct calculation conventions.
 
-| Turnover Metric | Value |
-| --- | ---: |
-| Average turnover | 0.049103 |
-| Median turnover | 0.042894 |
-| Maximum turnover | 0.448734 |
-| Observations | 812 |
+The strategy-return artifact contains 813 observations, with bounded daily return summary statistics showing a mean return of approximately 0.000617, standard deviation of approximately 0.003798, minimum return of approximately -0.02688, and maximum return of approximately 0.03477. These are historical test-period statistics only.
 
-| Concentration Metric | Value |
-| --- | ---: |
-| Average effective positions | 6.734010 |
-| Average Herfindahl | 0.160065 |
-| Average max weight | 0.332553 |
-| Average top-5 weight share | 0.668991 |
-| Maximum single-asset weight | 0.479322 |
-| Maximum top-5 weight share | 0.834449 |
-| Observations | 813 |
+## Portfolio Construction and Risk Interpretation
 
-Weights artifact evidence:
-- Shape: 813 rows by 29 assets.
-- Date range: 2023-01-03 to 2026-03-31.
-- Minimum weight: 0.0.
-- Maximum weight: 0.479322.
-- Average nonzero assets: 18.627306.
-- Finite ratio: 1.0.
+The baseline is a long-only MSR allocation prototype using ensemble expected-return forecasts. The weights artifact contains 813 rows across 29 assets, with row sums effectively equal to 1.0 and no negative weights reported in the bounded summary. The average number of nonzero assets is approximately 18.6, but effective diversification is materially lower because the optimizer concentrates capital.
+
+Concentration is a key implementation caveat. The maximum single-asset weight reaches approximately 47.9%. Average top-5 concentration is approximately 66.9%, and maximum top-5 concentration reaches approximately 83.4%. Average effective positions are approximately 6.73. These diagnostics suggest the allocation may be sensitive to forecast error, covariance estimation, optimizer instability, and asset-specific shocks.
+
+Turnover also requires review. Average turnover is approximately 4.9%, median turnover is approximately 4.3%, and maximum turnover is approximately 44.9%. Since the baseline does not include transaction costs, slippage, borrow constraints, taxes, or market-impact assumptions, reported returns may overstate implementable performance.
+
+There are no concentration constraints in the baseline diagnostics. This is an important distinction: concentration metrics are descriptive evidence, not imposed portfolio limits.
 
 ## Figures
 
@@ -108,57 +68,47 @@ Weights artifact evidence:
 
 ## Methodology Caveats
 
-- Research-only historical backtest evidence.
-- No investment advice.
-- No target allocations.
-- No trading recommendations.
-- Historical weights are not target allocations.
-- Baseline diagnostics do not include transaction costs.
-- Concentration diagnostics are descriptive; no explicit concentration constraint is imposed in the baseline.
-- The workflow depends on deterministic local cached artifacts; cache lineage, vintage, and universe construction require human review.
-- Single-fit ML setup is reported.
-- Model components are Lasso, Random Forest, and XGBoost.
-- Feature count reported in the deterministic evidence is 17, but bounded summaries only expose the prediction output column `ensemble_pred`; underlying feature definitions should be reviewed from approved source documentation.
-- Weights are lagged by one trading day before return realization.
-- Notebook benchmark reconciliation remains open.
+This is research-only and based on a historical backtest. It is not investment advice, not a target allocation, and not a trading recommendation.
 
-## Open Questions for Human Review
+Key caveats for human review include local cache dependence, single-fit ML setup, no transaction costs, optimizer concentration, and benchmark reconciliation. The results depend on local cached inputs and the approved universe definition. The deterministic evidence states no live data call was used. Cache vintage, data lineage, feature availability timing, and survivorship assumptions should be reviewed before any further interpretation.
 
-- Does this run reconcile with Notebook 03 benchmark metrics and published MSR diagnostics?
-- Are the local-cache vintage, universe membership, and data lineage approved for research review?
-- Are transaction-cost assumptions required before further interpretation?
-- Should concentration limits or other optimizer constraints be evaluated in a subsequent research run?
-- Are the reported model features and target construction fully documented in approved source materials?
-- Are turnover levels robust under realistic implementation assumptions?
-- Are any survivorship, liquidity, corporate action, or data availability issues present in the cached universe?
+The single-fit setup also limits inference. Rolling or expanding retraining would help test whether the model behavior is stable through time. The ML ensemble and MSR optimizer may perform differently across regimes, especially if expected-return estimates are noisy.
+
+Benchmark reconciliation remains open. The result should be reconciled against the relevant notebook or published benchmark diagnostics before it is treated as a stable research finding.
+
+## Recommended Next Research Questions
+
+Recommended next research work should remain research-only:
+
+- Add transaction-cost and slippage sensitivity analysis.
+- Test explicit concentration constraints and compare risk-adjusted performance.
+- Evaluate rolling or expanding refit procedures.
+- Reconcile reported metrics against the benchmark and Notebook 03 diagnostics.
+- Test sensitivity to cache vintage, universe definition, and date alignment.
+- Review whether feature timing and data availability assumptions are free of look-ahead bias.
 
 ## Human Review Checklist
 
-- [ ] Confirm artifact contract validity.
-- [ ] Confirm source cache lineage and data vintage.
-- [ ] Confirm universe size and membership assumptions.
-- [ ] Review feature definitions and target construction.
-- [ ] Reconcile performance metrics with notebook benchmarks.
-- [ ] Review turnover and concentration diagnostics.
-- [ ] Assess transaction-cost sensitivity requirements.
-- [ ] Confirm that historical weights are not interpreted as target allocations.
-- [ ] Confirm research-only usage and no trading interpretation.
-- [ ] Approve or reject the run for further research analysis.
+Human review required.
+
+- Confirm artifact contract validity and source cache lineage.
+- Confirm universe definition, date ranges, and train/test split.
+- Review feature columns and feature timing assumptions.
+- Reconcile deterministic metrics with benchmark diagnostics.
+- Assess concentration, turnover, and transaction-cost sensitivity.
+- Confirm historical weights are not interpreted as target allocations.
+- Confirm this memo is treated as research-only and not as trading guidance.
 
 ## Appendix / Source Artifacts
 
 The deterministic source artifacts are:
-- run_manifest.json
-- metrics.json
-- report.md
-- predictions.parquet
-- weights.parquet
-- strategy_returns.parquet
-- figures/*.png
 
-Artifact directory: `results/ml_ensemble_msr_demo`
+- `run_manifest.json`
+- `metrics.json`
+- `report.md`
+- `predictions.parquet`
+- `weights.parquet`
+- `strategy_returns.parquet`
+- `figures/*.png`
 
-Artifact contract status:
-- Valid: true.
-- Missing files: none.
-- Warnings: none.
+Artifact contract status: valid, with no missing files or validation errors reported for `results/ml_ensemble_msr_demo`.
