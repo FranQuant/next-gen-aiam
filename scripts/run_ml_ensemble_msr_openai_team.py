@@ -34,7 +34,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-id")
     parser.add_argument("--prompt")
     parser.add_argument("--write-handoff", action="store_true")
-    return parser.parse_args()
+    parser.add_argument("--write-readme", action="store_true")
+    args = parser.parse_args()
+    if args.write_readme and not args.write_handoff:
+        parser.error("--write-readme requires --write-handoff")
+    return args
 
 
 def main() -> None:
@@ -55,10 +59,7 @@ def main() -> None:
         except RuntimeError as exc:
             raise SystemExit(str(exc)) from exc
         if args.write_handoff:
-            (output_dir / "research_team_handoff.md").write_text(
-                final_output,
-                encoding="utf-8",
-            )
+            _write_handoff_files(output_dir, final_output, write_readme=args.write_readme)
         print(final_output)
         return
 
@@ -70,13 +71,13 @@ def main() -> None:
     if args.print_markdown:
         markdown = build_handoff_markdown(output_dir, write_figures=args.write_figures)
         if args.write_handoff:
-            (output_dir / "research_team_handoff.md").write_text(markdown, encoding="utf-8")
+            _write_handoff_files(output_dir, markdown, write_readme=args.write_readme)
         print(markdown)
         return
 
     if args.write_handoff:
         markdown = build_handoff_markdown(output_dir, write_figures=args.write_figures)
-        (output_dir / "research_team_handoff.md").write_text(markdown, encoding="utf-8")
+        _write_handoff_files(output_dir, markdown, write_readme=args.write_readme)
 
     print(build_handoff_summary_json(output_dir, write_figures=args.write_figures))
 
@@ -87,6 +88,12 @@ def _print_team_progress() -> None:
     print("[Quant Strategy Agent] Reviewing strategy mechanics...", file=sys.stderr)
     print("[Portfolio Risk Agent] Reviewing risk diagnostics...", file=sys.stderr)
     print("[Research Handoff Agent] Producing final memo...", file=sys.stderr)
+
+
+def _write_handoff_files(output_dir: Path, markdown: str, write_readme: bool = False) -> None:
+    (output_dir / "research_team_handoff.md").write_text(markdown, encoding="utf-8")
+    if write_readme:
+        (output_dir / "README.md").write_text(markdown, encoding="utf-8")
 
 
 if __name__ == "__main__":
