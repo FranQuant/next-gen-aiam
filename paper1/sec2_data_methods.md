@@ -172,14 +172,14 @@ requires immediate attention.
 **(†) The SHY-concentration artifact.** VMP(GMV(sample)) at rank 3 is not a genuine portfolio
 result. The unconstrained sample covariance matrix has extreme eigenvalues: SHY (iShares 1–3
 Year Treasury Bond, a near-cash instrument) emerges as the near-zero-variance anchor, and the
-GMV(sample) optimizer corners the portfolio in it — producing a base-strategy volatility of
-2.31% that is effectively a cash surrogate. VMP then scales this near-zero-vol position up to
-the $1.5\times$ cap to match the target volatility, leveraging a short-duration Treasury
-position and claiming the Sharpe credit. The strategy earns short-duration Treasury carry, not a
-diversified risk premium. Ledoit-Wolf regularization breaks the corner: GMV(LW) redistributes
-the covariance eigenvalues, forces the optimizer into a genuinely multi-asset solution (vol
-4.01%), and achieves Sharpe 1.215. All subsequent analysis excludes VMP(GMV(sample)) from
-comparative claims; it is retained in Appendix C for completeness.
+GMV(sample) optimizer corners the portfolio in it — base vol 3.16%, Sharpe 0.958, effectively
+short-duration Treasury carry. VMP then scales this near-cash position up to the $1.5\times$
+cap to match the target volatility; the VMP'd variant reaches ann vol 2.31% and gross
+Sharpe 1.345, claiming the Sharpe credit. It earns short-duration Treasury carry, not a
+diversified risk premium. Ledoit-Wolf regularization breaks the corner: GMV(LW) is a genuinely
+multi-asset solution (base vol 4.01%, Sharpe 0.954; VMP(GMV(LW)) Sharpe 1.215). All subsequent
+analysis excludes VMP(GMV(sample)) from comparative claims; it is retained in Appendix C for
+completeness.
 
 **Top 10 by gross Sharpe — artifact excluded:**
 
