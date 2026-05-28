@@ -21,7 +21,7 @@ across all 24 families is the evidence that matters.
 
 The result extends to the 7 expanded configurations (4 constrained MV variants, 3 long-short
 extensions): 6 of 7 improve under VMP. The sole exception is FF3-Mom-LS, where
-VMP(FF3-Mom-LS) worsens an already near-zero Sharpe (0.103 → −0.045). With a base strategy
+VMP(FF3-Mom-LS) worsens an already near-zero Sharpe (0.103 → −0.037). With a base strategy
 whose rolling returns are frequently negative, inverse-vol scaling amplifies the downside
 during drawdown periods rather than dampening vol spikes. This exception is specific to
 near-zero-expected-return strategies and does not qualify the universal finding for the
@@ -120,8 +120,8 @@ VMP and regime-conditional switching exhibit the same partial redundancy (Findin
 respond to volatility regimes: VMP through a daily multiplicative scalar, regime switching
 through a monthly strategy replacement. Stacking them yields Sharpe 1.608 for
 VMP(SWITCH(v2a)), the highest in the study, but the gain is subadditive: VMP alone on the
-v1 rule adds +0.184; regime switching alone adds +0.434; combined adds +0.580, not the
-additive +0.618. The two refinements share roughly 6% of their incremental Sharpe. For
+v1 rule adds +0.184; regime switching alone adds +0.434; combined adds +0.528, not the
+additive +0.618. The two refinements share roughly 15% of their incremental Sharpe. For
 practitioners facing a complexity–cost tradeoff, VMP over a simple base — VMP(MDP(LW)) at
 1.372 or VMP(MDP(sample)) at 1.368 — achieves near-top performance without the regime
 classification infrastructure.
