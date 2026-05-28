@@ -105,7 +105,7 @@ Finding 4 introduces a crack in that generality. In Regime 5 — Low Growth & Co
 the late-cycle or early-recession configuration in the 8-regime macro classifier — MSR(sample)
 produces conditional Sharpe=1.392 against MSR(LW) conditional Sharpe=1.097. Sample wins
 by +0.295 within this single regime. In every other regime, LW matches or beats sample
-(Finding 4). Regime 5 covers 924 of 5,868 daily observations (15.8% of the full sample).
+(Finding 4). Regime 5 covers 924 of 5,868 daily observations (15.7% of the full sample).
 
 Why would the noisy, overfit optimizer outperform the regularized one in a specific regime?
 In a late-cycle contraction, a narrow subset of assets — typically short-duration fixed
@@ -113,7 +113,7 @@ income and defensive equities — generates the highest realized Sharpe. The sam
 concentrates on exactly this cluster, which happens to be correct ex post. LW shrinkage
 pulls the portfolio back toward diversification and misses the concentrated trade. The
 average disadvantage of sample concentration (the full-sample −0.164 Sharpe gap) reflects
-that this regime accounts for only 15.8% of observations; the remaining 84.2% penalize the
+that this regime accounts for only 15.7% of observations; the remaining 84.3% penalize the
 noisy concentration, overwhelming the R5 advantage in the aggregate.
 
 The regime-conditional routing that exploits this exception — substituting MSR(sample) for

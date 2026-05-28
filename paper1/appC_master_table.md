@@ -124,4 +124,4 @@ Within each family, base configurations are listed first, VMP-overlay variants i
 
 ---
 
-**Row count: 62.** All figures match `data/published/master_table_62strategies.csv` to the precision shown. The BL-Eq(sample) and BL-Eq(LW) rows are numerically identical (differences below rounding threshold) because the equilibrium prior $\boldsymbol{\pi}$ and view matrix are identical in both variants; the only distinction is the shrinkage applied to $\boldsymbol{\Sigma}$ in the MSR solve, which converges to the same solution on this universe.
+**Row count: 62.** All figures match `data/published/master_table_62strategies.csv` to the precision shown. The BL-Eq(sample) and BL-Eq(LW) rows are numerically identical (differences below rounding threshold) because when $P=\mathbf{0}$ (BL-Eq has no active views), the BL posterior reduces to the equilibrium prior regardless of $\Sigma$; the covariance estimator is algebraically irrelevant. Return series differ by $\leq 2.8 \times 10^{-8}$/day, floating-point rounding only. See §4.2 Finding 10.

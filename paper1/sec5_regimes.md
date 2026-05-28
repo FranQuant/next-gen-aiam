@@ -18,7 +18,7 @@ exercise. Its cost is that the rule commits to training-period findings that may
 full-sample findings. That cost is paid explicitly and openly.
 
 **The regime engine.** The macro classifier is a López de Prado-style feature-engineering
-pipeline on eight FRED indicators: GDP growth, CPI inflation, unemployment, VIX, S&P 500
+pipeline on eight macro indicators: GDP growth, CPI inflation, unemployment, VIX, S&P 500
 trailing return, and three yield-curve features (level, slope, and curvature). Each
 indicator is transformed into level, first-difference, and second-difference (convexity)
 features; the dominant regime at each decision date is the mode across all eight indicator
@@ -27,7 +27,7 @@ methodology and regime transition matrices appear in Appendix D.
 
 **Regime distribution.** Over the 2003–2026 sample (5,868 NYSE trading days): R0 Expansion
 1,603 days (27.3%); R1 Recovery 1,481 days (25.2%); R2 Neutral 230 days (3.9%); R3 Slow
-Growth 85 days (1.4%); R4 Stress 210 days (3.6%); R5 Low & Contracting 924 days (15.8%);
+Growth 85 days (1.4%); R4 Stress 210 days (3.6%); R5 Low & Contracting 924 days (15.7%);
 R6 Crisis 148 days (2.5%); R7 Contraction 1,187 days (20.2%). Expansion and recovery
 (R0+R1) account for 52% of sample days; late-cycle and contraction (R5+R7) account for 36%.
 
@@ -78,8 +78,8 @@ fixed income and defensive equities — generates the highest realized Sharpe. T
 unconstrained MSR(sample) optimizer concentrates on exactly this cluster, which happens to
 be correct ex post in R5. Ledoit-Wolf regularization pulls the portfolio back toward
 diversification, missing the concentrated trade. The full-sample LW advantage
-($\Delta=+0.164$ over sample, §4.1) reflects that R5 accounts for only 15.8% of
-observations; the remaining 84.2% penalize the concentration, overwhelming the R5 advantage
+($\Delta=+0.164$ over sample, §4.1) reflects that R5 accounts for only 15.7% of
+observations; the remaining 84.3% penalize the concentration, overwhelming the R5 advantage
 in aggregate. Regime conditioning recovers the R5 advantage without incurring the aggregate
 concentration penalty — not by overriding the §4 finding, but by confining the noisy
 optimizer to the one regime where its bias is a feature rather than a bug.

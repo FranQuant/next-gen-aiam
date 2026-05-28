@@ -17,7 +17,7 @@ Institutional adoption imposes a sequential cost screen: gross Sharpe must survi
 net-of-friction Sharpe, and net Sharpe must then pass a risk-budget approval. The analysis
 applies a uniform 10 bps round-trip cost per unit of one-way daily turnover computed at each
 decision date; Appendix F provides the asset-class-stratified cost ladder (2 bps fixed income,
-3 bps broad/international ETFs, 5 bps sector ETFs and commodities/FX, 10 bps single names)
+3 bps broad/international ETFs, 5 bps sector ETFs and commodities/FX, 5 bps single names)
 and the full stratified table.
 
 At 10 bps flat, the 62 strategies divide into two clean groups. **Low-turnover survivors**
