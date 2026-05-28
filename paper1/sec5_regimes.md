@@ -87,9 +87,9 @@ optimizer to the one regime where its bias is a feature rather than a bug.
 ## §5.3 OOS confirmation, VMP combination, and the combined ceiling
 
 **OOS confirmation.** Applying the training-derived v2a mapping to the held-out 2023–2026
-test period (3.3 years): SWITCH(v2a) Sharpe=2.124 versus SWITCH(LW) v1 Sharpe=2.010,
-$\Delta=+0.114$. The directional sign holds. The 3.3-year window is power-limited and
-$\Delta=+0.114$ alone does not clear conventional significance. The primary OOS evidence is
+test period (3.3 years): SWITCH(v2a) Sharpe=2.114 versus SWITCH(LW) v1 Sharpe=2.010,
+$\Delta=+0.104$. The directional sign holds. The 3.3-year window is power-limited and
+$\Delta=+0.104$ alone does not clear conventional significance. The primary OOS evidence is
 structural: the regime-to-strategy pattern that drives v2a's lift — most importantly
 R5→MSR(sample) — replicates when the analysis is repeated on the full sample. The R0
 assignment shifts post-hoc from MSR(LW) to MDP(LW) (per §5.1's honesty note), but R5,
