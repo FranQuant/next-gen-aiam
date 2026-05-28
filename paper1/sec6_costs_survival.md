@@ -99,8 +99,8 @@ sub-periods; neither estimator dominates reliably on either horizon, confirming 
 about HRP's structural insensitivity to eigenvalue regularization rather than a training-sample
 artifact.
 
-**Regime conditioning.** On the held-out test period, SWITCH(v2a) produces OOS Sharpe 2.124
-vs. SWITCH(LW) v1 at 2.010, $\Delta = +0.114$. The directional sign holds. The 3.3-year
+**Regime conditioning.** On the held-out test period, SWITCH(v2a) produces OOS Sharpe 2.114
+vs. SWITCH(LW) v1 at 2.010, $\Delta = +0.104$. The directional sign holds. The 3.3-year
 test window limits statistical power and the gap alone does not clear conventional significance;
 the primary OOS evidence for v2a is structural — the regime-to-strategy routing derived
 exclusively from 2003–2022 training data produces the same R5→MSR(sample) assignment as the
@@ -108,7 +108,7 @@ full-sample analysis (§5.3). The R5 anomaly is a persistent feature of late-cyc
 dynamics rather than a training-window artifact.
 
 What does not survive OOS is the full-sample ordering of specific parameterisations within
-families. Test-period leadership is held by the MDP family — VMP(MDP(LW)) OOS Sharpe 2.432,
+families. Test-period leadership is held by the MDP family — VMP(MDP(LW)) OOS Sharpe 2.422,
 VMP(MDP(sample)) 2.416, MDP(LW) 2.304 — which is directionally consistent with the
 full-sample MDP ranking but involves Sharpe magnitudes two to three times the training-period
 figures. The regime shift from a high-vol, rate-shock training environment to a low-vol,
