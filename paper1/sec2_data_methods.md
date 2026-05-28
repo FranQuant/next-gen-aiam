@@ -57,8 +57,8 @@ around the headline findings.
 
 ## §2.2 Strategy families
 
-The 62 configurations arise from the crossing of family × estimator choice × VMP overlay: 24
-base configurations, each paired with a VMP-overlay counterpart, plus seven expanded variants.
+The 62 configurations arise from 31 base-level configurations (24 core estimator–family
+combinations + 7 expanded variants), each evaluated with and without the VMP overlay → 31×2 = 62.
 Fuller derivations, the complete family inventory, and per-family specification tables are in
 Appendix B. The survey below gives the operative formula and one-line intuition for each family.
 
@@ -107,8 +107,8 @@ $$E[r \mid q] = \bigl[(\tau\Sigma)^{-1} + P^\top \Omega^{-1} P\bigr]^{-1}
                \bigl[(\tau\Sigma)^{-1}\pi + P^\top \Omega^{-1} q\bigr],$$
 where $P$ is the view matrix and $\Omega$ is view uncertainty. Four variants: BL-Eq (null view,
 $P = \mathbf{0}$, reduces algebraically to the equal-weight prior — the BL circularity lemma,
-§4); BL-Mom (12-month trailing momentum views); BL-Rev (mean-reversion views). Two estimators
-for momentum and reversal variants.
+§4), with sample and LW estimators; BL-Mom(LW) (12-month trailing momentum views);
+BL-Rev(LW) (mean-reversion views).
 
 **Time-Series Momentum (TSMOM)** \citep{moskowitz2012time} — weight each asset in proportion
 to the sign of its trailing return, scaled by target volatility:
@@ -136,9 +136,8 @@ $$w_t^{\text{VMP}} = \text{clip}\!\left(\frac{\bar{\sigma}}{\hat{\sigma}_t},\;0.
                      \cdot w_t^{\text{base}},$$
 where $\bar{\sigma}$ is the strategy's long-run annualized volatility, $\hat{\sigma}_t$ is the
 21-day realized volatility lagged one day, and the clip bounds keep leverage in
-$[0.25\times,\,1.50\times]$ of the base weight. The VMP overlay is applied to each of the 24
-base configurations, doubling the count to 48; Figure 1 (in §3) illustrates the exposure
-multiplier mechanism for a representative strategy.
+$[0.25\times,\,1.50\times]$ of the base weight. The VMP overlay is applied to all 31 base configurations, yielding 62 total; Figure 1 (in §3)
+illustrates the exposure multiplier mechanism for a representative strategy.
 
 Seven additional configurations round out the comparison: four constrained mean-variance
 variants (MSR\_C and MVO\_C, each with sample and LW estimators) and three long-short extensions
@@ -206,7 +205,7 @@ A few entries at the tails of the base-strategy distribution merit brief notice 
 the short leg that produces the original momentum anomaly in futures universes, and the 12-month
 lookback in a mixed-asset universe is too noisy to compensate. The VMP overlay lifts it by
 +0.258 Sharpe points, rescuing it to 1.059, near the median of all 62 configurations. BL-Mom(LW)
-is the absolute-return leader among base strategies at 12.57% annualized — its momentum-tilted
+is the highest-returning base strategy at 12.57% annualized — its momentum-tilted
 views rotate into high-return assets during trending markets — but carries a −21.34% maximum
 drawdown that the VMP overlay cannot fully compress (the worst momentum-reversal periods do not
 coincide with high realized volatility). The low-volatility factor portfolio FF3-LowVol achieves
@@ -214,22 +213,11 @@ a competitive risk-adjusted Sharpe (1.021) at gross return of only 4.34% per yea
 low for most institutional mandates without leverage.
 
 **Out-of-sample test period (2023–2026).** On the held-out test window the family ordering is
-preserved. Excluding the SHY artifact, the test-period leaders are VMP(MDP(LW)) at Sharpe 2.432,
+preserved. Excluding the SHY artifact, the test-period leaders are VMP(MDP(LW)) at Sharpe 2.422,
 VMP(MDP(sample)) at 2.416, and MDP(LW) at 2.304. The VMP overlay continues to improve every
 base configuration on the test period, replicating the full-sample sign-test result
 ($24/24$ directional improvements, probability $2^{-24} \approx 6 \times 10^{-8}$ under $H_0$)
 on the OOS window.
-
-**ML and RL baselines in context.** A companion track evaluates ML signal strategies (Lasso,
-Random Forest, XGBoost ensemble) and RL agents (REINFORCE, PPO) on the same universe and
-harness; results appear in the extended comparison table in Appendix C. The RL result is
-informative here because it defines an implicit floor: both algorithms converge to a
-near-equal-weight allocation over the test period (OOS Sharpe ≈ 2.03, ranks 26–27 of 39
-evaluated strategies), meaning sequential decision-making does not improve on one-shot
-optimization for this universe. The ML ensemble clears the bar at OOS Sharpe 2.579. The
-classical strategies in the top-10 table above are full-sample results; over the same 2023–2026
-window the top classical configurations (VMP(MDP(LW)), VMP(MDP(sample))) approach the RL-floor
-Sharpe from above, consistent with the regime pattern in §5.
 
 ---
 
