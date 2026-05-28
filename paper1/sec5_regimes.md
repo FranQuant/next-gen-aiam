@@ -90,11 +90,12 @@ optimizer to the one regime where its bias is a feature rather than a bug.
 test period (3.3 years): SWITCH(v2a) Sharpe=2.124 versus SWITCH(LW) v1 Sharpe=2.010,
 $\Delta=+0.114$. The directional sign holds. The 3.3-year window is power-limited and
 $\Delta=+0.114$ alone does not clear conventional significance. The primary OOS evidence is
-structural: the training-only derivation (2003–2022) produces the same regime-to-strategy
-assignments as a full-sample derivation would, indicating that the mapping reflects a
-persistent feature of the macro-regime distribution rather than noise in the training window.
-A routing rule that changes under full-sample revision would be a weaker result; one that
-does not is the expected signature of a genuine structural relationship.
+structural: the regime-to-strategy pattern that drives v2a's lift — most importantly
+R5→MSR(sample) — replicates when the analysis is repeated on the full sample. The R0
+assignment shifts post-hoc from MSR(LW) to MDP(LW) (per §5.1's honesty note), but R5,
+the cell responsible for most of the +0.434 improvement, is identified consistently across
+the training-only and full-sample analyses. This indicates a persistent feature of late-cycle
+macro dynamics rather than training-window noise.
 
 **VMP combination.** Applying the VMP overlay to SWITCH(v2a) produces full-sample
 Sharpe=1.608 and Calmar=0.921 — the highest gross Sharpe in the 62-strategy comparison.
