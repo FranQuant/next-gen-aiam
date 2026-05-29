@@ -28,7 +28,7 @@ strategies incur a negligible implementability penalty. **High-turnover collapse
 different story. FF3-Mom's 20.25% average daily turnover converts gross Sharpe 0.685 into net
 Sharpe 0.394 — a loss of 0.291 Sharpe points, the largest single degradation in the table.
 FF3-Mom-LS falls further to net −0.306, the weakest strategy in the study on a cost-adjusted
-basis. BL-Mom(LW), with 5.11% turnover driven by continuous momentum-signal rotation across
+basis. **BL-Mom(LW)**, with 5.11% turnover driven by continuous momentum-signal rotation across
 29 tickers, loses 0.108 Sharpe points (gross 1.042 → net 0.934) and exits the top-10 net
 ranking.
 
@@ -36,8 +36,8 @@ SWITCH(LW) occupies the strategically important intermediate position. Its 2.04%
 daily turnover — the regime signal fires monthly and most assignments persist for many
 consecutive days — produces a net Sharpe of 1.020 (gross 1.080, loss 0.060). SWITCH(LW)
 survives as a cost-adjusted competitor precisely because regime-based rebalancing is sparse by
-construction. VMP(MDP(LW)) leads the cost-adjusted table at net Sharpe 1.336 (gross 1.372,
-loss 0.037); VMP(SWITCH(LW)) follows at net Sharpe 1.201 (gross 1.265, loss 0.064). The
+construction. **VMP(MDP(LW))** leads the cost-adjusted table at net Sharpe 1.336 (gross 1.372,
+loss 0.037); **VMP(SWITCH(LW))** follows at net Sharpe 1.201 (gross 1.265, loss 0.064). The
 ordering at the top of the table is unchanged by costs.
 
 ![Scatter of net Sharpe under flat 10 bps round-trip (x-axis) vs. net Sharpe under

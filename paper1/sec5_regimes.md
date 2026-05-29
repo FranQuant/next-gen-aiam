@@ -42,7 +42,7 @@ routing follows directly:
   would be overfit by construction. Pre-registration means committing before the test data is
   observed and accepting the noise that comes with that commitment.
 
-- **R5 (Low & Contracting, 924 days):** MSR(sample) selected, with training-period
+- **R5 (Low & Contracting, 924 days):** **MSR(sample)** selected, with training-period
   conditional Sharpe 1.392 — the best non-SWITCH strategy in this regime. MSR(LW) in R5
   achieves conditional Sharpe only 1.097, confirming the gap that motivates the
   substitution.
@@ -103,7 +103,7 @@ rate-shock. SWITCH(v2a)'s abrupt reallocations at regime transitions contrast wi
 smoother, regime-agnostic patterns of the other strategies.
 ](figures/asset_class_allocation_timeline.png)
 
-**VMP combination.** Applying the VMP overlay to SWITCH(v2a) produces full-sample
+**VMP combination.** Applying the VMP overlay to **SWITCH(v2a)** produces full-sample
 Sharpe=1.608 and Calmar=0.921 — the highest gross Sharpe in the 62-strategy comparison.
 This configuration stacks all three robust refinements identified in §§3–5: regime-conditional
 strategy routing (§5), Ledoit-Wolf shrinkage applied within two of the three routed targets

@@ -8,7 +8,7 @@ ones that need it most?
 
 ## §3.1 The 24/24 result
 
-The most direct answer: the VMP overlay improves the gross Sharpe ratio on every one of the
+The most direct answer: the **VMP** overlay improves the gross Sharpe ratio on every one of the
 24 original base configurations without exception. Lifts range from +0.119
 (FF3-Mom) to +0.400 (MSR(sample)); the median improvement is +0.194 Sharpe points. This
 24/24 record is the statistical anchor of the section. Under $H_0$ that the overlay is
@@ -75,7 +75,7 @@ portfolio vol that is less subject to single-asset spikes than equal-weight or M
 constructions. The vol-management already embedded in the base strategy leaves less room
 for the overlay.
 
-MSR(sample) sits at the opposite extreme (+0.400, 0.895 → 1.295). The unconstrained
+**MSR(sample)** sits at the opposite extreme (+0.400, 0.895 → 1.295). The unconstrained
 optimizer concentrates the portfolio in whichever asset had the highest in-sample Sharpe,
 and that concentration is itself a source of vol instability — when the concentrated asset's
 vol spikes, the whole portfolio spikes. VMP's inverse scaling responds to exactly these
@@ -93,8 +93,8 @@ winner.
 ## §3.4 Partial redundancy with shrinkage and regime conditioning
 
 The most counterintuitive VMP result is that the overlay applied to a noisy estimator can
-exceed shrinkage applied alone — or even shrinkage combined with VMP. VMP(MSR(sample))
-achieves Sharpe 1.295, exceeding both raw MSR(LW) at 1.059 (+0.236) and
+exceed shrinkage applied alone — or even shrinkage combined with VMP. **VMP(MSR(sample))**
+achieves Sharpe 1.295, exceeding both raw **MSR(LW)** at 1.059 (+0.236) and
 VMP(MSR(LW)) at 1.239. The same pattern holds for VMP(GMV(sample)) Sharpe 1.345 exceeding
 GMV(LW) at 0.954, and VMP(MDP(sample)) Sharpe 1.368 exceeding MDP(LW) at 1.167.
 
@@ -119,10 +119,10 @@ sufficient to dominate the estimation-stage one.
 VMP and regime-conditional switching exhibit the same partial redundancy. Both
 respond to volatility regimes: VMP through a daily multiplicative scalar, regime switching
 through a monthly strategy replacement. Stacking them yields Sharpe 1.608 for
-VMP(SWITCH(v2a)), the highest in the study, but the gain is subadditive: VMP alone on the
+**VMP(SWITCH(v2a))**, the highest in the study, but the gain is subadditive: VMP alone on the
 v1 rule adds +0.184; regime switching alone adds +0.434; combined adds +0.528, not the
 additive +0.618. The two refinements share roughly 15% of their incremental Sharpe. For
-practitioners facing a complexity–cost tradeoff, VMP over a simple base — VMP(MDP(LW)) at
+practitioners facing a complexity–cost tradeoff, VMP over a simple base — **VMP(MDP(LW))** at
 1.372 or VMP(MDP(sample)) at 1.368 — achieves near-top performance without the regime
 classification infrastructure.
 

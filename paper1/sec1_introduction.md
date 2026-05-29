@@ -38,7 +38,7 @@ whose hierarchical clustering already smooths block correlations. Regime conditi
 entirely from training data through a López de Prado-style feature-engineering pipeline on eight macro indicators,
 adds a statistically significant and economically meaningful lift over the strongest
 non-conditional strategy. The strongest classical strategy in the study combines all three:
-VMP applied to the regime-conditional switcher SWITCH(v2a), which reaches a Sharpe ratio of
+**VMP** applied to the regime-conditional switcher **SWITCH(v2a)**, which reaches a Sharpe ratio of
 1.608 in the train-only-derived configuration.
 
 The uncomfortable footnote deserves its own paragraph. Within-strategy variation across calendar

@@ -12,7 +12,7 @@ excluded before interpretation.
 The evaluation universe spans 29 instruments across five asset groups: eight large-cap US equity
 single names (AAPL, MSFT, GOOGL, NVDA, JPM, JNJ, XOM, WMT); six US sector ETFs (XLK, XLF, XLE,
 XLV, XLP, XLU); five broad and international equity ETFs (SPY, IWM, EFA, EEM, FXI); five
-fixed-income ETFs (SHY, IEF, TLT, AGG, HYG); and five commodity and FX instruments (GLD, SLV,
+fixed-income ETFs (**SHY**, IEF, TLT, AGG, HYG); and five commodity and FX instruments (GLD, SLV,
 DBC, USO, EURUSD). Daily OHLCV prices are sourced from EODHD; the sample runs from 2003-01-02 to
 2026-04-30 (23.3 years, approximately 5,870 NYSE trading days). BTC-USD is excluded entirely for
 survivorship hygiene. Four tickers with post-2003 inception dates (GOOGL 2004-08-19, FXI
@@ -158,7 +158,7 @@ requires immediate attention.
 
 | Rank | Configuration | Sharpe | Note |
 |-----:|:--------------|-------:|:-----|
-|    1 | VMP(MDP(LW))        | 1.372 | |
+|    1 | **VMP(MDP(LW))**        | 1.372 | |
 |    2 | VMP(MDP(sample))    | 1.368 | |
 |    3 | VMP(GMV(sample))    | 1.345 | (†) degenerate artifact |
 |    4 | VMP(MSR(sample))    | 1.295 | |
@@ -169,8 +169,8 @@ requires immediate attention.
 |    9 | VMP(BL-Mom(LW))     | 1.217 | |
 |   10 | VMP(GMV(LW))        | 1.215 | |
 
-**(†) The SHY-concentration artifact.** VMP(GMV(sample)) at rank 3 is not a genuine portfolio
-result. The unconstrained sample covariance matrix has extreme eigenvalues: SHY (iShares 1–3
+**(†) The SHY-concentration artifact.** **VMP(GMV(sample))** at rank 3 is not a genuine portfolio
+result. The unconstrained sample covariance matrix has extreme eigenvalues: **SHY** (iShares 1–3
 Year Treasury Bond, a near-cash instrument) emerges as the near-zero-variance anchor, and the
 GMV(sample) optimizer corners the portfolio in it — base vol 3.16%, Sharpe 0.958, effectively
 short-duration Treasury carry. VMP then scales this near-cash position up to the $1.5\times$

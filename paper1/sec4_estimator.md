@@ -2,8 +2,8 @@
 
 Section §3 established that VMP lifts every base strategy through the same inverse-vol
 mechanism, but the overlay does not explain the performance differences that precede it.
-MSR(LW) Sharpe=1.059 versus MSR(sample) Sharpe=0.895 is a gap of +0.164, large enough to
-reorder the leaderboard. HRP(LW) Sharpe=1.093 versus HRP(sample) Sharpe=1.045 is a gap of
+**MSR(LW)** Sharpe=1.059 versus **MSR(sample)** Sharpe=0.895 is a gap of +0.164, large enough to
+reorder the leaderboard. **HRP(LW)** Sharpe=1.093 versus **HRP(sample)** Sharpe=1.045 is a gap of
 0.047, small enough to be indistinguishable from noise. The same statistical substitution —
 Ledoit-Wolf in place of the sample covariance — produces one of the largest single-method
 effects in the study for one family and is effectively zero for another. This section asks why.
@@ -83,7 +83,7 @@ HRP is structurally noise-tolerant. Recursive bisection never inverts anything; 
 correlation-based clustering and variance-weighted bisection dampen single-asset dominance
 geometrically. LW smooths the off-diagonals, but the optimizer that consumes them was
 already insensitive to their exact values. The substitution is inconsequential because
-hierarchical bisection does not propagate eigenvalue noise. GMV is the extreme version of
+hierarchical bisection does not propagate eigenvalue noise. **GMV** is the extreme version of
 the MSR pathology: unconstrained, it corners entirely in the minimum-variance asset (SHY,
 iShares 1–3 Year Treasury), producing vol=3.16% and Sharpe=0.958 on a portfolio that is
 effectively cash at the prevailing risk-free rate. LW breaks this corner:

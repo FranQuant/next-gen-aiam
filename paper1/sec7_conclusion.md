@@ -30,7 +30,7 @@ a derivation-window artifact.
 
 ## The mechanism-versus-ranking distinction
 
-Stacking all three refinements produces VMP(SWITCH(v2a)) at full-sample Sharpe 1.608 — the
+Stacking all three refinements produces **VMP(SWITCH(v2a))** at full-sample Sharpe 1.608 — the
 strongest classical configuration in this study. The correct reading of that number is
 supplied by §6.3: within-strategy Sharpe variation across five-year calendar buckets
 (MSR(LW) ranging 0.41–1.80) exceeds the full-sample cross-strategy spread (~0.50 Sharpe
