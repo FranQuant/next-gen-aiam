@@ -129,6 +129,9 @@ results/rl/n1/
 results/rl/n2/
 results/rl/n3/
 
+# paper1 build artifacts (regenerable from scripts/build_paper1.py)
+paper1/build/
+
 # rendered-notebook HTML exports (regenerable; inflated size + skewed GitHub language stats)
 results/**/*.html
 # write-only DL portfolio weight parquets (notebook 05 outputs; nothing reloads them)
