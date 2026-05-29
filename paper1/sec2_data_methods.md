@@ -9,11 +9,11 @@ excluded before interpretation.
 
 ## §2.1 Universe and harness
 
-The evaluation universe spans 29 instruments across five asset groups: eight large-cap US equity
+The evaluation universe spans 29 instruments across six asset groups: eight large-cap US equity
 single names (AAPL, MSFT, GOOGL, NVDA, JPM, JNJ, XOM, WMT); six US sector ETFs (XLK, XLF, XLE,
-XLV, XLP, XLU); five broad and international equity ETFs (SPY, IWM, EFA, EEM, FXI); five
-fixed-income ETFs (**SHY**, IEF, TLT, AGG, HYG); and five commodity and FX instruments (GLD, SLV,
-DBC, USO, EURUSD). Daily OHLCV prices are sourced from EODHD; the sample runs from 2003-01-02 to
+XLV, XLP, XLU); two broad US equity ETFs (SPY, IWM); three international equity ETFs (EFA, EEM,
+FXI); five fixed-income ETFs (**SHY**, IEF, TLT, AGG, HYG); and five commodity and FX instruments
+(GLD, SLV, DBC, USO, EURUSD). Daily OHLCV prices are sourced from EODHD; the sample runs from 2003-01-02 to
 2026-04-30 (23.3 years, approximately 5,870 NYSE trading days). BTC-USD is excluded entirely for
 survivorship hygiene. Four tickers with post-2003 inception dates (GOOGL 2004-08-19, FXI
 2004-10-08, GLD 2004-11-18, HYG 2007-04-11) are handled through a variable universe size

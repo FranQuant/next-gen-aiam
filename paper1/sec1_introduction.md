@@ -21,8 +21,8 @@ and Fama-French factor tilts \citep{fama1993common} — each tested across estim
 \citep{moreira2017volatility}, yielding 62 strategy configurations on a single 29-asset
 multi-asset universe (US single names, US sector ETFs, broad and international equity ETFs,
 fixed income, and commodities/FX) over 2003–2026 (23.3 years, approximately 5,870 NYSE trading
-days). These comprise 24 base configurations, their 31 volatility-managed counterparts, and seven
-expanded variants. All strategies share a common walk-forward harness, a single held-out test
+days). These comprise 31 base-level configurations (24 core estimator-family combinations plus seven
+expanded variants), each evaluated with and without the VMP overlay — 31 × 2 = 62. All strategies share a common walk-forward harness, a single held-out test
 period (2023 onwards), identical transaction-cost accounting, and a Sharpe ratio convention
 following \citet{sharpe1966mutual}. Statistical robustness is assessed via
 \citet{memmel2003performance} paired tests, block-bootstrap confidence intervals, and
