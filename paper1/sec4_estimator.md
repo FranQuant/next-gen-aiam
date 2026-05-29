@@ -17,7 +17,7 @@ and the optimizer loads heavily on whichever asset had the highest sample Sharpe
 trailing estimation window — typically a low-vol fixed-income ETF during a trending quarter.
 The concentrated position unwinds with mean reversion out of sample (Michaud 1989). The
 result is MSR(sample) Sharpe=0.895, among the lower base-strategy results in the table
-despite maximizing in-sample Sharpe at each refit (Finding 2).
+despite maximizing in-sample Sharpe at each refit.
 
 Ledoit-Wolf regularization shrinks the sample eigenvalues toward their grand mean and the
 off-diagonal covariances toward zero by an analytically optimal factor. The extreme
@@ -27,7 +27,7 @@ the corner solution. MSR(LW) Sharpe=1.059, a +0.164 improvement — the largest
 single-estimator substitution effect in the full 62-strategy comparison.
 
 The Memmel (2003) paired test on the 29-asset 2003–2026 sample gives $z=1.13$, $p=0.259$:
-directional but not significant at conventional thresholds (Finding R1). This is worth
+directional but not significant at conventional thresholds. This is worth
 stating plainly. The economic gap (+0.164 Sharpe) is meaningful, but 23.3 years of daily
 returns on 29 assets is not a large sample for paired Sharpe inference — the test is
 underpowered. The earlier test on a 30-asset 2008–2026 panel reached clear significance
@@ -50,7 +50,7 @@ cluster weights structurally — Ledoit-Wolf shrinkage has little to correct. Th
 smoothing does refine the correlation block structure the dendrogram uses for cluster
 boundaries, but the effect on final portfolio weights is second-order. On the 29-asset
 sample: HRP(sample) Sharpe=1.045, HRP(LW) Sharpe=1.093, $\Delta=+0.047$ in favor of LW.
-Memmel $z=-0.67$, $p=0.506$ — not close to significance (Finding R4).
+Memmel $z=-0.67$, $p=0.506$ — not close to significance.
 
 The sign reversal across samples reinforces the interpretation. In the prior 30-asset
 2008–2026 study, HRP(sample) led by +0.037 (sample ahead). A +0.047 LW advantage here and
@@ -63,7 +63,7 @@ algebraic limit: when the view specification matrix $P$ is null, the BL posterio
 reduces to the equilibrium prior regardless of $\Sigma$, because the update term
 $P'\Omega^{-1}P$ vanishes. The covariance estimator is literally irrelevant. BL-Eq(sample)
 and BL-Eq(LW) produce return series differing by at most $2.8 \times 10^{-8}$ per day —
-floating-point rounding only (Finding 10). This is a useful diagnostic boundary: estimator
+floating-point rounding only. This is a useful diagnostic boundary: estimator
 choice is exactly zero when the optimizer never differentiates on covariance structure.
 
 ## §4.3 Same operation, opposite outcomes — the structural reason
@@ -86,7 +86,7 @@ already insensitive to their exact values. The substitution is inconsequential b
 hierarchical bisection does not propagate eigenvalue noise. GMV is the extreme version of
 the MSR pathology: unconstrained, it corners entirely in the minimum-variance asset (SHY,
 iShares 1–3 Year Treasury), producing vol=3.16% and Sharpe=0.958 on a portfolio that is
-effectively cash at the prevailing risk-free rate (Finding 1). LW breaks this corner:
+effectively cash at the prevailing risk-free rate. LW breaks this corner:
 GMV(LW) vol=4.01%, Sharpe=0.954, a diversified portfolio at essentially identical Sharpe.
 
 The practitioner implication follows: choosing a robust *method* — HRP, MDP, RP — makes
@@ -101,11 +101,11 @@ There is one exception to the pattern — and it is the foundation of §5.
 ## §4 → §5 Transition: the regime where sample beats LW
 
 The §4 finding holds on average across the full 23-year sample: LW shrinkage helps MSR.
-Finding 4 introduces a crack in that generality. In Regime 5 — Low Growth & Contracting,
+There is one crack in this generality. In Regime 5 — Low Growth & Contracting,
 the late-cycle or early-recession configuration in the 8-regime macro classifier — MSR(sample)
 produces conditional Sharpe=1.392 against MSR(LW) conditional Sharpe=1.097. Sample wins
-by +0.295 within this single regime. In every other regime, LW matches or beats sample
-(Finding 4). Regime 5 covers 924 of 5,868 daily observations (15.7% of the full sample).
+by +0.295 within this single regime, while LW matches or beats sample in every other regime.
+Regime 5 covers 924 of 5,868 daily observations (15.7% of the full sample).
 
 Why would the noisy, overfit optimizer outperform the regularized one in a specific regime?
 In a late-cycle contraction, a narrow subset of assets — typically short-duration fixed

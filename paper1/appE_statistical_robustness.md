@@ -31,7 +31,7 @@ For the specific claim in §3 (main paper) regarding the original 24 base strate
 
 ## E.2 Full Memmel Test Results
 
-### Finding R1 — MSR(LW) vs MSR(sample): shrinkage benefit
+### MSR(LW) vs MSR(sample): shrinkage benefit
 
 **Claim (§4):** Ledoit-Wolf shrinkage improves MSR Sharpe on the 29-asset 2003–2026 universe.
 
@@ -42,13 +42,13 @@ For the specific claim in §3 (main paper) regarding the original 24 base strate
 
 The directional result (LW > sample for MSR) is consistent across both samples, but the 2003–2026 sample does not reach the 5% threshold. The extended pre-GFC period (2003–2007) dilutes the signal: in calm, near-random-walk regimes, the Stein-type shrinkage advantage over sample covariance compresses. The conclusion in §4 is deliberately hedged: the LW benefit is "directional but not significant at 5% on the 29-asset extended sample."
 
-### Finding R2 — VMP universal lift: sign test
+### VMP universal lift: sign test
 
 **Claim (§3):** VMP raises Sharpe for every base strategy.
 
 Applied to the original 24-strategy set: 24/24 positive signs, $p = 2^{-24} \approx 6 \times 10^{-8}$. This is the most overwhelming individual statistical result in the study. The individual pairwise contrast VMP(MSR(LW)) vs MSR(LW) gives $z = 1.90$, $p = 0.058$ — marginally outside the 5% threshold but directionally consistent. The universality claim is defended by the sign test, not by any single pairwise Memmel contrast.
 
-### Finding R3 — SWITCH(v2a) vs SWITCH(LW) v1: regime routing adds value
+### SWITCH(v2a) vs SWITCH(LW) v1: regime routing adds value
 
 **Claim (§5):** SWITCH(v2a) (R0→MSR(LW), R5→MSR(sample), default→MDP(LW)) significantly outperforms SWITCH(LW) v1 (R0→EW, R5→MSR(LW), default→MDP(LW)).
 
@@ -58,7 +58,7 @@ Applied to the original 24-strategy set: 24/24 positive signs, $p = 2^{-24} \app
 
 This is the strongest pairwise Memmel result in the study (full-sample 2003–2026). The v2a rule was derived on the training period (2003–2022) and the Memmel test is computed on the full sample; the test cannot be interpreted as an OOS significance test but confirms the directional magnitude of the routing improvement.
 
-### Finding R4 — HRP shrinkage near-invariance
+### HRP shrinkage near-invariance
 
 **Claim (§4):** HRP is approximately invariant to the choice of covariance estimator (sample vs LW).
 
@@ -74,13 +74,13 @@ The sign is opposite to the 30-asset 2008–2026 prior study, reinforcing the ne
 |---|---|---|---|
 | VMP(MSR(LW)) vs MSR(LW) | 1.90 | 0.058 | Marginal |
 
-This contrast sits just above the 5% threshold individually. It is combined with the 24/24 sign test (Finding R2) as joint evidence for VMP universality; the marginal individual p-value does not undermine the claim when the sign-test evidence is considered.
+This contrast sits just above the 5% threshold individually. It is combined with the 24/24 sign test as joint evidence for VMP universality; the marginal individual p-value does not undermine the claim when the sign-test evidence is considered.
 
 ---
 
 ## E.3 Block Bootstrap Sharpe 95% Confidence Intervals
 
-Table E.1 reports 95% bootstrap confidence intervals for the top 10 configurations by gross Sharpe (degenerate artifact VMP(GMV(sample)) excluded; see §3.2 and Findings 1, 6.5). All CIs are computed from 5,868 daily returns, 252-day blocks, 5,000 resamples. Figure 9 (`docs/figures/bootstrap_sharpe_cis.png`) displays these intervals graphically.
+Table E.1 reports 95% bootstrap confidence intervals for the top 10 configurations by gross Sharpe (degenerate artifact VMP(GMV(sample)) excluded; see §3.2). All CIs are computed from 5,868 daily returns, 252-day blocks, 5,000 resamples. The figure below displays these intervals graphically.
 
 **Table E.1. Bootstrap 95% CIs — top 10 configurations.**
 
@@ -107,4 +107,4 @@ All 95% CI lower bounds exceed 0.67, confirming that all top-10 configurations p
 
 ## E.4 Discussion
 
-The tests above reveal what can and cannot be concluded from a 23.3-year daily sample of 29 assets. Sharpe inference is power-limited at these sample sizes: a typical 252-day block bootstrap CI for a Sharpe near 1.3 spans roughly ±0.5 Sharpe units, meaning that differences smaller than 0.3–0.4 are difficult to detect at conventional levels. The strongest evidence in this study is therefore directional consistency across multiple independent tests rather than any single significant p-value. The 24/24 VMP sign test ($p \approx 6 \times 10^{-8}$) is the most overwhelming individual result; the SWITCH(v2a) Memmel contrast ($z = 2.05$, $p = 0.040$) is the only pairwise test that crosses the 5% threshold. The shrinkage benefit for MSR (Finding R1) and the HRP near-invariance (Finding R4) are directionally consistent with the prior 30-asset 2008–2026 literature but cannot be claimed as statistically proven on the current sample alone. This limitation is reported honestly in §§4–5 rather than smoothed over by selective presentation.
+The tests above reveal what can and cannot be concluded from a 23.3-year daily sample of 29 assets. Sharpe inference is power-limited at these sample sizes: a typical 252-day block bootstrap CI for a Sharpe near 1.3 spans roughly ±0.5 Sharpe units, meaning that differences smaller than 0.3–0.4 are difficult to detect at conventional levels. The strongest evidence in this study is therefore directional consistency across multiple independent tests rather than any single significant p-value. The 24/24 VMP sign test ($p \approx 6 \times 10^{-8}$) is the most overwhelming individual result; the SWITCH(v2a) Memmel contrast ($z = 2.05$, $p = 0.040$) is the only pairwise test that crosses the 5% threshold. The shrinkage benefit for MSR and the HRP near-invariance are directionally consistent with the prior 30-asset 2008–2026 literature but cannot be claimed as statistically proven on the current sample alone. This limitation is reported honestly in §§4–5 rather than smoothed over by selective presentation.

@@ -44,7 +44,7 @@ routing follows directly:
 
 - **R5 (Low & Contracting, 924 days):** MSR(sample) selected, with training-period
   conditional Sharpe 1.392 — the best non-SWITCH strategy in this regime. MSR(LW) in R5
-  achieves conditional Sharpe only 1.097 (Finding 4), confirming the gap that motivates the
+  achieves conditional Sharpe only 1.097, confirming the gap that motivates the
   substitution.
 
 - **R1–R4, R6–R7 (all other regimes):** MDP(LW), the strongest non-conditional base
@@ -70,7 +70,7 @@ MDP(LW) default; across the other six regimes MDP(LW) is consistently dominant.
 $\Delta=+0.434$. The two changes from v1 are: replacing R0→EW with R0→MSR(LW), and
 replacing R5→MSR(LW) with R5→MSR(sample). The Memmel (2003) paired test on the 29-asset
 2003–2026 sample gives $z=2.05$, $p=0.040$ — the strongest single statistically significant
-result in the study (Finding R3). The test is computed on the base (non-VMP) return series;
+result in the study. The test is computed on the base (non-VMP) return series;
 the VMP warm-up correction does not enter this contrast.
 
 **Mechanism.** In a late-cycle contraction, a narrow cluster of assets — short-duration

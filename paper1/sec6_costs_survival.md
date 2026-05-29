@@ -94,7 +94,7 @@ recently trended up — is not peculiar to the training-period regime sequence; 
 persistently across sub-periods.
 
 **HRP near-invariance.** HRP(sample) and HRP(LW) produce similar OOS performance, consistent
-with the Memmel (2003) Sharpe test (§4.2, Finding R4). The near-invariance is stable across
+with the Memmel (2003) Sharpe test (§4.2). The near-invariance is stable across
 sub-periods; neither estimator dominates reliably on either horizon, confirming the finding is
 about HRP's structural insensitivity to eigenvalue regularization rather than a training-sample
 artifact.

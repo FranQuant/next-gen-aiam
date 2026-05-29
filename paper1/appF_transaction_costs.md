@@ -100,7 +100,7 @@ Table F.1 ranks all 62 configurations by net Sharpe under the stratified asset-c
 | 61 | FF3-Mom-LS | 0.103 | 1456.4% | 0.150 | −0.046 |
 | 62 | VMP(FF3-Mom-LS) | −0.037 | 1456.4% | 0.150 | −0.187 |
 
-†VMP(GMV(sample)) flagged as a degenerate artifact; see §3.2 and Finding 6.5.
+†VMP(GMV(sample)) flagged as a degenerate artifact; see §3.2.
 
 All figures derived directly from `data/published/master_table_62strategies.csv`, column `NetStrat`.
 
@@ -112,6 +112,6 @@ The implementability filter from §6.1 subjects strategies to three sequential g
 
 **SWITCH(LW) net cost loss.** SWITCH(LW) base strategy loses 0.060 Sharpe points at flat 10 bps (gross 1.080 → net 10bps 1.020). Under stratified costs the loss falls to 0.020 points (net 1.060), because SWITCH(LW)'s 2.04% annual turnover is concentrated in the ETF sub-universe priced at 2–3 bps. VMP(SWITCH(LW)) retains net Sharpe 1.201 (flat 10 bps) / 1.243 (stratified) — both placing it in the top five of its respective ranking.
 
-**FF3-Mom collapse (Finding 13).** FF3-Mom's gross Sharpe of 0.685 falls to 0.394 net of flat 10 bps (loss = 0.291 Sharpe points, the largest degradation in the 62-strategy table) and recovers partially to 0.592 under the 5-bps stratified ETF schedule (loss = 0.093 Sharpe points). Even under the more favourable stratified schedule, FF3-Mom ranks 60th of 62 configurations. Its annual turnover of 2,025% disqualifies it as an institutional allocation regardless of cost assumption. VMP(FF3-Mom) (rank 57, net 0.704 stratified) fares marginally better but remains in the bottom decile.
+**FF3-Mom collapse.** FF3-Mom's gross Sharpe of 0.685 falls to 0.394 net of flat 10 bps (loss = 0.291 Sharpe points, the largest degradation in the 62-strategy table) and recovers partially to 0.592 under the 5-bps stratified ETF schedule (loss = 0.093 Sharpe points). Even under the more favourable stratified schedule, FF3-Mom ranks 60th of 62 configurations. Its annual turnover of 2,025% disqualifies it as an institutional allocation regardless of cost assumption. VMP(FF3-Mom) (rank 57, net 0.704 stratified) fares marginally better but remains in the bottom decile.
 
 The qualitative conclusion is robust to cost schedule: low-to-moderate turnover strategies with meaningful signal (MDP, SWITCH, VMP variants thereof) dominate the implementability-filtered ranking, while factor strategies that derive return from high-frequency rotation (FF3-Mom, FF3-Multi, BL-Mom(LW)) pay prohibitive cost penalties at any realistic fee level.

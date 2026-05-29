@@ -9,11 +9,11 @@ ones that need it most?
 ## §3.1 The 24/24 result
 
 The most direct answer: the VMP overlay improves the gross Sharpe ratio on every one of the
-24 original base configurations without exception (Finding 6). Lifts range from +0.119
+24 original base configurations without exception. Lifts range from +0.119
 (FF3-Mom) to +0.400 (MSR(sample)); the median improvement is +0.194 Sharpe points. This
 24/24 record is the statistical anchor of the section. Under $H_0$ that the overlay is
 equally likely to help or hurt any given strategy, the probability of observing 24 positive
-signs out of 24 independent trials is $2^{-24} \approx 6 \times 10^{-8}$ (Finding R2). No
+signs out of 24 independent trials is $2^{-24} \approx 6 \times 10^{-8}$. No
 pairwise significance threshold is needed to defend the universality claim; the sign test
 overwhelms it. The headline pairwise contrast — VMP(MSR(LW)) vs. MSR(LW), $\Delta = +0.180$
 Sharpe — is individually marginal ($z = 1.90$, $p = 0.058$), but the directional consistency
@@ -94,7 +94,7 @@ winner.
 
 The most counterintuitive VMP result is that the overlay applied to a noisy estimator can
 exceed shrinkage applied alone — or even shrinkage combined with VMP. VMP(MSR(sample))
-achieves Sharpe 1.295, exceeding both raw MSR(LW) at 1.059 (+0.236, Finding 7) and
+achieves Sharpe 1.295, exceeding both raw MSR(LW) at 1.059 (+0.236) and
 VMP(MSR(LW)) at 1.239. The same pattern holds for VMP(GMV(sample)) Sharpe 1.345 exceeding
 GMV(LW) at 0.954, and VMP(MDP(sample)) Sharpe 1.368 exceeding MDP(LW) at 1.167.
 
@@ -116,7 +116,7 @@ is narrower: for the MSR family, VMP and LW shrinkage both target the same sourc
 underperformance (concentration-driven vol), and the execution-stage intervention is
 sufficient to dominate the estimation-stage one.
 
-VMP and regime-conditional switching exhibit the same partial redundancy (Finding 12). Both
+VMP and regime-conditional switching exhibit the same partial redundancy. Both
 respond to volatility regimes: VMP through a daily multiplicative scalar, regime switching
 through a monthly strategy replacement. Stacking them yields Sharpe 1.608 for
 VMP(SWITCH(v2a)), the highest in the study, but the gain is subadditive: VMP alone on the
