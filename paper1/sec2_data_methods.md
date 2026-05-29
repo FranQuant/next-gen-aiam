@@ -62,6 +62,24 @@ combinations + 7 expanded variants), each evaluated with and without the VMP ove
 Fuller derivations, the complete family inventory, and per-family specification tables are in
 Appendix B. The survey below gives the operative formula and one-line intuition for each family.
 
+Before the per-family detail, Table 1 summarises the framework families on their objective, estimator sensitivity, and required inputs.
+
+| Framework | Objective | Estimator sensitivity | Required inputs |
+|-----------|-----------|----------------------|-----------------|
+| EW | Equal capital across all assets at each rebalance | None | None |
+| GMV | Minimize portfolio variance subject to fully invested | High (Σ inversion) | Σ |
+| MSR | Maximize portfolio Sharpe ratio | Very high (Σ inversion + μ) | Σ, μ |
+| MDP | Maximize diversification ratio (weighted vol / portfolio vol) | Moderate | Σ |
+| RP / ERC | Equalize asset risk contributions to portfolio variance | Moderate | Σ |
+| HRP | Hierarchical clustering + recursive inverse-variance bisection | Low (no inversion) | Σ (diagonal + correlations) |
+| BL | Bayesian blend of equilibrium prior and investor views | Variable (vanishes when P=0) | Σ, π, P, Ω, q |
+| TSMOM | Long-only volatility-scaled trend-following on own time series | None | Past returns, realized vol |
+| FF3 | Cross-sectional ranking on momentum / low-vol / quality / multi | Low | Signal scores, Σ diagonal |
+| SWITCH | Regime-conditional routing across base strategies | Inherits from routed targets | Regime classification + sub-strategies |
+| VMP | Time-series exposure scaling by clipped inverse realized vol | None | Realized vol only |
+| MSR\_C / MVO\_C | Constrained mean-variance (box constraints on weights) | Very high | Σ, μ |
+| L/S extensions | Long-short versions of TSMOM, BL-Mom, FF3-Mom | Inherits from base | Base inputs + short availability |
+
 **Equal-weight (EW)** — the DeMiguel–Garlappi–Uppal benchmark \citep{demiguel2009optimal}:
 $w_i = 1/N$ at each rebalance date, monthly. Cheapest to implement; hardest to beat persistently.
 
