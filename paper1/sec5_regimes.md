@@ -97,6 +97,12 @@ the cell responsible for most of the +0.434 improvement, is identified consisten
 the training-only and full-sample analyses. This indicates a persistent feature of late-cycle
 macro dynamics rather than training-window noise.
 
+![Asset-class allocation weights for four representative strategies (EW, MDP(LW), MSR(LW),
+SWITCH(v2a)) over 2003–2026. Shaded bands mark GFC (2008–2009), COVID (2020), and the 2022
+rate-shock. SWITCH(v2a)'s abrupt reallocations at regime transitions contrast with the
+smoother, regime-agnostic patterns of the other strategies.
+](figures/asset_class_allocation_timeline.png)
+
 **VMP combination.** Applying the VMP overlay to SWITCH(v2a) produces full-sample
 Sharpe=1.608 and Calmar=0.921 — the highest gross Sharpe in the 62-strategy comparison.
 This configuration stacks all three robust refinements identified in §§3–5: regime-conditional

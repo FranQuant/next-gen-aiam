@@ -97,6 +97,10 @@ Table E.1 reports 95% bootstrap confidence intervals for the top 10 configuratio
 | VMP(GMV(LW)) | 1.215 | 0.678 | 1.826 | 1.148 |
 | VMP(GMV(OAS)) | 1.207 | 0.667 | 1.890 | 1.223 |
 
+![95% block-bootstrap Sharpe confidence intervals for the top configurations; 252-day blocks,
+5,000 resamples. Error bars span the 2.5th–97.5th percentile of the bootstrap distribution.
+](figures/bootstrap_sharpe_cis.png)
+
 All 95% CI lower bounds exceed 0.67, confirming that all top-10 configurations produce reliably positive Sharpe ratios at the 2.5th percentile. The wide intervals (≥0.70 Sharpe units) reflect the inherent difficulty of Sharpe inference over a 23.3-year daily sample: even with 5,868 observations, cross-cycle regime variation generates substantial bootstrap variability. VMP(SWITCH(sample)) and VMP(SWITCH(LW)) have the narrowest CIs (0.717 and 0.820 respectively), consistent with their regime-conditional routing reducing tail-dependence on any single market environment. The low-turnover GMV variants exhibit wider CIs despite moderate point estimates, driven by their concentrated fixed-income exposure and episodic yield-curve dislocations.
 
 ---
