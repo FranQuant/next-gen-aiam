@@ -51,17 +51,21 @@ excludes crypto entirely.
 
 ## Forward pointers
 
-Two open questions follow directly. First: does learned complexity — ML signal extraction
-(Lasso, Random Forest, XGBoost), deep sequence models (MLP, LSTM, Transformer), reinforcement
-learning allocators, or LLM-generated Black-Litterman views — add Sharpe above the 1.608
-classical ceiling on the same universe and harness? Paper 2 answers this directly, using the
-identical 29-asset walk-forward harness and the same 2022-12-31 train/test split.
+Paper 2 picks up each of the five structural limits from §2.2 in turn, on the identical 29-asset
+walk-forward harness and the same 2022-12-31 train/test split. ML-extracted return predictors
+(Lasso, Random Forest, XGBoost) target the μ̂ estimation problem in MSR-family methods — replacing
+the sample mean with a regularized, cross-asset signal extraction. Deep sequence models (MLP, LSTM,
+Transformer) target signal scarcity, learning non-linear return relationships across the full panel
+rather than fixed per-asset summaries. Reinforcement-learning allocators target both signal use
+and regime adaptivity in one architecture, replacing the fixed routing rule with a policy that
+updates from realized portfolio outcomes. LLM-generated Black-Litterman views target the
+view-specification burden in BL — at the cost of non-determinism, which is precisely why the
+research-agents governance substrate (Appendix H.4) was built around the LLM step. All four
+families are evaluated against the 1.608 classical ceiling.
 
-Second: can the research discipline demonstrated here — a deterministic multi-stage pipeline
-with strict temporal barriers, reproducible published artifacts, and human-in-the-loop review
-gates — be operationalized as a governed agentic research workflow? Paper 3 documents the
-end-to-end build under a forbidden-capabilities substrate and asks whether the governance
-constraints that make classical empirical research credible translate to an AI-assisted
-research system.
+Paper 3 then asks whether the multi-tool agentic research workflow that produced Papers 1 and 2
+can itself be operationalized under a governance substrate — documenting the end-to-end build and
+asking whether the constraints that make classical empirical research credible translate to an
+AI-assisted research system.
 
 Paper 1 ends here: classical methods, one harness, one verdict on the mechanisms.

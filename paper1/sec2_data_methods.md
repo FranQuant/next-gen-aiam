@@ -64,21 +64,21 @@ Appendix B. The survey below gives the operative formula and one-line intuition 
 
 Before the per-family detail, Table 1 summarises the framework families on their objective, estimator sensitivity, and required inputs.
 
-| Framework | Objective | Estimator sensitivity | Required inputs |
-|-----------|-----------|----------------------|-----------------|
-| EW | Equal capital across all assets at each rebalance | None | None |
-| GMV | Minimize portfolio variance subject to fully invested | High (Σ inversion) | Σ |
-| MSR | Maximize portfolio Sharpe ratio | Very high (Σ inversion + μ) | Σ, μ |
-| MDP | Maximize diversification ratio (weighted vol / portfolio vol) | Moderate | Σ |
-| RP / ERC | Equalize asset risk contributions to portfolio variance | Moderate | Σ |
-| HRP | Hierarchical clustering + recursive inverse-variance bisection | Low (no inversion) | Σ (diagonal + correlations) |
-| BL | Bayesian blend of equilibrium prior and investor views | Variable (vanishes when P=0) | Σ, π, P, Ω, q |
-| TSMOM | Long-only volatility-scaled trend-following on own time series | None | Past returns, realized vol |
-| FF3 | Cross-sectional ranking on momentum / low-vol / quality / multi | Low | Signal scores, Σ diagonal |
-| SWITCH | Regime-conditional routing across base strategies | Inherits from routed targets | Regime classification + sub-strategies |
-| VMP | Time-series exposure scaling by clipped inverse realized vol | None | Realized vol only |
-| MSR\_C / MVO\_C | Constrained mean-variance (box constraints on weights) | Very high | Σ, μ |
-| L/S extensions | Long-short versions of TSMOM, BL-Mom, FF3-Mom | Inherits from base | Base inputs + short availability |
+| Framework | Objective | Estimator sensitivity | Required inputs | Known structural limit |
+|-----------|-----------|----------------------|-----------------|------------------------|
+| EW | Equal capital across all assets at each rebalance | None | None | No signal use; ignores all available information |
+| GMV | Minimize portfolio variance subject to fully invested | High (Σ inversion) | Σ | Ignores expected returns; cash-corner risk under sample Σ |
+| MSR | Maximize portfolio Sharpe ratio | Very high (Σ inversion + μ) | Σ, μ | Sample μ̂ noise drives concentration; even LW doesn't fix μ̂ |
+| MDP | Maximize diversification ratio (weighted vol / portfolio vol) | Moderate | Σ | Diversification-ratio target is a proxy, not an investor objective |
+| RP / ERC | Equalize asset risk contributions to portfolio variance | Moderate | Σ | No return information; equal-risk is a heuristic not a theorem |
+| HRP | Hierarchical clustering + recursive inverse-variance bisection | Low (no inversion) | Σ (diagonal + correlations) | Robust but leaves return-side alpha unexploited |
+| BL | Bayesian blend of equilibrium prior and investor views | Variable (vanishes when P=0) | Σ, π, P, Ω, q | Requires P, q, Ω specification; practitioner burden |
+| TSMOM | Long-only volatility-scaled trend-following on own time series | None | Past returns, realized vol | Single signal (own-asset momentum); ignores cross-asset information |
+| FF3 | Cross-sectional ranking on momentum / low-vol / quality / multi | Low | Signal scores, Σ diagonal | Fixed factor signals; no learning of non-linear combinations |
+| SWITCH | Regime-conditional routing across base strategies | Inherits from routed targets | Regime classification + sub-strategies | Hard-coded regime classifier; adaptivity is bounded by the pipeline |
+| VMP | Time-series exposure scaling by clipped inverse realized vol | None | Realized vol only | One signal (realized vol); blind to regime, signal quality, risk type |
+| MSR\_C / MVO\_C | Constrained mean-variance (box constraints on weights) | Very high | Σ, μ | Box constraints help but don't fix μ̂ noise |
+| L/S extensions | Long-short versions of TSMOM, BL-Mom, FF3-Mom | Inherits from base | Base inputs + short availability | Composition is unfavorable in mixed multi-asset universes |
 
 **Equal-weight (EW)** — the DeMiguel–Garlappi–Uppal benchmark \citep{demiguel2009optimal}:
 $w_i = 1/N$ at each rebalance date, monthly. Cheapest to implement; hardest to beat persistently.
@@ -161,6 +161,12 @@ Seven additional configurations round out the comparison: four constrained mean-
 variants (MSR\_C and MVO\_C, each with sample and LW estimators) and three long-short extensions
 (TSMOM-LS(12m), BL-Mom-LS(LW), FF3-Mom-LS), all assuming zero borrow cost and unlimited short
 availability. The long-short results are analyzed in §6.
+
+### What classical methods do not address
+
+The structural-limits column in Table 1 maps onto five recurring problems that no configuration in this study fully resolves. The μ̂ estimation problem is pervasive: MSR and its constrained variants all require an expected-return vector, yet every estimator tried — sample mean, Ledoit-Wolf shrinkage — reduces estimation error without eliminating it; §4 shows the optimizer still concentrates on whichever asset led the window. The signal-scarcity problem constrains TSMOM and FF3: TSMOM uses one scalar per asset (its own trailing return), and the FF3 variants use fixed cross-sectional rankings from a predetermined signal menu; neither extracts non-linear relationships across the full return panel. The fixed-heuristic regime problem caps SWITCH: the routing rule is committed at training time, and no mechanism allows it to update its regime classifier or its routing map as the environment shifts. The view-specification burden makes BL practically demanding: even the null-view BL-Eq reduces algebraically to equal weight (§4), so meaningful use of the framework requires a practitioner to commit to a P, q, Ω triple at every rebalance — a specification burden that the model itself cannot bear. Finally, VMP is single-axis: the realized-volatility scalar adjusts exposure magnitude but is blind to regime, signal quality, and the source of risk.
+
+These five structural limits define what a comparison with learned methods on the same harness might actually test — Paper 2 takes that test directly.
 
 ## §2.3 The naive horse race
 
