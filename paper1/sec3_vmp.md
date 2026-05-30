@@ -128,8 +128,10 @@ classification infrastructure.
 
 ---
 
+::: transition
 VMP lifts every base strategy, by different amounts, through the same inverse-vol mechanism.
 What it cannot explain is why MSR and HRP sit so far apart on the base-strategy leaderboard,
 or why Ledoit-Wolf shrinkage adds 0.164 Sharpe points to MSR but is statistically
 indistinguishable from zero for HRP. For that we turn to Section §4, where estimator choice
 is the independent variable.
+:::

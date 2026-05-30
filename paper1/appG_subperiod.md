@@ -16,6 +16,10 @@ allocations default to equal-weight before sufficient estimation data accumulate
 Source: `data/published/strategy_returns_base.parquet` and
 `data/cache/portfolio_returns/switch_v2a_oos_29assets.parquet`.
 
+```{=latex}
+\begin{landscape}
+```
+
 | Strategy | 2003 | 2004 | 2005 | 2006 | 2007 | 2008 | 2009 | 2010 | 2011 | 2012 | 2013 | 2014 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | EW | +25.3 | +21.0 | +16.3 | +18.8 | +20.8 | −25.0 | +31.7 | +11.7 | +4.3 | +11.2 | +13.7 | +5.4 |
@@ -43,12 +47,20 @@ Source: `data/published/strategy_returns_base.parquet` and
 | FF3-Multi | +24.1 | +13.4 | +8.4 | +11.7 | +14.0 | −4.8 | +8.3 | +6.6 | +8.5 | +4.9 | +9.1 | +4.1 |
 | SWITCH(v2a) | +24.0 | +15.6 | +16.1 | +9.6 | +16.8 | +11.8 | −4.2 | +9.6 | +5.0 | +5.2 | +5.3 | +16.0 |
 
+```{=latex}
+\end{landscape}
+```
+
 ---
 
 ## Table G.1b — Calendar-Year Returns, 2015–2026* (%)
 
 Same 24 strategies. 2026* = through April 30, 2026 (partial year; annualised figures should
 not be inferred from this column).
+
+```{=latex}
+\begin{landscape}
+```
 
 | Strategy | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026* |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -76,6 +88,10 @@ not be inferred from this column).
 | FF3-Qlty | +0.6 | −1.9 | +20.7 | −4.1 | +12.4 | +8.6 | +3.1 | −16.4 | +15.3 | +26.0 | +15.2 | +3.5 |
 | FF3-Multi | −1.2 | +6.3 | +15.1 | −4.9 | +13.5 | +3.1 | +7.4 | −8.1 | +11.7 | +17.5 | +18.0 | +4.4 |
 | SWITCH(v2a) | +1.8 | +13.6 | +15.6 | −1.0 | +17.2 | +18.2 | +1.4 | −6.0 | +21.0 | +17.2 | +13.8 | +10.2 |
+
+```{=latex}
+\end{landscape}
+```
 
 ---
 

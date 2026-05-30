@@ -41,7 +41,7 @@ APPENDIX_SECTIONS = [
     ROOT / "paper1/glossary.md",
 ]
 
-# Abstract text pulled from sec0_front_matter.md
+# Abstract text
 ABSTRACT = (
     "We evaluate the principal families of classical portfolio allocation — mean-variance and "
     "maximum-Sharpe optimization, diversification objectives, risk parity, hierarchical risk "
@@ -74,10 +74,40 @@ abstract: |
 
 """
 
+# LaTeX header injected via --include-in-header
+# - tcolorbox for transition paragraph tinting (RGB 230,240,250)
+# - pdflscape for App G landscape tables
+# - etoolbox \pretocmd for automatic \clearpage before every \section
+#   (handles §1–§7, References, Appendices A–H, and Glossary in one rule)
+# - \pretocmd{\tableofcontents}{\clearpage}{}{} puts TOC on its own page (p.2)
+# - longtable/booktabs for wide tables; \setlength{\tabcolsep}{4pt} tightens columns
 LATEX_HEADER = r"""\usepackage{longtable}
 \usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{pdflscape}
+\usepackage{etoolbox}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins}
 \raggedbottom
+\setlength{\tabcolsep}{4pt}
+\definecolor{transitbg}{RGB}{230,240,250}
+\tcbset{
+  transition/.style={
+    enhanced,
+    colback=transitbg,
+    colframe=transitbg,
+    boxrule=0pt,
+    arc=2pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    before upper={\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}},
+  }
+}
+\pretocmd{\tableofcontents}{\clearpage}{}{}
+\pretocmd{\section}{\clearpage}{}{}
 """
+
+# Raw pandoc block for \clearpage (used explicitly between main body and appendices)
+RAW_CLEARPAGE = "\n\n```{=latex}\n\\clearpage\n```\n\n"
 
 
 def fix_citations(text: str) -> str:
@@ -95,8 +125,46 @@ def fix_citations(text: str) -> str:
     return text
 
 
+def fix_table_names(text: str) -> str:
+    """Abbreviate 'ledoit_wolf' → 'LW' inside markdown table rows only.
+    Avoids modifying Python source code references in backtick spans."""
+    lines = text.split("\n")
+    result = []
+    for line in lines:
+        if line.strip().startswith("|"):
+            line = line.replace("ledoit_wolf", "LW").replace(r"ledoit\_wolf", "LW")
+        result.append(line)
+    return "\n".join(result)
+
+
+def fix_transition_divs(text: str) -> str:
+    """Convert ::: transition ... ::: fenced divs into tcolorbox raw LaTeX blocks.
+    The build script processes these before pandoc sees the markdown, so pandoc
+    never encounters the fenced_divs syntax."""
+    open_tag = (
+        "\n\n```{=latex}\n\\begin{tcolorbox}[transition]\n```\n\n"
+    )
+    close_tag = "\n\n```{=latex}\n\\end{tcolorbox}\n```\n\n"
+
+    def repl(m: re.Match) -> str:
+        inner = m.group(1).strip()
+        return open_tag + inner + close_tag
+
+    # Match ::: transition\n...\n::: (non-greedy, dotall)
+    return re.sub(
+        r"^::: transition\s*\n(.*?)\n:::[ \t]*$",
+        repl,
+        text,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+
+
 def load(path: Path) -> str:
-    return fix_citations(path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    text = fix_citations(text)
+    text = fix_table_names(text)
+    text = fix_transition_divs(text)
+    return text
 
 
 def assemble() -> None:
@@ -105,9 +173,13 @@ def assemble() -> None:
 
     for f in MAIN_SECTIONS:
         parts.append(load(f).strip())
-        parts.append("\n\n---\n\n")
+        parts.append("\n\n")
 
-    # Bibliography goes here — between main body and appendices
+    # \clearpage before References (the etoolbox \pretocmd{\section} handles this
+    # automatically because pandoc emits \section for level-1 headings, but we also
+    # add an explicit one here for the unnumbered references heading which may not
+    # trigger \pretocmd in all pandoc versions)
+    parts.append(RAW_CLEARPAGE)
     parts.append("# References {.unnumbered}\n\n::: {#refs}\n:::\n\n")
 
     for f in APPENDIX_SECTIONS:
@@ -137,6 +209,7 @@ def build_pdf() -> None:
         "--variable", "linkcolor=NavyBlue",
         "--toc",
         "--toc-depth=2",
+        "--number-sections",
         f"--resource-path={ROOT / 'docs'}",
         f"--include-in-header={header_file}",
     ]

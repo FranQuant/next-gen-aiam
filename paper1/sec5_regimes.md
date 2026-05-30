@@ -118,9 +118,11 @@ combined gain is still the study's largest lift from any pair of refinements.
 
 ---
 
+::: transition
 Three robust methodological refinements have now been identified and quantified — vol
 management (§3), estimator choice where the optimizer overfits (§4), and regime conditioning
 built from training data (§5). Their combination reaches gross Sharpe 1.608. §6 examines
 what survives once implementation costs are applied, sub-periods are examined separately,
 and the question of whether the 2023–2026 test period is different in kind from the training
 window is addressed directly.
+:::

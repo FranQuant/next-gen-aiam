@@ -239,9 +239,11 @@ on the OOS window.
 
 ---
 
+::: transition
 The headline of the naive ranking is stark: **every entry in the genuine top 10 is a VMP
 variant**. This pattern holds on the held-out test period and survives transaction-cost
 adjustment for all but the highest-turnover configurations (§6). Section 3 asks what the VMP
 overlay is actually doing — documenting the universal 24/24 lift, its interaction with
 estimator choice, and the partial redundancy with regime conditioning — before Sections 4 and
 5 isolate the estimator and regime dimensions separately.
+:::

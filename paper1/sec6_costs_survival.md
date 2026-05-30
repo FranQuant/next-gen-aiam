@@ -205,6 +205,7 @@ over any future five-year horizon.
 
 ---
 
+::: transition
 The three stress tests produce a coherent verdict. Transaction costs reorganise the bottom half
 of the ranking table but leave the structural leaders — diversification-based and
 regime-conditional strategies — in place; VMP(MDP(LW)) at net 1.336 and VMP(SWITCH(LW)) at
@@ -218,3 +219,4 @@ deployable signal.
 §7 draws on these three findings to articulate what the horse race has actually established
 about structural portfolio construction, states the study's limitations, and closes with the
 forward pointer to the comparison with learned methods in Paper 2.
+:::

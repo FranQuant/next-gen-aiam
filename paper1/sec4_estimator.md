@@ -98,6 +98,7 @@ decision; Ledoit-Wolf is not optional.
 
 There is one exception to the pattern — and it is the foundation of §5.
 
+::: transition
 ## §4 → §5 Transition: the regime where sample beats LW
 
 The §4 finding holds on average across the full 23-year sample: LW shrinkage helps MSR.
@@ -121,3 +122,4 @@ MDP(LW) in Regime 5 while leaving all other regimes unchanged — is the single 
 lifts SWITCH from Sharpe=1.080 to Sharpe=1.514, the strongest statistically significant
 result in the study ($z=2.05$, $p=0.040$). §5 develops the construction, the identification
 strategy, and the sub-period evidence.
+:::
