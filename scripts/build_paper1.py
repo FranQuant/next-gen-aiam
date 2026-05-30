@@ -83,24 +83,25 @@ abstract: |
 # - longtable/booktabs for wide tables; \setlength{\tabcolsep}{4pt} tightens columns
 LATEX_HEADER = r"""\usepackage{longtable}
 \usepackage{booktabs}
-\usepackage{multirow}
 \usepackage{pdflscape}
 \usepackage{etoolbox}
-\usepackage{tcolorbox}
-\tcbuselibrary{skins}
+\usepackage{xcolor}
 \raggedbottom
 \setlength{\tabcolsep}{4pt}
 \definecolor{transitbg}{RGB}{230,240,250}
-\tcbset{
-  transition/.style={
-    enhanced,
-    colback=transitbg,
-    colframe=transitbg,
-    boxrule=0pt,
-    arc=2pt,
-    left=8pt, right=8pt, top=6pt, bottom=6pt,
-    before upper={\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}},
-  }
+\newsavebox{\transitioncontent}
+\newenvironment{transitionbox}{%
+  \begin{lrbox}{\transitioncontent}%
+  \begin{minipage}{\dimexpr\linewidth-16pt\relax}%
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{6pt}%
+}{%
+  \end{minipage}%
+  \end{lrbox}%
+  \par\medskip\noindent
+  \setlength{\fboxsep}{8pt}%
+  \colorbox{transitbg}{\usebox{\transitioncontent}}%
+  \par\medskip%
 }
 \pretocmd{\tableofcontents}{\clearpage}{}{}
 \pretocmd{\section}{\clearpage}{}{}
@@ -141,10 +142,8 @@ def fix_transition_divs(text: str) -> str:
     """Convert ::: transition ... ::: fenced divs into tcolorbox raw LaTeX blocks.
     The build script processes these before pandoc sees the markdown, so pandoc
     never encounters the fenced_divs syntax."""
-    open_tag = (
-        "\n\n```{=latex}\n\\begin{tcolorbox}[transition]\n```\n\n"
-    )
-    close_tag = "\n\n```{=latex}\n\\end{tcolorbox}\n```\n\n"
+    open_tag = "\n\n```{=latex}\n\\begin{transitionbox}\n```\n\n"
+    close_tag = "\n\n```{=latex}\n\\end{transitionbox}\n```\n\n"
 
     def repl(m: re.Match) -> str:
         inner = m.group(1).strip()
