@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore")
 # ── Style ──────────────────────────────────────────────────────────────────────
 matplotlib.rcParams.update({
     "font.family": "serif",
-    "font.size": 10,
+    "font.size": 11,
     "axes.spines.top": False,
     "axes.spines.right": False,
     "axes.grid": True,
@@ -23,10 +23,12 @@ matplotlib.rcParams.update({
     "grid.linestyle": "--",
     "figure.facecolor": "white",
     "axes.facecolor": "white",
-    "axes.labelsize": 10,
-    "legend.fontsize": 8,
-    "xtick.labelsize": 8,
-    "ytick.labelsize": 8,
+    "axes.titlesize": 12,
+    "axes.labelsize": 11,
+    "legend.fontsize": 10,
+    "xtick.labelsize": 10,
+    "ytick.labelsize": 10,
+    "figure.titlesize": 12,
 })
 
 FAMILY_COLORS = {
@@ -123,7 +125,7 @@ ylim = ax.get_ylim()
 y_label = np.exp(np.log(ylim[0]) + 0.015 * (np.log(ylim[1]) - np.log(ylim[0])))
 for start, end, label in CRISES:
     mid = start + (end - start) / 2
-    ax.text(mid, y_label, label, fontsize=6.5, ha="center", va="bottom",
+    ax.text(mid, y_label, label, fontsize=8, ha="center", va="bottom",
             color="dimgray", style="italic")
 
 # BL-Mom(LW) trough annotation — computed from data, not hardcoded
@@ -137,7 +139,7 @@ ax.annotate(
     f"BL-Mom(LW)\n{maxdd_bl:.2f}% max DD",
     xy=(trough_date, trough_val),
     xytext=(trough_date + pd.Timedelta(days=300), trough_val * 0.62),
-    fontsize=7.5,
+    fontsize=9,
     color=FAMILY_COLORS["Black-Litterman"],
     arrowprops=dict(arrowstyle="-", color=FAMILY_COLORS["Black-Litterman"], lw=0.8),
     ha="left",
@@ -375,7 +377,7 @@ for i in range(len(strat_order)):
         else:
             txt = f"{val:.2f}"
         color = "white" if (not np.isnan(val) and abs(val) > vmax * 0.6) else "black"
-        ax.text(j, i, txt, ha="center", va="center", fontsize=7,
+        ax.text(j, i, txt, ha="center", va="center", fontsize=9,
                 color=color if not np.isnan(val) else "dimgray")
 
 # Hatch sparse columns
@@ -401,9 +403,9 @@ for (row_i, col_j) in highlight_cells:
     ax.add_patch(rect)
 
 ax.set_xticks(range(len(reg_order)))
-ax.set_xticklabels([REGIME_LABELS[k] for k in reg_order], fontsize=7.5)
+ax.set_xticklabels([REGIME_LABELS[k] for k in reg_order], fontsize=10)
 ax.set_yticks(range(len(strat_order)))
-ax.set_yticklabels(strat_order, fontsize=8)
+ax.set_yticklabels(strat_order, fontsize=10)
 ax.set_title(
     "Regime-Conditional Annualized Sharpe — 12 Base Strategies × 8 Regimes (2003–2026)\n"
     "(*sparse: n < 252 days; gold border = training-only-derived SWITCH(v2a) selection rule)",
@@ -463,7 +465,7 @@ ylim_e = ax_exp.get_ylim()
 for start, end, label in CRISES:
     mid = start + (end - start) / 2
     ax_exp.text(mid, ylim_e[0] + 0.01 * (ylim_e[1] - ylim_e[0]),
-                label, fontsize=6.5, ha="center", va="bottom",
+                label, fontsize=8, ha="center", va="bottom",
                 color="dimgray", style="italic")
 
 ax_exp.set_ylabel("Exposure multiplier")
@@ -545,9 +547,9 @@ for i in range(nstrats):
             ax.text(j, i, f"{val:.0%}", ha="center", va="center", fontsize=5, color=tc)
 
 ax.set_xticks(range(nyears))
-ax.set_xticklabels(cal_labels, rotation=45, ha="right", fontsize=7)
+ax.set_xticklabels(cal_labels, rotation=45, ha="right", fontsize=9)
 ax.set_yticks(range(nstrats))
-ax.set_yticklabels(df_cal.index.tolist(), fontsize=7.5)
+ax.set_yticklabels(df_cal.index.tolist(), fontsize=9)
 ax.set_title(
     "Calendar-Year Returns — 24 Strategies, 2003–2026  (* 2026 through April)",
     fontsize=11, fontweight="bold",
