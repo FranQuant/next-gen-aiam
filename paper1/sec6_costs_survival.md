@@ -48,7 +48,7 @@ flat-10-bps baseline. Points on the diagonal are turnover-insensitive strategies
 circles = base strategies; open rings = VMP variants.
 ](figures/stratified_vs_flat_costs.png)
 
-Figure 7 confirms that the flat-10-bps assumption is conservative for equity-heavy factor
+The net-Sharpe scatter above confirms that the flat-10-bps assumption is conservative for equity-heavy factor
 strategies: under stratified costs the top-5 net ranking (excluding artifacts) shifts to
 VMP(MDP(LW)) 1.360, VMP(MDP(sample)) 1.327, VMP(SWITCH(sample)) 1.258, VMP(SWITCH(LW))
 1.242, VMP(EW) 1.133. MDP-family strategies retain the leadership; the qualitative conclusion
@@ -127,7 +127,7 @@ across all strategy families. TSMOM(12m) and BL-Mom(LW) exhibit the largest year
 swings; SWITCH(LW) and HRP variants the smallest.
 ](figures/calendar_returns_heatmap.png)
 
-Figure 10 is the visual core of the section. Each row is a single strategy; the colour range
+The calendar-year returns heatmap above is the visual core of the section. Each row is a single strategy; the colour range
 within that row — how far from green to red a single strategy travels across years — is the
 within-strategy variation. By inspection it is large. The cross-strategy variation — the
 difference between the greenest and reddest row in any single year — is what the headline

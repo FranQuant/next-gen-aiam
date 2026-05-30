@@ -1,7 +1,7 @@
 # Appendix G — Sub-Period Sensitivity Tables
 
 This appendix supplies the numerical data underlying the sub-period discussion in §6.3. Two
-tables are provided: calendar-year returns for all 24 strategies in Figure 10 (Table G.1a and
+tables are provided: calendar-year returns for all 24 strategies from the §6.3 heatmap (Table G.1a and
 G.1b, split across time), and the five-sub-period Sharpe table for eight representative
 strategies that is referenced in the §6.3 narrative (Table G.2).
 

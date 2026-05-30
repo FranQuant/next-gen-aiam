@@ -154,8 +154,8 @@ $$w_t^{\text{VMP}} = \text{clip}\!\left(\frac{\bar{\sigma}}{\hat{\sigma}_t},\;0.
                      \cdot w_t^{\text{base}},$$
 where $\bar{\sigma}$ is the strategy's long-run annualized volatility, $\hat{\sigma}_t$ is the
 21-day realized volatility lagged one day, and the clip bounds keep leverage in
-$[0.25\times,\,1.50\times]$ of the base weight. The VMP overlay is applied to all 31 base configurations, yielding 62 total; Figure 1 (in §3)
-illustrates the exposure multiplier mechanism for a representative strategy.
+$[0.25\times,\,1.50\times]$ of the base weight. The VMP overlay is applied to all 31 base configurations, yielding 62 total; the exposure-multiplier
+figure in §3 illustrates the mechanism for a representative strategy.
 
 Seven additional configurations round out the comparison: four constrained mean-variance
 variants (MSR\_C and MVO\_C, each with sample and LW estimators) and three long-short extensions

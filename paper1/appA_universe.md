@@ -6,7 +6,7 @@ The study spans **2003-01-02 to 2026-04-30**, comprising **5,869 NYSE trading da
 
 ## A.2 Asset Universe
 
-The 29-asset universe spans five groups designed to represent a diversified multi-asset allocation problem. Tickers are given in EODHD notation (`TICKER.EXCHANGE`).
+The 29-asset universe spans six groups designed to represent a diversified multi-asset allocation problem. Tickers are given in EODHD notation (`TICKER.EXCHANGE`).
 
 | Ticker | Name | Asset Group | First Obs. |
 |---|---|---|---|
@@ -24,11 +24,11 @@ The 29-asset universe spans five groups designed to represent a diversified mult
 | XLV.US | Health Care Select Sector SPDR | US Sector ETF | 2003-01-02 |
 | XLP.US | Consumer Staples Select Sector SPDR | US Sector ETF | 2003-01-02 |
 | XLU.US | Utilities Select Sector SPDR | US Sector ETF | 2003-01-02 |
-| SPY.US | SPDR S&P 500 ETF | Broad / Intl Equity ETF | 2003-01-02 |
-| IWM.US | iShares Russell 2000 ETF | Broad / Intl Equity ETF | 2003-01-02 |
-| EFA.US | iShares MSCI EAFE ETF | Broad / Intl Equity ETF | 2003-01-02 |
-| EEM.US | iShares MSCI Emerging Markets ETF | Broad / Intl Equity ETF | 2003-04-11 |
-| FXI.US | iShares China Large-Cap ETF | Broad / Intl Equity ETF | 2004-10-08 |
+| SPY.US | SPDR S&P 500 ETF | Broad US Equity ETF | 2003-01-02 |
+| IWM.US | iShares Russell 2000 ETF | Broad US Equity ETF | 2003-01-02 |
+| EFA.US | iShares MSCI EAFE ETF | International Equity ETF | 2003-01-02 |
+| EEM.US | iShares MSCI Emerging Markets ETF | International Equity ETF | 2003-04-11 |
+| FXI.US | iShares China Large-Cap ETF | International Equity ETF | 2004-10-08 |
 | SHY.US | iShares 1–3 Year Treasury Bond ETF | Fixed Income ETF | 2003-01-02 |
 | IEF.US | iShares 7–10 Year Treasury Bond ETF | Fixed Income ETF | 2003-01-02 |
 | TLT.US | iShares 20+ Year Treasury Bond ETF | Fixed Income ETF | 2003-01-02 |

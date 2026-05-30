@@ -58,7 +58,7 @@ asterisked values should be read cautiously. Gold borders highlight the two cell
 SWITCH(v2a): MSR(LW) in R0 (Expansion) and MSR(sample) in R5 (Low & Contracting).
 ](figures/regime_conditional_heatmap.png)
 
-Figure 8 shows the full 12 × 8 conditional Sharpe matrix that generates the routing rule.
+The regime-conditional heatmap below shows the full 12 × 8 conditional Sharpe matrix that generates the routing rule.
 Three features stand out. First, the heatmap is not uniform noise: several regimes produce
 strong directional separation across strategies, confirming that the macro classifier captures
 real variation in the opportunity set. Second, R5 is the clearest anomaly — MSR(sample) is

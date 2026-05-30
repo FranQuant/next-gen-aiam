@@ -41,7 +41,7 @@ level — it compresses its time-series variation around that level.
 
 ![VMP exposure multiplier for MSR(LW), 2003–2026. Top panel: 21-day realized vol (annualized) vs. long-run vol (10.6%). Bottom panel: exposure multiplier clipped to [0.25, 1.5]. Red fill = vol cap active; green fill = maximum leverage applied. Crisis periods appear as the deepest vol spikes; the 0.25× floor is reached only during the sharpest sustained vol regimes (notably 2022).](figures/vmp_exposure_mechanism.png)
 
-Two features of Figure 1 define the mechanism in practice. First, the multiplier spends the
+Two features of the VMP exposure figure above define the mechanism in practice. First, the multiplier spends the
 majority of its time between 0.8× and 1.5×, with the upper cap binding frequently during
 expansionary low-vol periods (green fill). For MSR(LW), whose long-run vol is 10.6%
 annualized, the 2003–2007 and 2012–2017 expansions are long enough to sustain near-maximum
